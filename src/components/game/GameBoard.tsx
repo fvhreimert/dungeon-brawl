@@ -1,4 +1,5 @@
 import type { Tile } from '@/types/game'
+import './GameBoard.css'
 
 type GameBoardProps = {
   categories: readonly string[]

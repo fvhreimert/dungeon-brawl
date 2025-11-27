@@ -1,0 +1,72 @@
+.scoreboard {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.score-card {
+  padding: 14px;
+  background: linear-gradient(180deg, #1a1a1a 0%, #141414 100%);
+  border: 3px solid #333333;
+  box-shadow:
+    inset 0 0 0 3px #222222,
+    0 5px 0 #000000,
+    0 0 0 2px #0a0a0a;
+  display: grid;
+  gap: 10px;
+}
+
+.score-card-active {
+  border-color: #b51a2c;
+  box-shadow:
+    inset 0 0 0 3px #b51a2c55,
+    0 5px 0 #000000,
+    0 0 0 2px #0a0a0a,
+    0 0 14px rgba(181, 26, 44, 0.4);
+}
+
+.player-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  letter-spacing: 1.6px;
+  line-height: 1.1;
+  color: #e0e0e0;
+}
+
+.player-name span {
+  color: #b51a2c;
+  text-shadow: 0 0 10px rgba(181, 26, 44, 0.5);
+}
+
+.player-score {
+  font-size: 32px;
+  line-height: 1;
+  color: #ffb347;
+  text-shadow:
+    -1px 0 #2b030c,
+    1px 0 #2b030c,
+    0 -1px #2b030c,
+    0 1px #2b030c;
+}
+
+.score-meter {
+  width: 100%;
+  height: 12px;
+  background: #0a0a0a;
+  border: 2px solid #333333;
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+.meter-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4d1019 0%, #b51a2c 100%);
+  box-shadow: 0 0 16px rgba(181, 26, 44, 0.6);
+  transition: width 200ms ease;
+}

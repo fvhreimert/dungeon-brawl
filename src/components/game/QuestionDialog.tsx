@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Button as RetroButton } from '@/components/ui/8bit/button'
 import type { Tile } from '@/types/game'
 import { gameConfig } from '@/config/gameConfig'
+import './QuestionDialog.css'
 
 type QuestionDialogProps = {
   tile: Tile

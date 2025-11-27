@@ -3,7 +3,8 @@
 ## Project Structure & Module Organization
 - `src/`: React + TypeScript source. Entry is `src/main.tsx`; root layout in `src/App.tsx` with styles in `src/App.css` and global tokens in `src/index.css`.
 - `src/config/`: Centralized configuration (`gameConfig.ts`) for gameplay settings, UI labels, and players.
-- `src/components/game/`: Feature components (`GameBoard`, `Scoreboard`, `QuestionDialog`) that render the Jeopardy flow.
+- `src/components/game/`: Feature components (`GameBoard`, `Scoreboard`, `QuestionDialog`) that render the Jeopardy flow. Each component has its own CSS file.
+- `src/components/actions/`: Interactive elements like the Mad Seer, Web, and Frog of Fate icons.
 - `src/components/ui/`: UI primitives, including 8bit buttons in `ui/8bit/`.
 - `src/hooks/`: Custom logic like `useJeopardyGame` for turn state, scoring, history (undo), and statistics.
 - `src/types/`: Shared TypeScript types (e.g., `game.ts`).
@@ -20,7 +21,7 @@
 
 ## Coding Style & Naming Conventions
 - Language: TypeScript + React function components.
-- Styles: Tailwind utilities plus scoped CSS modules like `src/App.css`; keep the pixel/dungeon aesthetic consistent.
+- Styles: Tailwind utilities plus component-specific CSS files (e.g., `GameBoard.css`, `Actions.css`) for custom pixel/dungeon aesthetics.
 - Naming: Components PascalCase (`QuestionDialog.tsx`), hooks camelCase (`useJeopardyGame`), CSS classes kebab-case if added.
 - Imports: Use path alias `@/` for `src/` (configured in `tsconfig.json`).
 - Formatting: 2-space indentation; rely on ESLint for consistency.

@@ -1,5 +1,6 @@
 import type { Player } from '@/types/game'
 import { gameConfig } from '@/config/gameConfig'
+import './Scoreboard.css'
 
 type ScoreboardProps = {
   players: Player[]

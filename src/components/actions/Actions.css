@@ -1,0 +1,105 @@
+.web-wrapper {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 250px;
+  height: 250px;
+  z-index: 10;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.web-wrapper {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 250px;
+  height: 250px;
+  z-index: 10;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: all 0.2s ease-out; /* Add transition for wrapper */
+  transform-origin: top right; /* Apply origin to wrapper */
+  filter: drop-shadow(0 0 5px rgba(0,0,0,0.3)); /* Apply base shadow to wrapper */
+}
+
+.web-wrapper:hover {
+  transform: translateY(-5px) scale(1.05);
+  filter: drop-shadow(0 0 15px rgba(220, 220, 255, 0.8));
+}
+
+.web-icon {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 250px;
+  height: auto;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  z-index: 10; /* Ensure web is below spider visually if needed, though order in DOM matters too. */
+  /* No individual transitions or filters here, handled by wrapper */
+}
+
+.spider-icon {
+  position: absolute;
+  transform: translate(50%, -50%) rotate(45deg); /* Base transform stays */
+  z-index: 11; /* Spider above web */
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  transition: all 0.2s ease-out; /* Keep for smoothness of inline styles. */
+  /* No individual hover effects or filters here, handled by wrapper */
+}
+
+.mad-seer-icon {
+  width: 100%;
+  max-width: 250px;
+  height: auto;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  pointer-events: auto;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); /* Existing shadow */
+  transition: transform 0.2s ease-out; /* Transition only transform */
+  z-index: 10; /* Ensure it's on top */
+}
+
+.mad-seer-icon:hover {
+  transform: translateY(-5px) scale(1.05);
+  /* Layered pixel glow: Inner transparent, Outer even more transparent */
+  filter: 
+    drop-shadow(3px 0 0 rgba(160, 32, 240, 0.4)) /* Inner: 40% opaque */
+    drop-shadow(-3px 0 0 rgba(160, 32, 240, 0.4))
+    drop-shadow(0 3px 0 rgba(160, 32, 240, 0.4))
+    drop-shadow(0 -3px 0 rgba(160, 32, 240, 0.4))
+    
+    drop-shadow(6px 0 0 rgba(160, 32, 240, 0.2)) /* Outer: 20% opaque, increased offset for layering effect */
+    drop-shadow(-6px 0 0 rgba(160, 32, 240, 0.2))
+    drop-shadow(0 6px 0 rgba(160, 32, 240, 0.2))
+    drop-shadow(0 -6px 0 rgba(160, 32, 240, 0.2));
+}
+
+.frog-of-fate-icon {
+  width: 100%;
+  max-width: 250px; /* Adjust size as needed, e.g., similar to mad seer */
+  height: auto; /* Maintain aspect ratio */
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  pointer-events: auto;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); /* Default shadow */
+  transition: transform 0.2s ease-out; /* Transition only transform */
+  z-index: 10; /* Ensure it's on top */
+}
+
+.frog-of-fate-icon:hover {
+  transform: translateY(-5px) scale(1.05);
+  /* Layered pixel glow: Inner transparent green, Outer even more transparent green */
+  filter: 
+    drop-shadow(3px 0 0 rgba(0, 150, 0, 0.4)) /* Inner: 40% opaque green */
+    drop-shadow(-3px 0 0 rgba(0, 150, 0, 0.4))
+    drop-shadow(0 3px 0 rgba(0, 150, 0, 0.4))
+    drop-shadow(0 -3px 0 rgba(0, 150, 0, 0.4))
+    
+    drop-shadow(6px 0 0 rgba(0, 150, 0, 0.2)) /* Outer: 20% opaque green, increased offset */
+    drop-shadow(-6px 0 0 rgba(0, 150, 0, 0.2))
+    drop-shadow(0 6px 0 rgba(0, 150, 0, 0.2))
+    drop-shadow(0 -6px 0 rgba(0, 150, 0, 0.2));
+}
