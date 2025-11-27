@@ -16,3 +16,20 @@ export type Player = {
   name: string
   score: number
 }
+
+export type GameStateSnapshot = {
+  tiles: Tile[]
+  players: Player[]
+  activePlayerIndex: number
+}
+
+export type GameStatEntry = {
+  turnNumber: number
+  playerId: string // Name as ID for now since unique
+  playerName: string
+  tileId: string
+  tileValue: number
+  result: 'correct' | 'wrong' | 'pass'
+  scoreChange: number
+  timestamp: number
+}

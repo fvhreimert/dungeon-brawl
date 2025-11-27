@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { Button as RetroButton } from '@/components/ui/8bit/button'
 import type { Tile } from '@/types/game'
+import { gameConfig } from '@/config/gameConfig'
 
 type QuestionDialogProps = {
   tile: Tile
@@ -16,10 +18,23 @@ export function QuestionDialog({
   onAnswer,
   onClose,
 }: QuestionDialogProps) {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !answerRevealed) {
+        onClose()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [onClose, answerRevealed])
+
   return (
-    <div className="dialog-backdrop" onClick={onClose}>
+    <div 
+      className={`dialog-backdrop ${answerRevealed ? 'pointer-events-none' : ''}`} 
+      onClick={answerRevealed ? undefined : onClose}
+    >
       <div
-        className="dialog"
+        className="dialog pointer-events-auto"
         onClick={(e) => {
           e.stopPropagation()
         }}
@@ -35,7 +50,7 @@ export function QuestionDialog({
           {answerRevealed && (
             <div className="dialog-answer-container">
               <div className="dialog-answer-divider"></div>
-              <p className="dialog-answer-label">THE ANSWER</p>
+              <p className="dialog-answer-label">{gameConfig.ui.labels.answerHeader}</p>
               <p className="dialog-answer-text">{tile.answer}</p>
             </div>
           )}
@@ -49,7 +64,7 @@ export function QuestionDialog({
               className="dialog-button-8bit dialog-button-reveal"
               onClick={onReveal}
             >
-              Reveal Answer
+              {gameConfig.ui.labels.revealButton}
             </RetroButton>
           ) : (
             <div className="dialog-actions-row">
@@ -59,7 +74,7 @@ export function QuestionDialog({
                 className="dialog-button-8bit dialog-button-correct"
                 onClick={() => onAnswer(true)}
               >
-                Correct
+                {gameConfig.ui.labels.correctButton}
               </RetroButton>
               <RetroButton
                 font="retro"
@@ -67,7 +82,7 @@ export function QuestionDialog({
                 className="dialog-button-8bit dialog-button-wrong"
                 onClick={() => onAnswer(false)}
               >
-                Wrong
+                {gameConfig.ui.labels.wrongButton}
               </RetroButton>
             </div>
           )}

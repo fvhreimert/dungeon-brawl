@@ -1,7 +1,7 @@
 import type { Tile } from '@/types/game'
 
 type GameBoardProps = {
-  categories: string[]
+  categories: readonly string[]
   tiles: Tile[]
   onTileSelect: (id: string) => void
 }
@@ -29,7 +29,6 @@ export function GameBoard({ categories, tiles, onTileSelect }: GameBoardProps) {
             disabled={tile.status === 'done'}
           >
             <span className="value">{tile.value}</span>
-            {tile.status === 'done' && <span className="claimed">Taken</span>}
           </button>
         ))}
       </div>

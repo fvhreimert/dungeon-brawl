@@ -1,4 +1,5 @@
 import type { Player } from '@/types/game'
+import { gameConfig } from '@/config/gameConfig'
 
 type ScoreboardProps = {
   players: Player[]
@@ -23,7 +24,12 @@ export function Scoreboard({ players, activePlayerIndex }: ScoreboardProps) {
           <div className="score-meter">
             <div
               className="meter-fill"
-              style={{ width: `${Math.min((player.score / 2000) * 100, 100)}%` }}
+              style={{
+                width: `${Math.min(
+                  (player.score / gameConfig.gameplay.maxScoreForMeter) * 100,
+                  100,
+                )}%`,
+              }}
             />
           </div>
         </div>

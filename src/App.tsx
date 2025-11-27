@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import './App.css'
 
 import questionData from './data/questions.json'
@@ -5,16 +6,8 @@ import { GameBoard } from './components/game/GameBoard'
 import { QuestionDialog } from './components/game/QuestionDialog'
 import { Scoreboard } from './components/game/Scoreboard'
 import { useJeopardyGame } from './hooks/useJeopardyGame'
-import type { Player, QAItem } from './types/game'
-
-const categories = ['Arcana', 'Relics', 'Beasts', 'Lore', 'Traps']
-const pointValues = [100, 200, 300, 400, 500]
-const initialPlayers: Player[] = [
-  { name: 'Rogue', score: 1200 },
-  { name: 'Mage', score: 900 },
-  { name: 'Paladin', score: 700 },
-  { name: 'Necro', score: 300 },
-]
+import { gameConfig } from './config/gameConfig'
+import type { QAItem } from './types/game'
 
 function App() {
   const {
@@ -27,22 +20,35 @@ function App() {
     handleRevealAnswer,
     handleAnswer,
     handleCloseDialog,
+    handleUndo,
   } = useJeopardyGame({
-    categories,
-    pointValues,
-    players: initialPlayers,
+    categories: gameConfig.gameplay.categories,
+    pointValues: gameConfig.gameplay.pointValues,
+    players: gameConfig.players,
     questionBank: questionData as QAItem[],
   })
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
+        e.preventDefault()
+        handleUndo()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [handleUndo])
 
   return (
     <div className="app">
       <div className="dungeon-frame">
-        <header className="title-wrap">
-          <h1 className="title">Dungeon Brawl</h1>
+        <header className="title-wrap relative">
+          <h1 className="title">{gameConfig.meta.title}</h1>
         </header>
 
         <GameBoard
-          categories={categories}
+          categories={gameConfig.gameplay.categories}
           tiles={tiles}
           onTileSelect={handleTileClick}
         />

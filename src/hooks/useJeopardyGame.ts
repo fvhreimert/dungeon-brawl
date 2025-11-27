@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react'
 
-import type { Player, QAItem, Tile } from '@/types/game'
+import type { Player, QAItem, Tile, GameStateSnapshot, GameStatEntry } from '@/types/game'
+import { gameConfig } from '@/config/gameConfig'
 
 type UseJeopardyGameParams = {
-  categories: string[]
-  pointValues: number[]
-  players: Player[]
+  categories: readonly string[]
+  pointValues: readonly number[]
+  players: readonly Player[]
   questionBank: QAItem[]
 }
 
@@ -35,8 +36,8 @@ export function useJeopardyGame({
             status: 'open' as const,
             question:
               match?.question ??
-              `Answer the ${category.toLowerCase()} challenge worth ${value} gold.`,
-            answer: match?.answer ?? 'TBD',
+              gameConfig.ui.labels.fallbackQuestion(category, value),
+            answer: match?.answer ?? gameConfig.ui.labels.fallbackAnswer,
           }
         }),
       ),
@@ -44,14 +45,54 @@ export function useJeopardyGame({
   )
 
   const [tiles, setTiles] = useState<Tile[]>(generatedTiles)
-  const [players, setPlayers] = useState<Player[]>(initialPlayers)
+  const [players, setPlayers] = useState<Player[]>([...initialPlayers])
   const [activePlayerIndex, setActivePlayerIndex] = useState(0)
   const [selectedTileId, setSelectedTileId] = useState<string | null>(null)
   const [answerRevealed, setAnswerRevealed] = useState(false)
+  
+  const [history, setHistory] = useState<GameStateSnapshot[]>([])
+  const [gameStats, setGameStats] = useState<GameStatEntry[]>([])
 
   const selectedTile = selectedTileId
     ? tiles.find((tile) => tile.id === selectedTileId) ?? null
     : null
+
+  const saveSnapshot = () => {
+    setHistory((prev) => {
+      const newHistory = [
+        ...prev,
+        {
+          tiles: [...tiles],
+          players: [...players],
+          activePlayerIndex,
+        },
+      ]
+      // Keep only last 5 states
+      return newHistory.slice(-5)
+    })
+  }
+
+  const recordStat = (
+    result: 'correct' | 'wrong' | 'pass',
+    scoreChange: number,
+  ) => {
+    if (!selectedTile) return
+    const currentPlayer = players[activePlayerIndex]
+    
+    setGameStats((prev) => [
+      ...prev,
+      {
+        turnNumber: prev.length + 1,
+        playerId: currentPlayer.name, // Using name as ID for now
+        playerName: currentPlayer.name,
+        tileId: selectedTile.id,
+        tileValue: selectedTile.value,
+        result,
+        scoreChange,
+        timestamp: Date.now(),
+      },
+    ])
+  }
 
   const handleTileClick = (tileId: string) => {
     const tile = tiles.find((t) => t.id === tileId)
@@ -65,6 +106,10 @@ export function useJeopardyGame({
   const handleAnswer = (correct: boolean) => {
     if (!selectedTile || !answerRevealed) return
 
+    saveSnapshot()
+    const scoreChange = correct ? selectedTile.value : -selectedTile.value
+    recordStat(correct ? 'correct' : 'wrong', scoreChange)
+
     setTiles((prev) =>
       prev.map((tile) =>
         tile.id === selectedTile.id ? { ...tile, status: 'done' } : tile,
@@ -76,9 +121,7 @@ export function useJeopardyGame({
         index === activePlayerIndex
           ? {
               ...player,
-              score: correct
-                ? player.score + selectedTile.value
-                : player.score - selectedTile.value,
+              score: player.score + scoreChange,
             }
           : player,
       ),
@@ -89,7 +132,48 @@ export function useJeopardyGame({
     setAnswerRevealed(false)
   }
 
+  const handlePass = () => {
+    if (!selectedTile || !answerRevealed) return
+
+    saveSnapshot()
+    recordStat('pass', 0)
+
+    setTiles((prev) =>
+      prev.map((tile) =>
+        tile.id === selectedTile.id ? { ...tile, status: 'done' } : tile,
+      ),
+    )
+    
+    // In a pass scenario, we just mark it done and move to next player
+    setActivePlayerIndex((prev) => (prev + 1) % players.length)
+    setSelectedTileId(null)
+    setAnswerRevealed(false)
+  }
+
+  const handleUndo = () => {
+    if (history.length === 0) return
+
+    const previousState = history[history.length - 1]
+    
+    setTiles(previousState.tiles)
+    setPlayers(previousState.players)
+    setActivePlayerIndex(previousState.activePlayerIndex)
+    
+    // Pop last history entry
+    setHistory((prev) => prev.slice(0, -1))
+    
+    // Pop last stat entry (since we are undoing the turn)
+    setGameStats((prev) => prev.slice(0, -1))
+    
+    // Reset selection state to be safe
+    setSelectedTileId(null)
+    setAnswerRevealed(false)
+  }
+
   const handleCloseDialog = () => {
+    // Prevent closing if answer is revealed to avoid "peeking" exploit
+    if (answerRevealed) return
+    
     setAnswerRevealed(false)
     setSelectedTileId(null)
   }
@@ -100,9 +184,13 @@ export function useJeopardyGame({
     activePlayerIndex,
     selectedTile,
     answerRevealed,
+    history,
+    gameStats,
     handleTileClick,
     handleRevealAnswer,
     handleAnswer,
+    handlePass,
+    handleUndo,
     handleCloseDialog,
   }
 }
