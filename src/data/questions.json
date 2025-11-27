@@ -1,0 +1,152 @@
+[
+  {
+    "category": "Arcana",
+    "value": 100,
+    "question": "Which rune color seals a basic warding circle in the dungeon halls?",
+    "answer": "A deep violet rune seals a basic warding circle."
+  },
+  {
+    "category": "Arcana",
+    "value": 200,
+    "question": "Name the spell that lets you glimpse two seconds into the future.",
+    "answer": "The spell is called Foresight Blink."
+  },
+  {
+    "category": "Arcana",
+    "value": 300,
+    "question": "What ingredient anchors a shadow-binding incantation?",
+    "answer": "A strip of nightshade-dyed cloth anchors the binding."
+  },
+  {
+    "category": "Arcana",
+    "value": 400,
+    "question": "Which element counters bloodfire magic in the catacombs?",
+    "answer": "Cold iron dust counters bloodfire magic."
+  },
+  {
+    "category": "Arcana",
+    "value": 500,
+    "question": "How many sigils form the full banishment sequence?",
+    "answer": "Seven sigils complete the banishment sequence."
+  },
+  {
+    "category": "Relics",
+    "value": 100,
+    "question": "What gem powers the smallest portal keystone?",
+    "answer": "A thumb-sized amber shard powers the keystone."
+  },
+  {
+    "category": "Relics",
+    "value": 200,
+    "question": "Which relic lets you breathe in toxic fog?",
+    "answer": "The Blacklung Torc grants safe breath in toxic fog."
+  },
+  {
+    "category": "Relics",
+    "value": 300,
+    "question": "What material is the Mirror of Echoes framed in?",
+    "answer": "It is framed in cold-worked obsidian."
+  },
+  {
+    "category": "Relics",
+    "value": 400,
+    "question": "Name the blade that drinks spell energy on hit.",
+    "answer": "The blade is called Spellthirst."
+  },
+  {
+    "category": "Relics",
+    "value": 500,
+    "question": "Which relic key opens any rusted lock once per night?",
+    "answer": "The Crimson Bite key opens any rusted lock once nightly."
+  },
+  {
+    "category": "Beasts",
+    "value": 100,
+    "question": "What scent drives cave ghouls away?",
+    "answer": "Burnt rosemary drives cave ghouls away."
+  },
+  {
+    "category": "Beasts",
+    "value": 200,
+    "question": "Which beast mimics a stone column until disturbed?",
+    "answer": "The pillar wraith mimics a stone column."
+  },
+  {
+    "category": "Beasts",
+    "value": 300,
+    "question": "How do you break a basilisk's stare safely?",
+    "answer": "Use a smoked obsidian mirror to break the stare."
+  },
+  {
+    "category": "Beasts",
+    "value": 400,
+    "question": "What noise calms a tunnel wyrm?",
+    "answer": "A slow, rhythmic drumbeat calms a tunnel wyrm."
+  },
+  {
+    "category": "Beasts",
+    "value": 500,
+    "question": "What organ do void hounds lack entirely?",
+    "answer": "Void hounds lack eyes entirely."
+  },
+  {
+    "category": "Lore",
+    "value": 100,
+    "question": "Who built the first gate into the lower crypts?",
+    "answer": "Architect Maelen forged the first gate."
+  },
+  {
+    "category": "Lore",
+    "value": 200,
+    "question": "Which dynasty sealed the blood wells?",
+    "answer": "The Varyn dynasty sealed the blood wells."
+  },
+  {
+    "category": "Lore",
+    "value": 300,
+    "question": "What festival marked the fall of the old keep?",
+    "answer": "The Ember Vigil marked the fall of the old keep."
+  },
+  {
+    "category": "Lore",
+    "value": 400,
+    "question": "Name the lost archivist who mapped every trap hall.",
+    "answer": "Archivist Selka mapped every trap hall."
+  },
+  {
+    "category": "Lore",
+    "value": 500,
+    "question": "Which oath bound the dungeon's heart to silence?",
+    "answer": "The Oath of Hollow Tongues bound it to silence."
+  },
+  {
+    "category": "Traps",
+    "value": 100,
+    "question": "What floor tile pattern hints at a dart trap?",
+    "answer": "A triple-chevron etch hints at darts."
+  },
+  {
+    "category": "Traps",
+    "value": 200,
+    "question": "How do you safely cross a gravity inversion hall?",
+    "answer": "Tie off, crawl low, and follow the iron studs."
+  },
+  {
+    "category": "Traps",
+    "value": 300,
+    "question": "Which tool reveals invisible tripwires fastest?",
+    "answer": "A pouch of chalk dust reveals them fastest."
+  },
+  {
+    "category": "Traps",
+    "value": 400,
+    "question": "What disarms a soul siphon rune?",
+    "answer": "A pinch of consecrated salt over the rune disarms it."
+  },
+  {
+    "category": "Traps",
+    "value": 500,
+    "question": "How many heartbeats before a pendulum trap reaches full swing?",
+    "answer": "Six heartbeats before full swing."
+  }
+]
