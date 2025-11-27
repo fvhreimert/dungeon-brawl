@@ -1,6 +1,6 @@
 export const gameConfig = {
   meta: {
-    title: "Dungeon Brawl",
+    title: "DUNGEON BRAWL",
     description: "A retro pixel-art jeopardy game",
   },
   gameplay: {
