@@ -4,7 +4,7 @@
 - `src/`: React + TypeScript source. Entry is `src/main.tsx`; root layout in `src/App.tsx` with styles in `src/App.css` and global tokens in `src/index.css`.
 - `src/config/`: Centralized configuration (`gameConfig.ts`) for gameplay settings, UI labels, and players.
 - `src/components/game/`: Feature components (`GameBoard`, `Scoreboard`, `QuestionDialog`) that render the Jeopardy flow. Each component has its own CSS file.
-- `src/components/actions/`: Interactive elements like the Mad Seer, Web, and Frog of Fate icons.
+- `src/components/actions/`: Interactive elements like the Mad Seer, Blood Sacrifice, Web, Frog of Fate, and Dice of Fortune icons.
 - `src/components/ui/`: UI primitives, including 8bit buttons in `ui/8bit/`.
 - `src/hooks/`: Custom logic like `useJeopardyGame` for turn state, scoring, history (undo), and statistics.
 - `src/types/`: Shared TypeScript types (e.g., `game.ts`).

@@ -47,40 +47,78 @@
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   transition: all 0.2s ease-out; /* Keep for smoothness of inline styles. */
-  /* No individual hover effects or filters here, handled by wrapper */
+  /* Pixel contour */
+  filter: 
+    drop-shadow(1px 0 0 white)
+    drop-shadow(-1px 0 0 white)
+    drop-shadow(0 1px 0 white)
+    drop-shadow(0 -1px 0 white);
+}
+
+.spider-icon.no-contour {
+  filter: none;
 }
 
 .mad-seer-icon {
   width: 100%;
-  max-width: 250px;
   height: auto;
+  object-fit: contain;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   pointer-events: auto;
   filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); /* Existing shadow */
   transition: transform 0.2s ease-out; /* Transition only transform */
   z-index: 10; /* Ensure it's on top */
+  margin-bottom: -2px;
 }
 
-.mad-seer-icon:hover {
+.action-item:hover .mad-seer-icon {
   transform: translateY(-5px) scale(1.05);
   /* Layered pixel glow: Inner transparent, Outer even more transparent */
   filter: 
-    drop-shadow(3px 0 0 rgba(160, 32, 240, 0.4)) /* Inner: 40% opaque */
-    drop-shadow(-3px 0 0 rgba(160, 32, 240, 0.4))
-    drop-shadow(0 3px 0 rgba(160, 32, 240, 0.4))
-    drop-shadow(0 -3px 0 rgba(160, 32, 240, 0.4))
+    drop-shadow(4px 0 0 rgba(160, 32, 240, 0.3)) /* Inner: 30% opaque */
+    drop-shadow(-4px 0 0 rgba(160, 32, 240, 0.3))
+    drop-shadow(0 4px 0 rgba(160, 32, 240, 0.3))
+    drop-shadow(0 -4px 0 rgba(160, 32, 240, 0.3))
     
-    drop-shadow(6px 0 0 rgba(160, 32, 240, 0.2)) /* Outer: 20% opaque, increased offset for layering effect */
-    drop-shadow(-6px 0 0 rgba(160, 32, 240, 0.2))
-    drop-shadow(0 6px 0 rgba(160, 32, 240, 0.2))
-    drop-shadow(0 -6px 0 rgba(160, 32, 240, 0.2));
+    drop-shadow(8px 0 0 rgba(160, 32, 240, 0.15)) /* Outer: 15% opaque, increased offset for layering effect */
+    drop-shadow(-8px 0 0 rgba(160, 32, 240, 0.15))
+    drop-shadow(0 8px 0 rgba(160, 32, 240, 0.15))
+    drop-shadow(0 -8px 0 rgba(160, 32, 240, 0.15));
 }
 
 .frog-of-fate-icon {
   width: 100%;
-  max-width: 250px; /* Adjust size as needed, e.g., similar to mad seer */
-  height: auto; /* Maintain aspect ratio */
+  height: auto;
+  object-fit: contain; /* Adjust size as needed, e.g., similar to mad seer */
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  pointer-events: auto;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); /* Default shadow */
+  transition: transform 0.2s ease-out; /* Transition only transform */
+  z-index: 10; /* Ensure it's on top */
+  margin-bottom: -3px;
+}
+
+.action-item:hover .frog-of-fate-icon {
+  transform: translateY(-5px) scale(1.05);
+  /* Layered pixel glow: Inner transparent green, Outer even more transparent green */
+  filter: 
+    drop-shadow(4px 0 0 rgba(0, 150, 0, 0.3)) /* Inner: 30% opaque green */
+    drop-shadow(-4px 0 0 rgba(0, 150, 0, 0.3))
+    drop-shadow(0 4px 0 rgba(0, 150, 0, 0.3))
+    drop-shadow(0 -4px 0 rgba(0, 150, 0, 0.3))
+    
+    drop-shadow(8px 0 0 rgba(0, 150, 0, 0.15)) /* Outer: 15% opaque green, increased offset */
+    drop-shadow(-8px 0 0 rgba(0, 150, 0, 0.15))
+    drop-shadow(0 8px 0 rgba(0, 150, 0, 0.15))
+    drop-shadow(0 -8px 0 rgba(0, 150, 0, 0.15));
+}
+
+.blood-sacrifice-icon {
+  width: 100%;
+  height: auto;
+  object-fit: contain; /* Adjust size as needed, e.g., similar to mad seer */
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   pointer-events: auto;
@@ -89,17 +127,140 @@
   z-index: 10; /* Ensure it's on top */
 }
 
-.frog-of-fate-icon:hover {
+.action-item:hover .blood-sacrifice-icon {
   transform: translateY(-5px) scale(1.05);
-  /* Layered pixel glow: Inner transparent green, Outer even more transparent green */
+  /* Layered pixel glow: Inner transparent red, Outer even more transparent red */
   filter: 
-    drop-shadow(3px 0 0 rgba(0, 150, 0, 0.4)) /* Inner: 40% opaque green */
-    drop-shadow(-3px 0 0 rgba(0, 150, 0, 0.4))
-    drop-shadow(0 3px 0 rgba(0, 150, 0, 0.4))
-    drop-shadow(0 -3px 0 rgba(0, 150, 0, 0.4))
+    drop-shadow(4px 0 0 rgba(139, 0, 0, 0.3)) /* Inner: 30% opaque dark red */
+    drop-shadow(-4px 0 0 rgba(139, 0, 0, 0.3))
+    drop-shadow(0 4px 0 rgba(139, 0, 0, 0.3))
+    drop-shadow(0 -4px 0 rgba(139, 0, 0, 0.3))
     
-    drop-shadow(6px 0 0 rgba(0, 150, 0, 0.2)) /* Outer: 20% opaque green, increased offset */
-    drop-shadow(-6px 0 0 rgba(0, 150, 0, 0.2))
-    drop-shadow(0 6px 0 rgba(0, 150, 0, 0.2))
-    drop-shadow(0 -6px 0 rgba(0, 150, 0, 0.2));
+    drop-shadow(8px 0 0 rgba(139, 0, 0, 0.15)) /* Outer: 15% opaque dark red, increased offset */
+    drop-shadow(-8px 0 0 rgba(139, 0, 0, 0.15))
+    drop-shadow(0 8px 0 rgba(139, 0, 0, 0.15))
+    drop-shadow(0 -8px 0 rgba(139, 0, 0, 0.15));
+}
+
+.card-jester-icon {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  pointer-events: auto;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); /* Default shadow */
+  transition: transform 0.2s ease-out; /* Transition only transform */
+  z-index: 10; /* Ensure it's on top */
+  margin-bottom: -8px;
+}
+
+.action-item:hover .card-jester-icon {
+  transform: translateY(-5px) scale(1.05);
+  /* Layered pixel glow: Inner transparent orange, Outer even more transparent orange */
+  filter: 
+    drop-shadow(4px 0 0 rgba(255, 165, 0, 0.3)) /* Inner: 30% opaque orange */
+    drop-shadow(-4px 0 0 rgba(255, 165, 0, 0.3))
+    drop-shadow(0 4px 0 rgba(255, 165, 0, 0.3))
+    drop-shadow(0 -4px 0 rgba(255, 165, 0, 0.3))
+    
+    drop-shadow(8px 0 0 rgba(255, 165, 0, 0.15)) /* Outer: 15% opaque orange, increased offset */
+    drop-shadow(-8px 0 0 rgba(255, 165, 0, 0.15))
+    drop-shadow(0 8px 0 rgba(255, 165, 0, 0.15))
+    drop-shadow(0 -8px 0 rgba(255, 165, 0, 0.15));
+}
+
+.action-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 16px; /* Space between items */
+  width: 250px;
+  height: auto;
+  cursor: pointer; /* Make the whole item show pointer */
+}
+
+.action-label {
+  margin-top: 8px;
+  font-size: 1.4rem;
+  color: rgba(255, 255, 255, 1); /* Subtle text color */
+  text-align: center;
+  font-family: 'ArcadeClassic', 'Press Start 2P', cursive; /* Pixel font */
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 0 #000; /* Slight shadow for readability */
+  transition: all 0.2s ease-out;
+}
+
+.action-item:hover .action-label {
+  transform: translateY(-5px) scale(1.05);
+}
+
+/* Specific Action Label Colors */
+.action-label-orange {
+  color: rgba(255, 165, 0, 1);
+}
+
+.action-item:hover .action-label-orange {
+  text-shadow: 0 0 8px rgba(255, 165, 0, 0.8);
+}
+
+.action-label-purple {
+  color: rgba(160, 32, 240, 1);
+}
+
+.action-item:hover .action-label-purple {
+  text-shadow: 0 0 8px rgba(160, 32, 240, 0.8);
+}
+
+.action-label-red {
+  color: rgba(139, 0, 0, 1);
+}
+
+.action-item:hover .action-label-red {
+  text-shadow: 0 0 8px rgba(139, 0, 0, 0.8);
+}
+
+.action-label-green {
+  color: rgba(0, 150, 0, 1);
+}
+
+.action-item:hover .action-label-green {
+  text-shadow: 0 0 8px rgba(0, 150, 0, 0.8);
+}
+
+.action-label-gold {
+  color: rgba(255, 215, 0, 1);
+}
+
+.action-item:hover .action-label-gold {
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+}
+
+.dice-of-fortune-icon {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  pointer-events: auto;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+  transition: transform 0.2s ease-out;
+  z-index: 10;
+  margin-bottom: -47px;
+}
+
+.action-item:hover .dice-of-fortune-icon {
+  transform: translateY(-5px) scale(1.05);
+  /* Layered pixel glow: Inner transparent gold, Outer even more transparent gold */
+  filter: 
+    drop-shadow(4px 0 0 rgba(255, 215, 0, 0.3))
+    drop-shadow(-4px 0 0 rgba(255, 215, 0, 0.3))
+    drop-shadow(0 4px 0 rgba(255, 215, 0, 0.3))
+    drop-shadow(0 -4px 0 rgba(255, 215, 0, 0.3))
+    
+    drop-shadow(8px 0 0 rgba(255, 215, 0, 0.15))
+    drop-shadow(-8px 0 0 rgba(255, 215, 0, 0.15))
+    drop-shadow(0 8px 0 rgba(255, 215, 0, 0.15))
+    drop-shadow(0 -8px 0 rgba(255, 215, 0, 0.15));
 }
