@@ -6,6 +6,7 @@ import questionData from './data/questions.json'
 import { GameBoard } from './components/game/GameBoard'
 import { QuestionDialog } from './components/game/QuestionDialog'
 import { MadSeerModal } from '@/features/actions/madSeer/MadSeerModal'
+import { useFrogSounds } from '@/features/actions/frogOfFate/useFrogSounds'
 import { Scoreboard } from './components/game/Scoreboard'
 import { useJeopardyGame } from './hooks/useJeopardyGame'
 import { gameConfig } from './config/gameConfig'
@@ -38,6 +39,7 @@ function App() {
   const [frogSelecting, setFrogSelecting] = useState(false)
   const [frogHighlightId, setFrogHighlightId] = useState<string | null>(null)
   const [frogLandingId, setFrogLandingId] = useState<string | null>(null)
+  const { playStart, playHop, playLand } = useFrogSounds()
 
   const handleWebClick = () => {
     setSpiderIndex((prev) => (prev < 8 ? prev + 1 : 1))
@@ -100,6 +102,7 @@ function App() {
 
     for (let i = 0; i < sequence.length; i++) {
       setFrogHighlightId(sequence[i])
+      playHop()
       const progress = i / sequence.length
       const delay = 120 + progress * 140 // shorter run, slightly slower overall
       await new Promise((resolve) => setTimeout(resolve, delay))
@@ -109,6 +112,7 @@ function App() {
     setFrogHighlightId(null)
     setFrogLandingId(finalTileId)
     applyTileMultiplier(finalTileId, 2)
+    playLand()
     setTimeout(() => {
       setFrogLandingId(null)
       setFrogSelecting(false)
@@ -117,6 +121,7 @@ function App() {
 
   const handleFrogClick = () => {
     if (madSeerActive || frogSelecting || selectedTile) return
+    playStart()
     runFrogSelection()
   }
 
