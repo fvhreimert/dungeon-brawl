@@ -19,6 +19,8 @@ export function QuestionDialog({
   onAnswer,
   onClose,
 }: QuestionDialogProps) {
+  const effectiveValue = tile.value * (tile.multiplier ?? 1)
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && !answerRevealed) {
@@ -42,7 +44,9 @@ export function QuestionDialog({
       >
         <div className="dialog-header-row">
           <div className="dialog-category-badge">{tile.category}</div>
-          <div className="dialog-value-badge">{tile.value}</div>
+          <div className="dialog-value-badge">
+            {effectiveValue}
+          </div>
         </div>
 
         <div className="dialog-content">

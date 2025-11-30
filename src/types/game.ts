@@ -10,6 +10,7 @@ export type QAItem = {
 export type Tile = QAItem & {
   id: string
   status: TileStatus
+  multiplier?: number
 }
 
 export type Player = {

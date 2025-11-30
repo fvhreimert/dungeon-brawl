@@ -34,6 +34,7 @@ export function useJeopardyGame({
             category,
             value,
             status: 'open' as const,
+            multiplier: 1,
             question:
               match?.question ??
               gameConfig.ui.labels.fallbackQuestion(category, value),
@@ -107,7 +108,8 @@ export function useJeopardyGame({
     if (!selectedTile || !answerRevealed) return
 
     saveSnapshot()
-    const scoreChange = correct ? selectedTile.value : -selectedTile.value
+    const effectiveValue = selectedTile.value * (selectedTile.multiplier ?? 1)
+    const scoreChange = correct ? effectiveValue : -effectiveValue
     recordStat(correct ? 'correct' : 'wrong', scoreChange)
 
     setTiles((prev) =>
@@ -178,6 +180,17 @@ export function useJeopardyGame({
     setSelectedTileId(null)
   }
 
+  const applyTileMultiplier = (tileId: string, multiplier: number) => {
+    setTiles((prev) =>
+      prev.map((tile) => {
+        if (tile.id !== tileId || tile.status === 'done') return tile
+        const current = tile.multiplier ?? 1
+        const capped = Math.min(current * multiplier, 128)
+        return { ...tile, multiplier: capped }
+      }),
+    )
+  }
+
   return {
     tiles,
     players,
@@ -192,5 +205,6 @@ export function useJeopardyGame({
     handlePass,
     handleUndo,
     handleCloseDialog,
+    applyTileMultiplier,
   }
 }

@@ -115,6 +115,18 @@
     drop-shadow(0 -8px 0 rgba(0, 150, 0, 0.15));
 }
 
+.action-item.frog-animating .frog-of-fate-icon {
+  animation: frogPulse 0.8s ease-in-out infinite alternate;
+  filter:
+    drop-shadow(0 0 8px rgba(0, 180, 0, 0.8))
+    drop-shadow(0 0 16px rgba(120, 255, 160, 0.6));
+}
+
+@keyframes frogPulse {
+  from { transform: translateY(-4px) scale(1.03); }
+  to { transform: translateY(4px) scale(1.08); }
+}
+
 .blood-sacrifice-icon {
   width: 100%;
   height: auto;
@@ -178,6 +190,7 @@
   width: 250px;
   height: auto;
   cursor: pointer; /* Make the whole item show pointer */
+  pointer-events: auto;
 }
 
 .action-label {
@@ -211,6 +224,28 @@
 
 .action-item:hover .action-label-purple {
   text-shadow: 0 0 8px rgba(160, 32, 240, 0.8);
+}
+
+.action-item.madseer-armed .mad-seer-icon {
+  filter:
+    drop-shadow(0 0 10px rgba(160, 32, 240, 0.8))
+    drop-shadow(0 0 18px rgba(214, 157, 255, 0.35));
+  animation: madseerIconPulse 1.3s ease-in-out infinite alternate;
+}
+
+.action-item.madseer-armed .action-label-purple {
+  text-shadow:
+    0 0 10px rgba(214, 157, 255, 0.9),
+    0 0 18px rgba(160, 32, 240, 0.6);
+}
+
+@keyframes madseerIconPulse {
+  from {
+    transform: translateY(-3px) scale(1.02);
+  }
+  to {
+    transform: translateY(3px) scale(1.06);
+  }
 }
 
 .action-label-red {
