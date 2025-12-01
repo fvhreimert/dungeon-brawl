@@ -15,6 +15,26 @@ import { useJeopardyGame } from './hooks/useJeopardyGame'
 import { gameConfig } from './config/gameConfig'
 import type { QAItem, Tile } from './types/game'
 
+import cardJesterIcon from '@/assets/images/actions/card_jester.png'
+import madSeerIcon from '@/assets/images/actions/mad_seer.png'
+import bloodSacrificeIcon from '@/assets/images/actions/blood_sacrifice.png'
+import minimizeIcon from '@/assets/images/ui/minimize.png'
+import expandIcon from '@/assets/images/ui/expand.png'
+import webIcon from '@/assets/images/actions/web.png'
+import frogIcon from '@/assets/images/actions/frog_of_fate.png'
+import diceIcon from '@/assets/images/actions/dice_of_fortune.png'
+
+import spider1 from '@/assets/images/actions/spiders/spider_1.png'
+import spider2 from '@/assets/images/actions/spiders/spider_2.png'
+import spider3 from '@/assets/images/actions/spiders/spider_3.png'
+import spider4 from '@/assets/images/actions/spiders/spider_4.png'
+import spider5 from '@/assets/images/actions/spiders/spider_5.png'
+import spider6 from '@/assets/images/actions/spiders/spider_6.png'
+import spider7 from '@/assets/images/actions/spiders/spider_7.png'
+import spider8 from '@/assets/images/actions/spiders/spider_8.png'
+
+const SPIDERS = [null, spider1, spider2, spider3, spider4, spider5, spider6, spider7, spider8]
+
 function App() {
   const {
     tiles,
@@ -185,15 +205,15 @@ function App() {
     <div className="app">
       <div className="layout-column left">
         <div className="action-item">
-          <img src="/src/assets/images/actions/card_jester.png" alt="Card Jester" className="card-jester-icon" />
+          <img src={cardJesterIcon} alt="Card Jester" className="card-jester-icon" />
           <span className="action-label action-label-orange">Card Jester</span>
         </div>
         <div className={`action-item ${madSeerActive ? 'madseer-armed' : ''}`} onClick={handleMadSeerStart}>
-          <img src="/src/assets/images/actions/mad_seer.png" alt="Mad Seer" className="mad-seer-icon" />
+          <img src={madSeerIcon} alt="Mad Seer" className="mad-seer-icon" />
           <span className="action-label action-label-purple">Mad Seer</span>
         </div>
         <div className="action-item">
-          <img src="/src/assets/images/actions/blood_sacrifice.png" alt="Blood Sacrifice" className="blood-sacrifice-icon" />
+          <img src={bloodSacrificeIcon} alt="Blood Sacrifice" className="blood-sacrifice-icon" />
           <span className="action-label action-label-red">Blood Sacrifice</span>
         </div>
       </div>
@@ -224,7 +244,7 @@ function App() {
             aria-label={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
           >
             <img 
-              src={isFullscreen ? "/src/assets/images/ui/minimize.png" : "/src/assets/images/ui/expand.png"} 
+              src={isFullscreen ? minimizeIcon : expandIcon} 
               alt={isFullscreen ? "Minimize" : "Maximize"} 
               style={{ width: '24px', height: '24px' }}
             />
@@ -250,12 +270,12 @@ function App() {
       <div className="layout-column right">
         <div className="web-wrapper" onClick={handleWebClick}>
           <img 
-            src="/src/assets/images/actions/web.png" 
+            src={webIcon} 
             alt="Web" 
           className="web-icon" 
         />
         <img 
-          src={`/src/assets/images/actions/spiders/spider_${spiderIndex}.png`}
+          src={SPIDERS[spiderIndex] || ''}
           alt="Spider"
             className={`spider-icon ${spiderIndex === 8 ? 'no-contour' : ''}`}
             style={{
@@ -273,16 +293,16 @@ function App() {
         </div>
         {/* Invisible spacer to match Card Jester's height/position in the left column */}
         <div className="action-item" style={{ visibility: 'hidden' }}>
-          <img src="/src/assets/images/actions/card_jester.png" alt="Card Jester" className="card-jester-icon" />
+          <img src={cardJesterIcon} alt="Card Jester" className="card-jester-icon" />
           <span className="action-label action-label-orange">Card Jester</span>
         </div>
         
         <div className={`action-item ${frogSelecting ? 'frog-animating' : ''}`} onClick={handleFrogClick}>
-          <img src="/src/assets/images/actions/frog_of_fate.png" alt="Frog of Fate" className="frog-of-fate-icon" />
+          <img src={frogIcon} alt="Frog of Fate" className="frog-of-fate-icon" />
           <span className="action-label action-label-green">Frog of Fate</span>
         </div>
         <div className={`action-item ${diceRolling ? 'dice-animating' : ''}`} onClick={handleDiceClick}>
-          <img src="/src/assets/images/actions/dice_of_fortune.png" alt="Dice of Fortune" className="dice-of-fortune-icon" />
+          <img src={diceIcon} alt="Dice of Fortune" className="dice-of-fortune-icon" />
           <span className="action-label action-label-gold">Dice of Fortune</span>
         </div>
       </div>

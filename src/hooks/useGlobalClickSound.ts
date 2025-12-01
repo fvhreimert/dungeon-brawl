@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
+import clickSound from '@/assets/sounds/UI/click.mp3'
 
-const CLICK_SOUND = '/src/assets/sounds/UI/click.mp3'
+const CLICK_SOUND = clickSound
 
 export function useGlobalClickSound() {
   useEffect(() => {

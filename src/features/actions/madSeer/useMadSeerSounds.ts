@@ -1,4 +1,6 @@
-const START_SOUNDS = ['/src/assets/sounds/actions/mad_seer/mad_seer_start.mp3']
+import madSeerStart from '@/assets/sounds/actions/mad_seer/mad_seer_start.mp3'
+
+const START_SOUNDS = [madSeerStart]
 
 function createAudio(src: string) {
   const audio = new Audio(src)

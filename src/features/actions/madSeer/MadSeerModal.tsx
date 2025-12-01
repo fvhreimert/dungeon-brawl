@@ -19,8 +19,25 @@ type FloatingWord = {
   direction: 'normal' | 'reverse'
 }
 
+
+// Simple Pseudo-Random Number Generator (PRNG) for deterministic randomness
+// This is a basic LCG, suitable for generating stable "random-like" values
+// based on a seed, which satisfies React's purity rules for useMemo.
+function createSeededRandom(seed: string) {
+  let h = 0
+  for (let i = 0; i < seed.length; i++) {
+    h = Math.imul(31, h) + seed.charCodeAt(i)
+  }
+  let s = h >>> 0
+  return function() {
+    s = (s * 9301 + 49297) % 233280
+    return s / 233280
+  }
+}
+
 export function MadSeerModal({ tile, onAccept, onReject }: MadSeerModalProps) {
   const floatingWords = useMemo<FloatingWord[]>(() => {
+    const random = createSeededRandom(`${tile.id}-${tile.question}`)
     const cleanedWords = tile.question
       .replace(/[^\w\s']/g, '')
       .split(/\s+/)
@@ -29,17 +46,17 @@ export function MadSeerModal({ tile, onAccept, onReject }: MadSeerModalProps) {
     const uniqueWords = Array.from(new Set(cleanedWords))
     const count = Math.min(
       uniqueWords.length || cleanedWords.length,
-      Math.max(4, Math.floor(Math.random() * 5) + 4),
+      Math.max(4, Math.floor(random() * 5) + 4),
     )
 
     const source = uniqueWords.length > 0 ? uniqueWords : cleanedWords
-    const shuffled = [...source].sort(() => Math.random() - 0.5)
+    const shuffled = [...source].sort(() => random() - 0.5)
 
     return shuffled.slice(0, count).map((word, index) => {
-      const angle = Math.random() * 360
-      const radius = 70 + Math.random() * 110
-      const duration = 10 + Math.random() * 5
-      const delay = Math.random() * duration
+      const angle = random() * 360
+      const radius = 70 + random() * 110
+      const duration = 10 + random() * 5
+      const delay = random() * duration
       return {
         id: `${word}-${index}`,
         word,
@@ -47,7 +64,7 @@ export function MadSeerModal({ tile, onAccept, onReject }: MadSeerModalProps) {
         radius,
         duration,
         delay,
-        direction: Math.random() > 0.5 ? 'reverse' : 'normal',
+        direction: random() > 0.5 ? 'reverse' : 'normal',
       }
     })
   }, [tile.id, tile.question])

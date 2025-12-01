@@ -1,9 +1,12 @@
 import { useState, useCallback } from 'react'
 import type { Tile } from '@/types/game'
+import diceStart from '@/assets/sounds/actions/dice_of_fortune/dice_start.mp3'
+import diceTick from '@/assets/sounds/actions/dice_of_fortune/dice_tick.wav'
+import diceLand from '@/assets/sounds/actions/dice_of_fortune/dice_land.mp3'
 
-const START_DICE_SOUND = '/src/assets/sounds/actions/dice_of_fortune/dice_start.mp3'
-const TICK_DICE_SOUND = '/src/assets/sounds/actions/dice_of_fortune/dice_tick.wav'
-const LAND_DICE_SOUND = '/src/assets/sounds/actions/dice_of_fortune/dice_land.mp3'
+const START_DICE_SOUND = diceStart
+const TICK_DICE_SOUND = diceTick
+const LAND_DICE_SOUND = diceLand
 
 function createAudio(src: string) {
   const audio = new Audio(src)
@@ -12,7 +15,6 @@ function createAudio(src: string) {
 
 export function useDiceOfFortune() {
   const [isRolling, setIsRolling] = useState(false)
-  const [crumbledTileIds, setCrumbledTileIds] = useState<string[]>([])
   const [selectedSurvivorId, setSelectedSurvivorId] = useState<string | null>(null)
 
   const playStartDice = useCallback(() => {
@@ -42,7 +44,6 @@ export function useDiceOfFortune() {
     if (openTiles.length < 2) return
 
     setIsRolling(true)
-    setCrumbledTileIds([])
     setSelectedSurvivorId(null)
 
     playStartDice()
@@ -61,7 +62,6 @@ export function useDiceOfFortune() {
       
       await new Promise(resolve => setTimeout(resolve, delay))
       
-      setCrumbledTileIds(prev => [...prev, victim.id])
       updateTileModifiers(victim.id, { isCrumbled: true })
       playTick()
     }
@@ -78,7 +78,7 @@ export function useDiceOfFortune() {
     // A very short pause to let the UI render the yellow indicator before ending.
     await new Promise(resolve => setTimeout(resolve, 200)) 
 
-    setCrumbledTileIds([]) // clear local animation state, rely on global 'isCrumbled'
+
   }, [playStartDice, playTick, playLand])
 
   const clearDiceEffect = useCallback((tiles: Tile[], updateTileModifiers: (id: string, mods: { isCrumbled?: boolean }) => void) => {

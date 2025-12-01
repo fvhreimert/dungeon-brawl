@@ -1,6 +1,10 @@
-const START_SOUNDS = ['/src/assets/sounds/actions/frog_of_fate/frog_start.mp3']
-const HOP_SOUNDS = ['/src/assets/sounds/actions/frog_of_fate/frog_tick.wav']
-const LAND_SOUNDS = ['/src/assets/sounds/actions/frog_of_fate/frog_land.mp3']
+import frogStart from '@/assets/sounds/actions/frog_of_fate/frog_start.mp3'
+import frogTick from '@/assets/sounds/actions/frog_of_fate/frog_tick.wav'
+import frogLand from '@/assets/sounds/actions/frog_of_fate/frog_land.mp3'
+
+const START_SOUNDS = [frogStart]
+const HOP_SOUNDS = [frogTick]
+const LAND_SOUNDS = [frogLand]
 
 function createHowl(src: string) {
   const audio = new Audio(src)

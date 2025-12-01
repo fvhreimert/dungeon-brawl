@@ -41,7 +41,7 @@
   justify-items: center;
   overflow: hidden;
   background-color: #080808; /* Fallback color */
-  background-image: url('/src/assets/images/textures/background.png');
+  background-image: url('./assets/images/textures/background.png');
   background-repeat: repeat;
   background-attachment: fixed;
   background-size: 1480px 780px;
