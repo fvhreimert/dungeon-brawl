@@ -299,3 +299,15 @@
     drop-shadow(0 8px 0 rgba(255, 215, 0, 0.15))
     drop-shadow(0 -8px 0 rgba(255, 215, 0, 0.15));
 }
+
+.action-item.dice-animating .dice-of-fortune-icon {
+  animation: dicePulse 0.8s ease-in-out infinite alternate;
+  filter:
+    drop-shadow(0 0 8px rgba(255, 215, 0, 0.8))
+    drop-shadow(0 0 16px rgba(255, 255, 224, 0.6));
+}
+
+@keyframes dicePulse {
+  from { transform: translateY(-4px) scale(1.03); }
+  to { transform: translateY(4px) scale(1.08); }
+}

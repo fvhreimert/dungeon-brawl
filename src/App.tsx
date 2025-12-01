@@ -7,6 +7,9 @@ import { GameBoard } from './components/game/GameBoard'
 import { QuestionDialog } from './components/game/QuestionDialog'
 import { MadSeerModal } from '@/features/actions/madSeer/MadSeerModal'
 import { useFrogSounds } from '@/features/actions/frogOfFate/useFrogSounds'
+import { useDiceOfFortune } from '@/features/actions/diceOfFortune/useDiceOfFortune'
+import { useMadSeerSounds } from '@/features/actions/madSeer/useMadSeerSounds'
+import { useGlobalClickSound } from '@/hooks/useGlobalClickSound'
 import { Scoreboard } from './components/game/Scoreboard'
 import { useJeopardyGame } from './hooks/useJeopardyGame'
 import { gameConfig } from './config/gameConfig'
@@ -25,6 +28,7 @@ function App() {
     handleCloseDialog,
     handleUndo,
     applyTileMultiplier,
+    updateTileModifiers,
   } = useJeopardyGame({
     categories: gameConfig.gameplay.categories,
     pointValues: gameConfig.gameplay.pointValues,
@@ -39,7 +43,11 @@ function App() {
   const [frogSelecting, setFrogSelecting] = useState(false)
   const [frogHighlightId, setFrogHighlightId] = useState<string | null>(null)
   const [frogLandingId, setFrogLandingId] = useState<string | null>(null)
-  const { playStart, playHop, playLand } = useFrogSounds()
+
+  useGlobalClickSound()
+  const { playStart: playFrogStart, playHop, playLand } = useFrogSounds()
+  const { playStart: playMadSeerStart } = useMadSeerSounds()
+  const { triggerDice, isRolling: diceRolling, selectedSurvivorId, clearDiceEffect } = useDiceOfFortune()
 
   const handleWebClick = () => {
     setSpiderIndex((prev) => (prev < 8 ? prev + 1 : 1))
@@ -58,24 +66,46 @@ function App() {
   }
 
   const handleMadSeerStart = () => {
-    if (selectedTile || frogSelecting) return
+    if (selectedTile || frogSelecting || diceRolling) return
+    playMadSeerStart()
     setMadSeerActive(true)
     setMadSeerPreviewTile(null)
   }
 
   const handleTileSelect = (tileId: string) => {
+    // Handle Mad Seer logic first
     if (madSeerActive) {
       const tile = tiles.find((t) => t.id === tileId)
       if (!tile || tile.status === 'done') return
+      // Allow selecting even if crumbled (user might want to check it?)
+      // Or generally allow selecting ANY tile that isn't 'done' for Mad Seer.
       setMadSeerPreviewTile(tile)
       return
     }
+
+    // If Dice of Fortune just ran, logic is handled in GameBoard regarding 'disabled'.
+    // Here we just need to know if we should clear the dice effect.
+    if (selectedSurvivorId) {
+      if (tileId === selectedSurvivorId) {
+        handleTileClick(tileId)
+        // Clear persistent crumbled state
+        clearDiceEffect(tiles, updateTileModifiers)
+      }
+      // Ignore clicks on other tiles (though they should be disabled in UI)
+      return
+    }
+
     handleTileClick(tileId)
   }
 
   const handleMadSeerAccept = () => {
     if (!madSeerPreviewTile) return
     handleTileClick(madSeerPreviewTile.id)
+    // If we accepted a tile while Dice effect was active (e.g. the survivor), we should clear the effect?
+    // If the user selects the survivor via Mad Seer, it's the same as clicking it.
+    if (selectedSurvivorId && madSeerPreviewTile.id === selectedSurvivorId) {
+        clearDiceEffect(tiles, updateTileModifiers)
+    }
     setMadSeerPreviewTile(null)
     setMadSeerActive(false)
   }
@@ -120,9 +150,14 @@ function App() {
   }
 
   const handleFrogClick = () => {
-    if (madSeerActive || frogSelecting || selectedTile) return
-    playStart()
+    if (madSeerActive || frogSelecting || selectedTile || diceRolling) return
+    playFrogStart()
     runFrogSelection()
+  }
+
+  const handleDiceClick = () => {
+    if (madSeerActive || frogSelecting || selectedTile || diceRolling || selectedSurvivorId) return
+    triggerDice(tiles, updateTileModifiers)
   }
 
   useEffect(() => {
@@ -202,9 +237,11 @@ function App() {
           onTileSelect={handleTileSelect}
           highlightOpenTiles={madSeerActive}
           highlightedTileId={madSeerPreviewTile?.id ?? null}
-          boardLocked={!!selectedTile || !!madSeerPreviewTile || frogSelecting}
+          // Only lock strictly during animations or modal open
+          boardLocked={!!selectedTile || !!madSeerPreviewTile || frogSelecting || diceRolling}
           frogHighlightId={frogHighlightId}
           frogLandingId={frogLandingId}
+          diceSurvivorId={selectedSurvivorId} // Pass survivor ID to GameBoard
         />
 
         <Scoreboard players={players} activePlayerIndex={activePlayerIndex} />
@@ -244,7 +281,7 @@ function App() {
           <img src="/src/assets/images/actions/frog_of_fate.png" alt="Frog of Fate" className="frog-of-fate-icon" />
           <span className="action-label action-label-green">Frog of Fate</span>
         </div>
-        <div className="action-item">
+        <div className={`action-item ${diceRolling ? 'dice-animating' : ''}`} onClick={handleDiceClick}>
           <img src="/src/assets/images/actions/dice_of_fortune.png" alt="Dice of Fortune" className="dice-of-fortune-icon" />
           <span className="action-label action-label-gold">Dice of Fortune</span>
         </div>

@@ -415,13 +415,13 @@
 @keyframes multThrobInsane {
   0% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(120, 200, 255, 0.7)); }
   50% { transform: scale(1.1); filter: drop-shadow(0 0 18px rgba(255, 180, 255, 0.9)); }
-  100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(120, 200, 255, 0.7)); }
+  100% { filter: drop-shadow(0 0 8px rgba(120, 200, 255, 0.7)); }
 }
 
 @keyframes multThrobAbsurd {
   0% { transform: scale(1); filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.8)); }
   50% { transform: scale(1.15); filter: drop-shadow(0 0 26px rgba(255, 255, 255, 0.95)); }
-  100% { transform: scale(1); filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.8)); }
+  100% { filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.8)); }
 }
 
 @keyframes multAbsurdHalo {
@@ -429,6 +429,44 @@
   50% { transform: scale(1.08); opacity: 1; }
   100% { transform: scale(0.96); opacity: 0.6; }
 }
+
+/* Styling for the sole surviving tile after Dice of Fortune effect */
+.tile-dice-survivor {
+  animation: diceSurvivorPulse 1s ease-in-out infinite alternate;
+  border-color: #ffd700; /* Gold border */
+  box-shadow:
+    0 0 10px rgba(255, 215, 0, 0.7),
+    inset 0 0 5px rgba(255, 215, 0, 0.5);
+  transform: scale(1.02);
+  z-index: 2; /* Bring to front */
+}
+
+.tile-dice-survivor::after {
+  border-color: rgba(255, 215, 0, 0.9);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+  opacity: 1;
+}
+
+.tile-dice-survivor .value {
+  color: #fff;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.9), 0 0 15px rgba(255, 165, 0, 0.6);
+}
+
+@keyframes diceSurvivorPulse {
+  from {
+    transform: scale(1.02);
+    box-shadow:
+      0 0 10px rgba(255, 215, 0, 0.7),
+      inset 0 0 5px rgba(255, 215, 0, 0.5);
+  }
+  to {
+    transform: scale(1.04);
+    box-shadow:
+      0 0 15px rgba(255, 215, 0, 0.9),
+      inset 0 0 8px rgba(255, 215, 0, 0.7);
+  }
+}
+
 .tile-madseer-target {
   background: radial-gradient(circle at 50% 35%, rgba(120, 44, 160, 0.35), #141414 70%);
   border-color: #5a2a8a;
@@ -528,4 +566,24 @@
   to {
     transform: scale(1.03);
   }
+}
+
+.tile-crumbled {
+  background: #2a2a2a !important;
+  border-color: #3a3a3a !important;
+  color: #555 !important;
+  box-shadow: inset 0 0 10px #000 !important;
+  transform: scale(0.95) !important;
+  cursor: default !important;
+  pointer-events: none;
+  animation: none !important;
+}
+
+.tile-crumbled .value {
+  text-shadow: none !important;
+  opacity: 0.5;
+}
+
+.tile-crumbled .multiplier-badge {
+  display: none;
 }

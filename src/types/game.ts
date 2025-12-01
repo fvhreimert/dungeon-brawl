@@ -7,10 +7,16 @@ export type QAItem = {
   answer: string
 }
 
+export type TileModifiers = {
+  isCrumbled?: boolean
+  // Add more trackers here as needed (e.g., isFrozen, isPoisoned)
+}
+
 export type Tile = QAItem & {
   id: string
   status: TileStatus
   multiplier?: number
+  modifiers?: TileModifiers
 }
 
 export type Player = {

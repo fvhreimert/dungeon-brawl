@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 
-import type { Player, QAItem, Tile, GameStateSnapshot, GameStatEntry } from '@/types/game'
+import type { Player, QAItem, Tile, GameStateSnapshot, GameStatEntry, TileModifiers } from '@/types/game'
 import { gameConfig } from '@/config/gameConfig'
 
 type UseJeopardyGameParams = {
@@ -35,6 +35,7 @@ export function useJeopardyGame({
             value,
             status: 'open' as const,
             multiplier: 1,
+            modifiers: {},
             question:
               match?.question ??
               gameConfig.ui.labels.fallbackQuestion(category, value),
@@ -114,7 +115,7 @@ export function useJeopardyGame({
 
     setTiles((prev) =>
       prev.map((tile) =>
-        tile.id === selectedTile.id ? { ...tile, status: 'done' } : tile,
+        tile.id === selectedTile.id ? { ...tile, status: 'done', modifiers: {} } : tile, // Clear modifiers on done
       ),
     )
 
@@ -142,7 +143,7 @@ export function useJeopardyGame({
 
     setTiles((prev) =>
       prev.map((tile) =>
-        tile.id === selectedTile.id ? { ...tile, status: 'done' } : tile,
+        tile.id === selectedTile.id ? { ...tile, status: 'done', modifiers: {} } : tile, // Clear modifiers on done
       ),
     )
     
@@ -191,6 +192,21 @@ export function useJeopardyGame({
     )
   }
 
+  const updateTileModifiers = (tileId: string, modifiers: Partial<TileModifiers>) => {
+    setTiles((prev) =>
+      prev.map((tile) => {
+        if (tile.id !== tileId) return tile
+        return {
+          ...tile,
+          modifiers: {
+            ...tile.modifiers,
+            ...modifiers,
+          },
+        }
+      }),
+    )
+  }
+
   return {
     tiles,
     players,
@@ -206,5 +222,6 @@ export function useJeopardyGame({
     handleUndo,
     handleCloseDialog,
     applyTileMultiplier,
+    updateTileModifiers,
   }
 }
