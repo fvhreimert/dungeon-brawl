@@ -1,0 +1,179 @@
+.blood-sacrifice-backdrop {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 50% 40%, rgba(60, 0, 0, 0.6), rgba(10, 0, 0, 0.95));
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  z-index: 80;
+  backdrop-filter: blur(6px);
+}
+
+.blood-sacrifice-dialog {
+  width: min(600px, 92vw);
+  background: #1a0505;
+  border: 4px solid #8b0000;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.9),
+    0 0 0 4px #0f0202,
+    inset 0 0 0 2px #3d0b0b;
+  color: #ffcccc;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  gap: 1.5rem;
+  image-rendering: pixelated;
+}
+
+/* Grid Texture Overlay */
+.blood-sacrifice-dialog::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(255, 0, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(255, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Header / Title */
+.blood-sacrifice-title {
+  font-family: 'ArcadeClassic', sans-serif;
+  font-size: 36px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #ff1a1a;
+  text-shadow:
+    0 0 15px rgba(255, 0, 0, 0.6),
+    2px 2px 0 #330000;
+  z-index: 1;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.blood-sacrifice-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    z-index: 1;
+    position: relative;
+}
+
+.pentagram-image {
+  width: 360px;
+  height: 360px;
+  object-fit: contain;
+  
+  /* Dynamic variables set in JS */
+  --glow-intensity: calc(var(--sacrifice-progress) * 50px); /* Max 50px glow */
+  --grayscale-amount: calc((1 - var(--sacrifice-progress)) * 100%);
+  --brightness-level: calc(0.4 + (var(--sacrifice-progress) * 0.8)); /* 0.4 to 1.2 */
+  
+  filter: 
+    grayscale(var(--grayscale-amount)) 
+    brightness(var(--brightness-level)) 
+    drop-shadow(0 0 var(--glow-intensity) #ff0000);
+    
+  transition: filter 0.1s linear;
+  animation: pulse-scale 4s infinite ease-in-out;
+}
+
+@keyframes pulse-scale {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.slider-container {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 1.5rem;
+    border: 2px solid #550000;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+}
+
+.sacrifice-label {
+    font-family: "Press Start 2P", system-ui, sans-serif;
+    color: #ff4d4d;
+    font-size: 1.1rem;
+    text-shadow: 2px 2px 0px #330000;
+    text-transform: uppercase;
+}
+
+/* Custom Range Slider Styling */
+.bloody-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 24px;
+  background: #2a0a0a;
+  outline: none;
+  border: 3px solid #550000;
+  box-shadow: inset 0 0 10px #000;
+  cursor: pointer;
+}
+
+.bloody-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 32px;
+  height: 32px;
+  background: #ff0000;
+  border: 3px solid #8b0000;
+  cursor: pointer;
+  box-shadow: 0 0 15px #ff0000;
+  image-rendering: pixelated;
+}
+
+.bloody-slider::-moz-range-thumb {
+  width: 32px;
+  height: 32px;
+  background: #ff0000;
+  border: 3px solid #8b0000;
+  cursor: pointer;
+  box-shadow: 0 0 15px #ff0000;
+}
+
+/* Actions */
+.sacrifice-actions {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+    z-index: 1;
+    width: 100%;
+    justify-content: center;
+}
+
+.sacrifice-btn-confirm {
+  background: linear-gradient(180deg, #8b0000 0%, #550000 100%) !important;
+  color: #ffcccc !important;
+  border: 1px solid #ff0000 !important;
+  box-shadow: 0 4px 0 #330000 !important;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.sacrifice-btn-confirm:active {
+  box-shadow: 0 0 0 #330000 !important;
+  transform: translateY(4px);
+}
+
+.sacrifice-btn-cancel {
+  background: linear-gradient(180deg, #2b2b2b 0%, #1a1a1a 100%) !important;
+  color: #cccccc !important;
+  box-shadow: 0 4px 0 #000000 !important;
+}
+
+.sacrifice-btn-cancel:active {
+  box-shadow: 0 0 0 #000000 !important;
+  transform: translateY(4px);
+}

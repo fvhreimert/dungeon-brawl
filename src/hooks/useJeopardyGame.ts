@@ -207,6 +207,21 @@ export function useJeopardyGame({
     )
   }
 
+  const performBloodSacrifice = (amount: number, targetPlayerIndex: number) => {
+    saveSnapshot()
+    setPlayers((prev) =>
+      prev.map((player, index) => {
+        if (index === activePlayerIndex) {
+          return { ...player, score: player.score - amount }
+        }
+        if (index === targetPlayerIndex) {
+          return { ...player, score: player.score - amount }
+        }
+        return player
+      }),
+    )
+  }
+
   return {
     tiles,
     players,
@@ -223,5 +238,6 @@ export function useJeopardyGame({
     handleCloseDialog,
     applyTileMultiplier,
     updateTileModifiers,
+    performBloodSacrifice,
   }
 }

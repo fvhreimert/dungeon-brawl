@@ -6,6 +6,8 @@ import questionData from './data/questions.json'
 import { GameBoard } from './components/game/GameBoard'
 import { QuestionDialog } from './components/game/QuestionDialog'
 import { MadSeerModal } from '@/features/actions/madSeer/MadSeerModal'
+import { BloodSacrificeModal } from '@/features/actions/bloodSacrifice/BloodSacrificeModal'
+import { PlayerSelectModal } from '@/components/game/PlayerSelectModal'
 import { useFrogSounds } from '@/features/actions/frogOfFate/useFrogSounds'
 import { useDiceOfFortune } from '@/features/actions/diceOfFortune/useDiceOfFortune'
 import { useMadSeerSounds } from '@/features/actions/madSeer/useMadSeerSounds'
@@ -49,6 +51,7 @@ function App() {
     handleUndo,
     applyTileMultiplier,
     updateTileModifiers,
+    performBloodSacrifice,
   } = useJeopardyGame({
     categories: gameConfig.gameplay.categories,
     pointValues: gameConfig.gameplay.pointValues,
@@ -63,6 +66,11 @@ function App() {
   const [frogSelecting, setFrogSelecting] = useState(false)
   const [frogHighlightId, setFrogHighlightId] = useState<string | null>(null)
   const [frogLandingId, setFrogLandingId] = useState<string | null>(null)
+  
+  const [bloodSacrificeActive, setBloodSacrificeActive] = useState(false)
+  const [bloodSacrificeAmount, setBloodSacrificeAmount] = useState<number | null>(null)
+  const [bloodSacrificeTargetSelecting, setBloodSacrificeTargetSelecting] = useState(false)
+
 
   useGlobalClickSound()
   const { playStart: playFrogStart, playHop, playLand } = useFrogSounds()
@@ -133,6 +141,30 @@ function App() {
   const handleMadSeerReject = () => {
     setMadSeerPreviewTile(null)
     setMadSeerActive(false)
+  }
+
+  const handleBloodSacrificeStart = () => {
+    if (selectedTile || frogSelecting || diceRolling || madSeerActive) return
+    setBloodSacrificeActive(true)
+  }
+
+  const handleBloodSacrificeConfirm = (amount: number) => {
+    setBloodSacrificeAmount(amount)
+    setBloodSacrificeActive(false)
+    setBloodSacrificeTargetSelecting(true)
+  }
+
+  const handleBloodSacrificeTargetSelect = (targetIndex: number) => {
+    if (bloodSacrificeAmount === null) return
+    performBloodSacrifice(bloodSacrificeAmount, targetIndex)
+    setBloodSacrificeTargetSelecting(false)
+    setBloodSacrificeAmount(null)
+  }
+
+  const handleBloodSacrificeCancel = () => {
+    setBloodSacrificeActive(false)
+    setBloodSacrificeTargetSelecting(false)
+    setBloodSacrificeAmount(null)
   }
 
   const getOpenTiles = () => tiles.filter((tile) => tile.status === 'open')
@@ -212,7 +244,7 @@ function App() {
           <img src={madSeerIcon} alt="Mad Seer" className="mad-seer-icon" />
           <span className="action-label action-label-purple">Mad Seer</span>
         </div>
-        <div className="action-item">
+        <div className="action-item" onClick={handleBloodSacrificeStart}>
           <img src={bloodSacrificeIcon} alt="Blood Sacrifice" className="blood-sacrifice-icon" />
           <span className="action-label action-label-red">Blood Sacrifice</span>
         </div>
@@ -312,6 +344,22 @@ function App() {
           tile={madSeerPreviewTile}
           onAccept={handleMadSeerAccept}
           onReject={handleMadSeerReject}
+        />
+      )}
+
+      {bloodSacrificeActive && (
+        <BloodSacrificeModal
+          onConfirm={handleBloodSacrificeConfirm}
+          onCancel={handleBloodSacrificeCancel}
+        />
+      )}
+
+      {bloodSacrificeTargetSelecting && (
+        <PlayerSelectModal
+          players={players}
+          activePlayerIndex={activePlayerIndex}
+          onSelect={handleBloodSacrificeTargetSelect}
+          onCancel={handleBloodSacrificeCancel}
         />
       )}
 
