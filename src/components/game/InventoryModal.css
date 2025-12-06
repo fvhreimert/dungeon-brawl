@@ -1,0 +1,299 @@
+.inventory-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200; 
+  animation: fadeIn 0.2s ease-out;
+}
+
+.inventory-container {
+  width: 90vw;
+  max-width: 1200px;
+  height: 85vh;
+  
+  position: relative;
+  padding: 6px; /* Creates the border thickness (Bigger pixels) */
+  
+  /* Remove old border/bg logic */
+  background: none;
+  border: none;
+  box-shadow: none;
+
+  /* Apply drop shadow to the entire clipped shape */
+  filter: drop-shadow(8px 12px 0 rgba(0,0,0,0.5));
+  
+  margin: 20px;
+  display: flex;
+  flex-direction: column;
+  image-rendering: pixelated;
+}
+
+/* The Border Layer */
+.inventory-border-bg {
+  position: absolute;
+  inset: 0;
+  background-color: #554a3f;
+  z-index: 0;
+  
+  /* 3-Step Pixel Corner Clip Path (6px unit -> 18px radius) */
+  clip-path: polygon(
+    0 18px, 6px 18px, 6px 12px, 12px 12px, 12px 6px, 18px 6px, 18px 0,
+    calc(100% - 18px) 0, calc(100% - 18px) 6px, calc(100% - 12px) 6px, calc(100% - 12px) 12px, calc(100% - 6px) 12px, calc(100% - 6px) 18px, 100% 18px,
+    100% calc(100% - 18px), calc(100% - 6px) calc(100% - 18px), calc(100% - 6px) calc(100% - 12px), calc(100% - 12px) calc(100% - 12px), calc(100% - 12px) calc(100% - 6px), calc(100% - 18px) calc(100% - 6px), calc(100% - 18px) 100%,
+    18px 100%, 18px calc(100% - 6px), 12px calc(100% - 6px), 12px calc(100% - 12px), 6px calc(100% - 12px), 6px calc(100% - 18px), 0 calc(100% - 18px)
+  );
+}
+
+/* The Content Layer */
+.inventory-inner {
+  position: relative;
+  z-index: 1;
+  background-color: #1F1B17;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  /* Same Clip Path for consistent rounding */
+  clip-path: polygon(
+    0 18px, 6px 18px, 6px 12px, 12px 12px, 12px 6px, 18px 6px, 18px 0,
+    calc(100% - 18px) 0, calc(100% - 18px) 6px, calc(100% - 12px) 6px, calc(100% - 12px) 12px, calc(100% - 6px) 12px, calc(100% - 6px) 18px, 100% 18px,
+    100% calc(100% - 18px), calc(100% - 6px) calc(100% - 18px), calc(100% - 6px) calc(100% - 12px), calc(100% - 12px) calc(100% - 12px), calc(100% - 12px) calc(100% - 6px), calc(100% - 18px) calc(100% - 6px), calc(100% - 18px) 100%,
+    18px 100%, 18px calc(100% - 6px), 12px calc(100% - 6px), 12px calc(100% - 12px), 6px calc(100% - 12px), 6px calc(100% - 18px), 0 calc(100% - 18px)
+  );
+}
+
+.inventory-header {
+  padding: 20px 30px;
+  background-color: #2A231D;
+  /* Border bottom separator */
+  position: relative;
+  z-index: 5;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; /* Align to top to match Title */
+}
+.inventory-header::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: #000;
+}
+
+.inventory-text-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.inventory-title {
+  font-family: 'VT323', monospace;
+  font-size: 42px;
+  color: #E0D8C8;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 2px 2px 0 #000;
+  line-height: 1; /* Ensure tight spacing */
+}
+
+.inventory-count {
+  font-family: 'VT323', monospace;
+  font-size: 28px;
+  color: #8f8070;
+  text-shadow: 1px 1px 0 #000;
+  margin-top: 4px;
+}
+
+.inventory-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 50px;
+  background-color: #14100C;
+  
+  /* Inner Border effect */
+  /* border-top: 4px solid #000;  Explicit border for separation */
+  /* border-bottom: 4px solid #000; */
+
+  scrollbar-width: thin;
+  scrollbar-color: #554a3f #1F1B17;
+  image-rendering: pixelated;
+}
+
+/* Pixelated Scrollbar */
+.inventory-list::-webkit-scrollbar {
+  width: 16px;
+}
+
+.inventory-list::-webkit-scrollbar-track {
+  background: #1F1B17;
+  border-left: 4px solid #000;
+}
+
+.inventory-list::-webkit-scrollbar-thumb {
+  background-color: #554a3f;
+  border: 2px solid #1F1B17;
+  box-shadow: inset -2px -2px 0 #332c26;
+}
+
+.inventory-empty {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #554a3f;
+  font-family: 'VT323', monospace;
+  font-size: 32px;
+  font-style: italic;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 50px;
+  justify-items: center;
+  padding-bottom: 40px;
+}
+
+.card-grid .card-description-box {
+  white-space: pre-line;
+  text-transform: none;
+  font-size: 20px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.card-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  transition: transform 180ms ease, z-index 180ms ease;
+  transform-origin: center center;
+  will-change: transform;
+  z-index: 1;
+}
+
+.card-wrapper:hover {
+  transform: translateY(-8px) scale(1.04);
+  z-index: 10;
+}
+
+.inventory-hover-card {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 240px;
+  padding: 12px;
+  background-color: #1F1B17;
+  border: 2px solid #000;
+  box-shadow:
+    inset 0 0 0 2px #3f3a30,
+    0 8px 0 #000;
+  font-family: 'VT323', monospace;
+  font-size: 22px;
+  letter-spacing: 1px;
+  color: #f2f2f2;
+  text-transform: uppercase;
+  pointer-events: none;
+  z-index: 900;
+  text-align: left;
+}
+
+.inventory-hover-card::after {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 10px solid #1F1B17;
+}
+
+.inventory-hover-card .hover-title {
+  font-size: 26px;
+  margin-bottom: 6px;
+}
+
+.inventory-hover-card .hover-description {
+  font-size: 16px;
+  text-transform: none;
+  letter-spacing: 0.5px;
+}
+
+
+.inventory-list .pixel-card {
+  filter: drop-shadow(4px 4px 0 #000);
+  cursor: pointer;
+  transition: filter 180ms ease;
+}
+
+.card-wrapper:hover .pixel-card {
+  filter: drop-shadow(8px 12px 0 rgba(0,0,0,0.8));
+}
+
+.inventory-footer {
+    padding: 15px;
+    text-align: center;
+    background-color: #2A231D;
+    /* Border handled by list's bottom border or container logic */
+    display: flex;
+    justify-content: center;
+    position: relative;
+}
+
+.close-hint {
+    font-family: 'VT323', monospace;
+    color: #8f8070;
+    font-size: 22px;
+    background: #1F1B17;
+    padding: 4px 16px;
+    border: 2px solid #443b32;
+    text-shadow: 1px 1px 0 #000;
+}
+
+.close-inventory-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    /* Explicit size to prevent layout shift */
+    width: 32px;
+    height: 32px;
+    
+    /* Alignment adjustment with Title */
+    margin-top: 6px;
+
+    /* Alpha value and transition */
+    opacity: 0.5;
+    transition: opacity 0.2s ease-out;
+}
+
+.close-inventory-btn:hover {
+    opacity: 1;
+}
+
+.close-inventory-btn:active {
+    /* No scale effect */
+}
+
+.close-inventory-btn img {
+    width: 100%;
+    height: 100%;
+    image-rendering: pixelated;
+    /* No shadow */
+}

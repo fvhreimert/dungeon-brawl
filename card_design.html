@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro Dungeon Cards Component</title>
+    
+    <!-- 
+        FONTS 
+        'VT323' is used for the pixel-art aesthetic.
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==========================================================================
+           1. CSS VARIABLES & CONFIGURATION
+           ========================================================================== */
+        :root {
+            /* --- DIMENSIONS --- */
+            --card-width: 320px;
+            --card-height: 480px; /* 2:3 Aspect Ratio */
+            --border-width: 15px; 
+            
+            /* --- DEFAULT FALLBACK COLORS (Common Theme) --- */
+            --col-parchment: #4e463d;      
+            --col-text-dark: #dccbb6;      
+            --col-gold-main: #b8b0a2;      
+            --col-gold-dark: #6b6359;      
+            --col-banner-dark: #2e2620;    
+            --col-backing: #3d332a;   
+        }
+
+        /* ==========================================================================
+           2. COLOR THEMES
+           Apply these classes to the .pixel-card container to change its look.
+           ========================================================================== */
+
+        /* Theme 1: Common (Worn Leather & Parchment) */
+        .theme-common {
+            --col-parchment: #4e463d;      
+            --col-text-dark: #dccbb6;      
+            --col-gold-main: #b8b0a2;      /* Highlight: Light Iron */
+            --col-gold-dark: #6b6359;      /* Shadow: Dark Iron */
+            --col-banner-dark: #2e2620;    
+            --col-backing: #3d332a;        
+        }
+
+        /* Theme 2: Dark Dungeon (Abyssal Slate) */
+        .theme-dungeon {
+            --col-parchment: #2d3238;      
+            --col-text-dark: #aebbc3;      
+            --col-gold-main: #7b8791;      /* Highlight: Light Steel */
+            --col-gold-dark: #464e54;      /* Shadow: Dark Steel */
+            --col-banner-dark: #121416;    
+            --col-backing: #212529;
+        }
+
+        /* Theme 3: Nature (Deep Forest) */
+        .theme-nature {
+            --col-parchment: #2f3d30;      
+            --col-text-dark: #b8cbb9;      
+            --col-gold-main: #637d40;      /* Highlight: Light Olive */
+            --col-gold-dark: #364522;      /* Shadow: Dark Olive */
+            --col-banner-dark: #1a261b;    
+            --col-backing: #263327;        
+        }
+
+        /* Theme 4: Gold (True Metallic) */
+        .theme-gold {
+            --col-parchment: #614e1a;      
+            --col-text-dark: #fff5db;      
+            --col-gold-main: #ffc400;      /* Highlight: Vivid Gold */
+            --col-gold-dark: #aa8200;      /* Shadow: Deep Gold */
+            --col-banner-dark: #403311;    
+            --col-backing: #4a3b14;        
+        }
+
+        /* Theme 5: Dark Red (Blood & Rust) */
+        .theme-red {
+            --col-parchment: #4a1a1a;      
+            --col-text-dark: #d6a6a6;      
+            --col-gold-main: #9a5d5d;      /* Highlight: Faded Rust */
+            --col-gold-dark: #5e3838;      /* Shadow: Darkened Rust */
+            --col-banner-dark: #2e0d0d;    
+            --col-backing: #3d1212;
+        }
+
+        /* Theme 6: Gray Neutral (Stone & Iron) */
+        .theme-gray {
+            --col-parchment: #333333;      
+            --col-text-dark: #cccccc;      
+            --col-gold-main: #808080;      /* Highlight: Stone Gray */
+            --col-gold-dark: #4d4d4d;      /* Shadow: Dark Stone */
+            --col-banner-dark: #262626;    
+            --col-backing: #383838;
+        }
+
+        /* Theme 7: Fel Magic (Chaotic Green) */
+        .theme-fel {
+            --col-parchment: #111f11;      
+            --col-text-dark: #a5d6a7;      
+            --col-gold-main: #76ff03;      /* Highlight: Fel Green */
+            --col-gold-dark: #3e8a02;      /* Shadow: Deep Fel Green */
+            --col-banner-dark: #0a140a;    
+            --col-backing: #1b301b;        
+        }
+
+        /* ==========================================================================
+           3. CARD COMPONENT STYLES
+           ========================================================================== */
+
+        /* --- Main Container --- */
+        .pixel-card {
+            width: var(--card-width);
+            height: var(--card-height);
+            position: relative;
+            box-sizing: border-box;
+            background: transparent; 
+            transition: transform 0.2s;
+            image-rendering: pixelated;
+            
+            /* Centering Content */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .pixel-card:hover {
+            transform: translateY(-4px);
+        }
+        
+        /* --- Frame Overlay (Top Layer) --- */
+        /* This element sits on top of everything to create the border/frame effect. */
+        .frame-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 9999; /* Highest Z-Index to ensure it overlays content */
+            pointer-events: none;
+            box-sizing: border-box;
+            
+            /* Pixel Perfect Rendering */
+            image-rendering: -moz-crisp-edges;
+            image-rendering: pixelated;
+            
+            /* Image set via inline style in JS */
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        /* --- Content Wrapper (Gap Layer) --- */
+        .card-backing-layer {
+            position: relative;
+            z-index: 1;
+            
+            /* Dimensions calculated to sit inside the frame border */
+            width: calc(100% - (var(--border-width) * 2));
+            height: calc(100% - (var(--border-width) * 2));
+            
+            display: flex;
+            padding: 1px; /* Small gap between backing and inner content */
+            box-sizing: border-box;
+            background-color: var(--col-backing); /* Theme-driven color */
+        }
+
+        /* --- Inner Content Container --- */
+        .card-inner {
+            position: relative;
+            z-index: 2;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border: 2px solid #000;
+            background-color: #111;
+            box-sizing: border-box;
+        }
+
+        /* Inner Shadow Vignette */
+        .card-inner::after {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            z-index: 20;
+            pointer-events: none;
+            box-shadow: 
+                inset 0 0 0 8px rgba(0,0,0,0.8),
+                inset 0 0 0 13px rgba(0,0,0,0.6),
+                inset 0 0 0 18px rgba(0,0,0,0.4),
+                inset 0 0 0 23px rgba(0,0,0,0.2),
+                inset 0 0 0 28px rgba(0,0,0,0.1);
+        }
+
+        /* --- Sub-Component: Visual/Image Well --- */
+        .card-visual-well {
+            width: 100%;
+            height: 55%; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 2px solid #000;
+        }
+
+        .card-visual-well img {
+            width: 100%;
+            height: auto;
+            flex-shrink: 0;
+            image-rendering: pixelated;
+        }
+
+        /* --- Sub-Component: Title Banner --- */
+        .title-banner {
+            flex: 0 0 auto;
+            position: relative;
+            z-index: 5;
+            padding: 4px 4px;
+            text-align: center;
+            background-color: var(--col-banner-dark);
+            
+            /* 3D Pixel Border Effect */
+            border-top: 4px solid var(--col-gold-main);
+            border-left: 4px solid var(--col-gold-main);
+            border-right: 4px solid var(--col-gold-dark);
+            border-bottom: 4px solid var(--col-gold-dark);
+            
+            /* Outer Outline */
+            outline: 2px solid #000;
+            margin-top: 2px;
+            margin-bottom: 2px;
+        }
+
+        .card-title {
+            font-family: 'VT323', monospace;
+            font-size: 28px; 
+            line-height: 1;
+            color: var(--col-gold-main);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            
+            /* Hard Pixel Shadow */
+            text-shadow: 
+                -1px -1px 0 #000,  
+                 1px -1px 0 #000,
+                -1px  1px 0 #000,
+                 1px  1px 0 #000;
+        }
+
+        /* --- Sub-Component: Description Box --- */
+        .card-description-box {
+            flex: 1 1 auto; 
+            background-color: var(--col-parchment);
+            padding: 5px 30px 35px 30px;
+            
+            /* Typography */
+            font-size: 22px;
+            color: var(--col-text-dark);
+            text-align: center;
+            line-height: 1.1;
+            
+            /* Layout */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            
+            /* Inset Shadows */
+            box-shadow: inset 0 0 0 2px rgba(0,0,0,0.1), inset 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+
+        /* ==========================================================================
+           4. PAGE LAYOUT (Demo Purposes Only)
+           ========================================================================== */
+        body {
+            background-color: #050505;
+            font-family: 'VT323', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px;
+        }
+
+        #card-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            justify-content: center;
+            max-width: 1400px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Container for the cards -->
+    <div id="card-grid"></div>
+
+    <script>
+        /* ==========================================================================
+           1. CARD DATA
+           ========================================================================== */
+        const cardsData = [
+            { title: "Iron Sword", desc: "A reliable blade for any adventurer.", theme: "theme-common" }, 
+            { title: "Cursed Skull", desc: "Emanates a cold, dark energy.", theme: "theme-dungeon" }, 
+            { title: "Elven Bow", desc: "Crafted from living wood by ancient hands.", theme: "theme-nature" }, 
+            { title: "Golden Idol", desc: "A heavy relic from the sunken temple.", theme: "theme-gold" }, 
+            { title: "Health Potion", desc: "Smells faintly of strawberries and iron.", theme: "theme-red" }, 
+            { title: "Stone Shield", desc: "Solid as the mountain itself.", theme: "theme-gray" },
+            { title: "Fel Flame", desc: "Burns with a chaotic, emerald fire.", theme: "theme-fel" }
+        ];
+
+        /* ==========================================================================
+           2. RENDER LOGIC
+           ========================================================================== */
+        
+        /**
+         * Creates a DOM element for a pixel art card.
+         * @param {Object} card - The card data object.
+         * @param {number} index - The index of the card (used for frame cycling).
+         * @returns {HTMLElement} The constructed card element.
+         */
+        function createCardElement(card, index) {
+            const el = document.createElement('div');
+            el.className = `pixel-card ${card.theme}`;
+            
+            // Frame Cycling Logic: Cycle through frames 1-6
+            const frameNum = (index % 6) + 1;
+            const frameImg = frameNum === 1 ? 'frame.png' : `frame${frameNum}.png`;
+
+            el.innerHTML = `
+                <!-- Layer 1: Backing & Content -->
+                <div class="card-backing-layer">
+                    <div class="card-inner">
+                        
+                        <!-- Image Well -->
+                        <div class="card-visual-well">
+                            <img src="image.png" alt="${card.title}">
+                        </div>
+
+                        <!-- Title Banner -->
+                        <div class="title-banner">
+                            <div class="card-title">${card.title}</div>
+                        </div>
+
+                        <!-- Description Box -->
+                        <div class="card-description-box">
+                            ${card.desc}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Layer 2: Frame Overlay (Top) -->
+                <div class="frame-overlay" style="background-image: url('${frameImg}')"></div>
+            `;
+            
+            return el;
+        }
+
+        /* ==========================================================================
+           3. INITIALIZATION
+           ========================================================================== */
+        const grid = document.getElementById('card-grid');
+
+        cardsData.forEach((card, index) => {
+            const cardElement = createCardElement(card, index);
+            grid.appendChild(cardElement);
+        });
+
+    </script>
+</body>
+</html>

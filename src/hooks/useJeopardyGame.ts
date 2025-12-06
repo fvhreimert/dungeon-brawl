@@ -1,13 +1,113 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import type { Player, QAItem, Tile, GameStateSnapshot, GameStatEntry, TileModifiers } from '@/types/game'
+import type {
+  PlayerConfig,
+  Player,
+  QAItem,
+  Tile,
+  GameStateSnapshot,
+  GameStatEntry,
+  TileModifiers,
+  PlayerStats,
+  ScoreChangeReason,
+  CardInstance,
+} from '@/types/game'
+import type { CardDefinition } from '@/data/cards'
 import { gameConfig } from '@/config/gameConfig'
+import {
+  getPassivePointsForCard,
+  runCardEffect,
+} from '@/features/cards/cardEffectRegistry'
 
 type UseJeopardyGameParams = {
   categories: readonly string[]
   pointValues: readonly number[]
-  players: readonly Player[]
+  players: readonly PlayerConfig[]
   questionBank: QAItem[]
+}
+
+const createEmptyTurnTotals = () => ({
+  total: 0,
+  thisTurn: 0,
+})
+
+const calculatePassivePointsPerTurn = (inventory: CardInstance[]) =>
+  inventory.reduce((sum, card) => sum + getPassivePointsForCard(card.id), 0)
+
+const createDefaultPlayerStats = (inventory: CardInstance[]): PlayerStats => ({
+  passivePointsPerTurn: calculatePassivePointsPerTurn(inventory),
+  passivePointsGained: createEmptyTurnTotals(),
+  pointsLostToQuestions: createEmptyTurnTotals(),
+  pointsLostToActiveCards: createEmptyTurnTotals(),
+  pointsLostToPassiveItems: createEmptyTurnTotals(),
+  isSilenced: false,
+  isPuppeteered: false,
+})
+
+const buildPlayerWithStats = (config: PlayerConfig): Player => ({
+  ...config,
+  inventory: [...config.inventory],
+  stats: createDefaultPlayerStats(config.inventory),
+})
+
+const createCardInstance = (definition: CardDefinition): CardInstance => {
+  const uid = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : `card-${Date.now()}-${Math.random().toString(36).slice(2)}`
+  return {
+    ...definition,
+    instanceId: `${definition.id}-${uid}`,
+    state: {},
+  }
+}
+
+const addToTurnTotals = (totals: { total: number; thisTurn: number }, amount: number) => ({
+  total: totals.total + amount,
+  thisTurn: totals.thisTurn + amount,
+})
+
+const resetTurnTotals = (totals: { total: number; thisTurn: number }) => ({
+  ...totals,
+  thisTurn: 0,
+})
+
+const resetPlayerTurnStats = (stats: PlayerStats): PlayerStats => ({
+  ...stats,
+  passivePointsGained: resetTurnTotals(stats.passivePointsGained),
+  pointsLostToQuestions: resetTurnTotals(stats.pointsLostToQuestions),
+  pointsLostToActiveCards: resetTurnTotals(stats.pointsLostToActiveCards),
+  pointsLostToPassiveItems: resetTurnTotals(stats.pointsLostToPassiveItems),
+})
+
+const updateStatsForScoreChange = (
+  stats: PlayerStats,
+  delta: number,
+  reason: ScoreChangeReason,
+): PlayerStats => {
+  if (delta === 0) return stats
+
+  const nextStats = { ...stats }
+  if (reason === 'question' && delta < 0) {
+    const lossAmount = Math.abs(delta)
+    nextStats.pointsLostToQuestions = addToTurnTotals(nextStats.pointsLostToQuestions, lossAmount)
+  }
+  if (reason === 'activeCard' && delta < 0) {
+    const lossAmount = Math.abs(delta)
+    nextStats.pointsLostToActiveCards = addToTurnTotals(nextStats.pointsLostToActiveCards, lossAmount)
+  }
+  if (reason === 'passiveItem') {
+    if (delta < 0) {
+      const lossAmount = Math.abs(delta)
+      nextStats.pointsLostToPassiveItems = addToTurnTotals(
+        nextStats.pointsLostToPassiveItems,
+        lossAmount,
+      )
+    } else {
+      nextStats.passivePointsGained = addToTurnTotals(nextStats.passivePointsGained, delta)
+    }
+  }
+
+  return nextStats
 }
 
 export function useJeopardyGame({
@@ -47,11 +147,19 @@ export function useJeopardyGame({
   )
 
   const [tiles, setTiles] = useState<Tile[]>(generatedTiles)
-  const [players, setPlayers] = useState<Player[]>([...initialPlayers])
+  const [players, setPlayers] = useState<Player[]>(
+    initialPlayers.map((player) => buildPlayerWithStats(player)),
+  )
+  const playersRef = useRef<Player[]>(players)
+  useEffect(() => {
+    playersRef.current = players
+  }, [players])
+  const applyScoreChangeRef = useRef<
+    (targetIndex: number, delta: number, reason?: ScoreChangeReason) => void
+  >(() => {})
   const [activePlayerIndex, setActivePlayerIndex] = useState(0)
   const [selectedTileId, setSelectedTileId] = useState<string | null>(null)
   const [answerRevealed, setAnswerRevealed] = useState(false)
-  
   const [history, setHistory] = useState<GameStateSnapshot[]>([])
   const [gameStats, setGameStats] = useState<GameStatEntry[]>([])
 
@@ -69,10 +177,81 @@ export function useJeopardyGame({
           activePlayerIndex,
         },
       ]
-      // Keep only last 5 states
       return newHistory.slice(-5)
     })
   }
+
+  const updatePlayerStats = useCallback(
+    (targetIndex: number, updater: (stats: PlayerStats) => PlayerStats) => {
+      setPlayers((prev) =>
+        prev.map((player, index) =>
+          index === targetIndex ? { ...player, stats: updater(player.stats) } : player,
+        ),
+      )
+    },
+    [setPlayers],
+  )
+
+  const updateCardState = useCallback(
+    (
+      playerIndex: number,
+      cardInstanceId: string,
+      updater: (state: Record<string, unknown>) => Record<string, unknown>,
+    ) => {
+      setPlayers((prev) =>
+        prev.map((player, index) => {
+          if (index !== playerIndex) return player
+          const inventory = player.inventory.map((card) =>
+            card.instanceId === cardInstanceId
+              ? { ...card, state: updater(card.state ?? {}) }
+              : card,
+          )
+          return { ...player, inventory }
+        }),
+      )
+    },
+    [setPlayers],
+  )
+
+  const applyScoreChange = useCallback(
+    (targetIndex: number, delta: number, reason: ScoreChangeReason = 'other') => {
+      if (delta === 0 && reason === 'other') return
+      setPlayers((prev) =>
+        prev.map((player, index) => {
+          if (index !== targetIndex) return player
+          return {
+            ...player,
+            score: player.score + delta,
+            stats: updateStatsForScoreChange(player.stats, delta, reason),
+          }
+        }),
+      )
+
+      if (delta < 0 && reason !== 'question') {
+        const inventory = playersRef.current[targetIndex]?.inventory ?? []
+        inventory.forEach((card) =>
+          runCardEffect(
+            'damageTaken',
+            card,
+            {
+              players: playersRef.current,
+              ownerPlayerIndex: targetIndex,
+              activePlayerIndex,
+              applyScoreChange: applyScoreChangeRef.current,
+              updatePlayerStats,
+              updateCardState,
+            },
+            { damage: Math.abs(delta), reason },
+          ),
+        )
+      }
+    },
+    [activePlayerIndex, updatePlayerStats, updateCardState],
+  )
+
+  useEffect(() => {
+    applyScoreChangeRef.current = applyScoreChange
+  }, [applyScoreChange])
 
   const recordStat = (
     result: 'correct' | 'wrong' | 'pass',
@@ -80,12 +259,12 @@ export function useJeopardyGame({
   ) => {
     if (!selectedTile) return
     const currentPlayer = players[activePlayerIndex]
-    
+
     setGameStats((prev) => [
       ...prev,
       {
         turnNumber: prev.length + 1,
-        playerId: currentPlayer.name, // Using name as ID for now
+        playerId: currentPlayer.name,
         playerName: currentPlayer.name,
         tileId: selectedTile.id,
         tileValue: selectedTile.value,
@@ -105,6 +284,20 @@ export function useJeopardyGame({
 
   const handleRevealAnswer = () => setAnswerRevealed(true)
 
+  const getNextPlayerIndex = () => (activePlayerIndex + 1) % players.length
+
+  const prepareNextPlayer = () => {
+    const nextIndex = getNextPlayerIndex()
+    setPlayers((prev) =>
+      prev.map((player, index) =>
+        index === nextIndex ? { ...player, stats: resetPlayerTurnStats(player.stats) } : player,
+      ),
+    )
+    setActivePlayerIndex(nextIndex)
+    setSelectedTileId(null)
+    setAnswerRevealed(false)
+  }
+
   const handleAnswer = (correct: boolean) => {
     if (!selectedTile || !answerRevealed) return
 
@@ -115,24 +308,12 @@ export function useJeopardyGame({
 
     setTiles((prev) =>
       prev.map((tile) =>
-        tile.id === selectedTile.id ? { ...tile, status: 'done', modifiers: {} } : tile, // Clear modifiers on done
+        tile.id === selectedTile.id ? { ...tile, status: 'done', modifiers: {} } : tile,
       ),
     )
 
-    setPlayers((prev) =>
-      prev.map((player, index) =>
-        index === activePlayerIndex
-          ? {
-              ...player,
-              score: player.score + scoreChange,
-            }
-          : player,
-      ),
-    )
-
-    setActivePlayerIndex((prev) => (prev + 1) % players.length)
-    setSelectedTileId(null)
-    setAnswerRevealed(false)
+    applyScoreChange(activePlayerIndex, scoreChange, 'question')
+    prepareNextPlayer()
   }
 
   const handlePass = () => {
@@ -143,40 +324,31 @@ export function useJeopardyGame({
 
     setTiles((prev) =>
       prev.map((tile) =>
-        tile.id === selectedTile.id ? { ...tile, status: 'done', modifiers: {} } : tile, // Clear modifiers on done
+        tile.id === selectedTile.id ? { ...tile, status: 'done', modifiers: {} } : tile,
       ),
     )
-    
-    // In a pass scenario, we just mark it done and move to next player
-    setActivePlayerIndex((prev) => (prev + 1) % players.length)
-    setSelectedTileId(null)
-    setAnswerRevealed(false)
+
+    prepareNextPlayer()
   }
 
   const handleUndo = () => {
     if (history.length === 0) return
 
     const previousState = history[history.length - 1]
-    
+
     setTiles(previousState.tiles)
     setPlayers(previousState.players)
     setActivePlayerIndex(previousState.activePlayerIndex)
-    
-    // Pop last history entry
+
     setHistory((prev) => prev.slice(0, -1))
-    
-    // Pop last stat entry (since we are undoing the turn)
     setGameStats((prev) => prev.slice(0, -1))
-    
-    // Reset selection state to be safe
+
     setSelectedTileId(null)
     setAnswerRevealed(false)
   }
 
   const handleCloseDialog = () => {
-    // Prevent closing if answer is revealed to avoid "peeking" exploit
     if (answerRevealed) return
-    
     setAnswerRevealed(false)
     setSelectedTileId(null)
   }
@@ -209,18 +381,82 @@ export function useJeopardyGame({
 
   const performBloodSacrifice = (amount: number, targetPlayerIndex: number) => {
     saveSnapshot()
+    applyScoreChange(activePlayerIndex, -amount, 'activeCard')
+    applyScoreChange(targetPlayerIndex, -amount, 'activeCard')
+  }
+
+  const addCardToInventory = (card: CardDefinition) => {
+    saveSnapshot()
+    const cardInstance = createCardInstance(card)
     setPlayers((prev) =>
       prev.map((player, index) => {
-        if (index === activePlayerIndex) {
-          return { ...player, score: player.score - amount }
+        if (index !== activePlayerIndex) return player
+        const inventory = [cardInstance, ...player.inventory]
+        return {
+          ...player,
+          inventory,
+          stats: {
+            ...player.stats,
+            passivePointsPerTurn: calculatePassivePointsPerTurn(inventory),
+          },
         }
-        if (index === targetPlayerIndex) {
-          return { ...player, score: player.score - amount }
-        }
-        return player
       }),
     )
   }
+
+  const activateCard = (cardInstanceId: string, targetPlayerIndex: number) => {
+    const ownerIndex = activePlayerIndex
+    const card = playersRef.current[ownerIndex]?.inventory.find(
+      (entry) => entry.instanceId === cardInstanceId,
+    )
+    if (!card) return
+    saveSnapshot()
+    runCardEffect(
+      'activated',
+      card,
+      {
+        players: playersRef.current,
+        ownerPlayerIndex: ownerIndex,
+        activePlayerIndex,
+        applyScoreChange: applyScoreChangeRef.current,
+        updatePlayerStats,
+        updateCardState,
+      },
+      { targetIndex: targetPlayerIndex },
+    )
+  }
+
+  const runTurnStartEffects = useCallback(
+    (playerIndex: number) => {
+      const player = playersRef.current[playerIndex]
+      if (!player) return
+      player.inventory.forEach((card) =>
+        runCardEffect(
+          'turnStart',
+          card,
+          {
+            players: playersRef.current,
+            ownerPlayerIndex: playerIndex,
+            activePlayerIndex,
+            applyScoreChange: applyScoreChangeRef.current,
+            updatePlayerStats,
+            updateCardState,
+          },
+          {},
+        ),
+      )
+    },
+    [activePlayerIndex, updatePlayerStats, updateCardState],
+  )
+
+  const hasMountedRef = useRef(false)
+  useEffect(() => {
+    if (!hasMountedRef.current) {
+      hasMountedRef.current = true
+      return
+    }
+    runTurnStartEffects(activePlayerIndex)
+  }, [activePlayerIndex, runTurnStartEffects])
 
   return {
     tiles,
@@ -239,5 +475,7 @@ export function useJeopardyGame({
     applyTileMultiplier,
     updateTileModifiers,
     performBloodSacrifice,
+    addCardToInventory,
+    activateCard,
   }
 }

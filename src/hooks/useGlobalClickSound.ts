@@ -18,10 +18,11 @@ export function useGlobalClickSound() {
       })
     }
 
-    window.addEventListener('click', handleClick)
+    // Use capture phase to hear clicks even if stopPropagation is called
+    window.addEventListener('click', handleClick, true)
 
     return () => {
-      window.removeEventListener('click', handleClick)
+      window.removeEventListener('click', handleClick, true)
     }
   }, [])
 }

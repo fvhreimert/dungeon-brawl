@@ -15,7 +15,8 @@
     inset 0 0 0 3px #222222,
     0 5px 0 #000000,
     0 0 0 2px #0a0a0a;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 10px;
 }
 
@@ -28,6 +29,60 @@
     0 0 14px rgba(181, 26, 44, 0.4);
 }
 
+.score-card-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.player-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.player-score-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.player-passive-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: 0.2px;
+  font-weight: 600;
+}
+
+.player-passive-value.positive {
+  color: #8effb9;
+}
+
+.player-passive-value.negative {
+  color: #ff8e8e;
+}
+
+.player-passive-arrow {
+  width: 14px;
+  height: 20px;
+  background-color: currentColor;
+  mask-size: contain;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-position: center;
+  display: inline-block;
+}
+
+.player-passive-amount {
+  line-height: 1;
+  font-size: inherit;
+  font-weight: 600;
+}
 .player-name {
   display: flex;
   align-items: center;
@@ -52,6 +107,32 @@
     1px 0 #2b030c,
     0 -1px #2b030c,
     0 1px #2b030c;
+}
+
+.inventory-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  transition: transform 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inventory-btn:hover {
+  transform: scale(1.1);
+}
+
+.inventory-btn:active {
+  transform: scale(0.95);
+}
+
+.inventory-btn img {
+  width: 32px;
+  height: 32px;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
 }
 
 .score-meter {

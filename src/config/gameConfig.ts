@@ -1,3 +1,12 @@
+import type { PlayerConfig } from '@/types/game'
+
+const defaultPlayers: PlayerConfig[] = [
+  { name: 'Rogue', score: 1200, inventory: [] },
+  { name: 'Mage', score: 900, inventory: [] },
+  { name: 'Paladin', score: 700, inventory: [] },
+  { name: 'Necro', score: 300, inventory: [] },
+]
+
 export const gameConfig = {
   meta: {
     title: "DUNGEON BRAWL",
@@ -8,12 +17,7 @@ export const gameConfig = {
     pointValues: [100, 200, 300, 400, 500],
     maxScoreForMeter: 2000, // Used to calculate the width of the score bar
   },
-  players: [
-    { name: 'Rogue', score: 1200 },
-    { name: 'Mage', score: 900 },
-    { name: 'Paladin', score: 700 },
-    { name: 'Necro', score: 300 },
-  ],
+  players: defaultPlayers,
   ui: {
     labels: {
       revealButton: "Reveal Answer",

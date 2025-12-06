@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Button as RetroButton } from '@/components/ui/8bit/button'
 import pentagram from '@/assets/images/actions/pentagram.png'
+import clickSound from '@/assets/sounds/UI/click.mp3'
 import './BloodSacrificeModal.css'
 
 type BloodSacrificeModalProps = {
@@ -13,6 +14,17 @@ export function BloodSacrificeModal({ onConfirm, onCancel }: BloodSacrificeModal
 
   // Calculate progress from 0 to 1 based on slider (min 1, max 100)
   const progress = (amount - 1) / 99
+
+  const playTick = () => {
+    const audio = new Audio(clickSound)
+    audio.volume = 0.15
+    audio.play().catch(() => {})
+  }
+
+  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAmount(Number(e.target.value))
+    playTick()
+  }
 
   return (
     <div className="blood-sacrifice-backdrop" onClick={onCancel}>
@@ -32,7 +44,7 @@ export function BloodSacrificeModal({ onConfirm, onCancel }: BloodSacrificeModal
                     min="1" 
                     max="100" 
                     value={amount} 
-                    onChange={(e) => setAmount(Number(e.target.value))}
+                    onChange={handleSliderChange}
                     className="bloody-slider"
                 />
             </div>

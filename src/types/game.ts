@@ -1,3 +1,5 @@
+import type { CardDefinition } from '@/data/cards'
+
 export type TileStatus = 'open' | 'done'
 
 export type QAItem = {
@@ -19,10 +21,37 @@ export type Tile = QAItem & {
   modifiers?: TileModifiers
 }
 
-export type Player = {
+export type CardInstance = CardDefinition & {
+  instanceId: string
+  state?: Record<string, unknown>
+}
+
+export type TurnTotals = {
+  total: number
+  thisTurn: number
+}
+
+export type PlayerStats = {
+  passivePointsPerTurn: number
+  passivePointsGained: TurnTotals
+  pointsLostToQuestions: TurnTotals
+  pointsLostToActiveCards: TurnTotals
+  pointsLostToPassiveItems: TurnTotals
+  isSilenced: boolean
+  isPuppeteered: boolean
+}
+
+export type PlayerConfig = {
   name: string
   score: number
+  inventory: CardInstance[]
 }
+
+export type Player = PlayerConfig & {
+  stats: PlayerStats
+}
+
+export type ScoreChangeReason = 'question' | 'activeCard' | 'passiveItem' | 'other'
 
 export type GameStateSnapshot = {
   tiles: Tile[]

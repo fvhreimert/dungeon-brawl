@@ -11,11 +11,13 @@ import { PlayerSelectModal } from '@/components/game/PlayerSelectModal'
 import { useFrogSounds } from '@/features/actions/frogOfFate/useFrogSounds'
 import { useDiceOfFortune } from '@/features/actions/diceOfFortune/useDiceOfFortune'
 import { useMadSeerSounds } from '@/features/actions/madSeer/useMadSeerSounds'
+import { useBloodSacrificeSounds } from '@/features/actions/bloodSacrifice/useBloodSacrificeSounds'
 import { useGlobalClickSound } from '@/hooks/useGlobalClickSound'
 import { Scoreboard } from './components/game/Scoreboard'
 import { useJeopardyGame } from './hooks/useJeopardyGame'
 import { gameConfig } from './config/gameConfig'
-import type { QAItem, Tile } from './types/game'
+import type { QAItem, Tile, PlayerConfig, CardInstance } from './types/game'
+import { CARDS, type CardDefinition } from '@/data/cards'
 
 import cardJesterIcon from '@/assets/images/actions/card_jester.png'
 import madSeerIcon from '@/assets/images/actions/mad_seer.png'
@@ -25,6 +27,8 @@ import expandIcon from '@/assets/images/ui/expand.png'
 import webIcon from '@/assets/images/actions/web.png'
 import frogIcon from '@/assets/images/actions/frog_of_fate.png'
 import diceIcon from '@/assets/images/actions/dice_of_fortune.png'
+import { CardRevealModal } from '@/features/actions/cardJester/CardRevealModal'
+import { InventoryModal } from '@/components/game/InventoryModal'
 
 import spider1 from '@/assets/images/actions/spiders/spider_1.png'
 import spider2 from '@/assets/images/actions/spiders/spider_2.png'
@@ -38,6 +42,29 @@ import spider8 from '@/assets/images/actions/spiders/spider_8.png'
 const SPIDERS = [null, spider1, spider2, spider3, spider4, spider5, spider6, spider7, spider8]
 
 function App() {
+  const [spiderIndex, setSpiderIndex] = useState(1)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [madSeerActive, setMadSeerActive] = useState(false)
+  const [madSeerPreviewTile, setMadSeerPreviewTile] = useState<Tile | null>(null)
+  const [frogSelecting, setFrogSelecting] = useState(false)
+  const [frogHighlightId, setFrogHighlightId] = useState<string | null>(null)
+  const [frogLandingId, setFrogLandingId] = useState<string | null>(null)
+  
+  const [bloodSacrificeActive, setBloodSacrificeActive] = useState(false)
+  const [bloodSacrificeAmount, setBloodSacrificeAmount] = useState<number | null>(null)
+  const [bloodSacrificeTargetSelecting, setBloodSacrificeTargetSelecting] = useState(false)
+
+  const [currentCard, setCurrentCard] = useState<CardDefinition | null>(null)
+  const [inventoryPlayerIndex, setInventoryPlayerIndex] = useState<number | null>(null)
+  const [cardUsePending, setCardUsePending] = useState<CardInstance | null>(null)
+  const [cardTargetSelecting, setCardTargetSelecting] = useState(false)
+
+
+  useGlobalClickSound()
+  const { playStart: playFrogStart, playHop, playLand } = useFrogSounds()
+  const { playStart: playMadSeerStart } = useMadSeerSounds()
+  const { playStart: playBloodSacrificeStart, playLand: playBloodSacrificeLand } = useBloodSacrificeSounds()
+  const { triggerDice, isRolling: diceRolling, selectedSurvivorId, clearDiceEffect } = useDiceOfFortune()
   const {
     tiles,
     players,
@@ -52,30 +79,14 @@ function App() {
     applyTileMultiplier,
     updateTileModifiers,
     performBloodSacrifice,
+    addCardToInventory,
+    activateCard,
   } = useJeopardyGame({
     categories: gameConfig.gameplay.categories,
     pointValues: gameConfig.gameplay.pointValues,
-    players: gameConfig.players,
+    players: gameConfig.players as PlayerConfig[],
     questionBank: questionData as QAItem[],
   })
-
-  const [spiderIndex, setSpiderIndex] = useState(1)
-  const [isFullscreen, setIsFullscreen] = useState(false)
-  const [madSeerActive, setMadSeerActive] = useState(false)
-  const [madSeerPreviewTile, setMadSeerPreviewTile] = useState<Tile | null>(null)
-  const [frogSelecting, setFrogSelecting] = useState(false)
-  const [frogHighlightId, setFrogHighlightId] = useState<string | null>(null)
-  const [frogLandingId, setFrogLandingId] = useState<string | null>(null)
-  
-  const [bloodSacrificeActive, setBloodSacrificeActive] = useState(false)
-  const [bloodSacrificeAmount, setBloodSacrificeAmount] = useState<number | null>(null)
-  const [bloodSacrificeTargetSelecting, setBloodSacrificeTargetSelecting] = useState(false)
-
-
-  useGlobalClickSound()
-  const { playStart: playFrogStart, playHop, playLand } = useFrogSounds()
-  const { playStart: playMadSeerStart } = useMadSeerSounds()
-  const { triggerDice, isRolling: diceRolling, selectedSurvivorId, clearDiceEffect } = useDiceOfFortune()
 
   const handleWebClick = () => {
     setSpiderIndex((prev) => (prev < 8 ? prev + 1 : 1))
@@ -91,6 +102,35 @@ function App() {
         document.exitFullscreen()
       }
     }
+  }
+
+  const handleCardJesterClick = () => {
+    if (madSeerActive || frogSelecting || selectedTile || diceRolling || bloodSacrificeActive) return
+    // Pick a random card
+    const randomCard = CARDS[Math.floor(Math.random() * CARDS.length)]
+    setCurrentCard(randomCard)
+    addCardToInventory(randomCard)
+  }
+
+  const handleInventoryClick = (playerIndex: number) => {
+    setInventoryPlayerIndex(playerIndex)
+  }
+
+  const handleCardUseRequest = (card: CardInstance) => {
+    setCardUsePending(card)
+    setCardTargetSelecting(true)
+  }
+
+  const handleCardTargetSelect = (targetIndex: number) => {
+    if (!cardUsePending) return
+    activateCard(cardUsePending.instanceId, targetIndex)
+    setCardUsePending(null)
+    setCardTargetSelecting(false)
+  }
+
+  const handleCardTargetCancel = () => {
+    setCardUsePending(null)
+    setCardTargetSelecting(false)
   }
 
   const handleMadSeerStart = () => {
@@ -145,6 +185,7 @@ function App() {
 
   const handleBloodSacrificeStart = () => {
     if (selectedTile || frogSelecting || diceRolling || madSeerActive) return
+    playBloodSacrificeStart()
     setBloodSacrificeActive(true)
   }
 
@@ -157,6 +198,7 @@ function App() {
   const handleBloodSacrificeTargetSelect = (targetIndex: number) => {
     if (bloodSacrificeAmount === null) return
     performBloodSacrifice(bloodSacrificeAmount, targetIndex)
+    playBloodSacrificeLand()
     setBloodSacrificeTargetSelecting(false)
     setBloodSacrificeAmount(null)
   }
@@ -236,7 +278,7 @@ function App() {
   return (
     <div className="app">
       <div className="layout-column left">
-        <div className="action-item">
+        <div className="action-item" onClick={handleCardJesterClick}>
           <img src={cardJesterIcon} alt="Card Jester" className="card-jester-icon" />
           <span className="action-label action-label-orange">Card Jester</span>
         </div>
@@ -296,7 +338,11 @@ function App() {
           diceSurvivorId={selectedSurvivorId} // Pass survivor ID to GameBoard
         />
 
-        <Scoreboard players={players} activePlayerIndex={activePlayerIndex} />
+        <Scoreboard 
+            players={players} 
+            activePlayerIndex={activePlayerIndex} 
+            onInventoryClick={handleInventoryClick}
+        />
       </div>
 
       <div className="layout-column right">
@@ -360,6 +406,33 @@ function App() {
           activePlayerIndex={activePlayerIndex}
           onSelect={handleBloodSacrificeTargetSelect}
           onCancel={handleBloodSacrificeCancel}
+        />
+      )}
+
+      {currentCard && (
+        <CardRevealModal
+          card={currentCard}
+          onClose={() => setCurrentCard(null)}
+        />
+      )}
+
+      {inventoryPlayerIndex !== null && (
+        <InventoryModal
+          player={players[inventoryPlayerIndex]}
+          onClose={() => setInventoryPlayerIndex(null)}
+          isActivePlayer={inventoryPlayerIndex === activePlayerIndex}
+          onUseCard={
+            inventoryPlayerIndex === activePlayerIndex ? handleCardUseRequest : undefined
+          }
+        />
+      )}
+
+      {cardTargetSelecting && cardUsePending && (
+        <PlayerSelectModal
+          players={players}
+          activePlayerIndex={activePlayerIndex}
+          onSelect={handleCardTargetSelect}
+          onCancel={handleCardTargetCancel}
         />
       )}
 
