@@ -9,9 +9,14 @@ export type CardEventPayloads = {
   activated: {
     targetIndex: number
   }
+  turnAdvanced: Record<string, never>
 }
 
 export type CardEffectEvent = keyof CardEventPayloads
+
+const calculateTickPenalty = (score: number) => Math.max(1, Math.floor(Math.abs(score) * 0.01))
+const hasCursedCoinTurns = (card: CardInstance) =>
+  typeof card.state?.turnsRemaining === 'number' ? card.state.turnsRemaining : 0
 
 export type CardEffectContext = {
   players: Player[]
@@ -31,24 +36,33 @@ export type CardEffectContext = {
     cardInstanceId: string,
     updater: (state: Record<string, unknown>) => Record<string, unknown>,
   ) => void
+  transferCardBetweenPlayers: (
+    fromIndex: number,
+    toIndex: number,
+    cardInstanceId: string,
+  ) => CardInstance | null
+  removeCardFromInventory: (playerIndex: number, cardInstanceId: string) => CardInstance | null
 }
 
 type CardEffectHandler<Event extends CardEffectEvent> = (
   context: CardEffectContext &
     { card: CardInstance } &
     CardEventPayloads[Event],
-) => void
+) => unknown
 
 interface CardEffectDefinition {
-  passivePointsPerTurn?: number
   handlers?: Partial<{ [E in CardEffectEvent]: CardEffectHandler<E> }>
+  getPassiveDelta?: (context: {
+    card: CardInstance
+    playerScore: number
+    player: Player
+  }) => number
 }
 
 const CARD_EFFECTS: Record<string, CardEffectDefinition> = {
   niffler: {
-    passivePointsPerTurn: 25,
     handlers: {
-      turnStart: ({ ownerPlayerIndex, applyScoreChange, updateCardState, card }) => {
+      turnAdvanced: ({ ownerPlayerIndex, applyScoreChange, updateCardState, card }) => {
         applyScoreChange(ownerPlayerIndex, 25, 'passiveItem')
         updateCardState(ownerPlayerIndex, card.instanceId, (prevState) => ({
           ...prevState,
@@ -57,6 +71,7 @@ const CARD_EFFECTS: Record<string, CardEffectDefinition> = {
         }))
       },
     },
+    getPassiveDelta: () => 25,
   },
   soul_burst: {
     handlers: {
@@ -80,14 +95,81 @@ const CARD_EFFECTS: Record<string, CardEffectDefinition> = {
       },
     },
   },
+  cursed_coin: {
+    handlers: {
+      turnAdvanced: ({
+        ownerPlayerIndex,
+        card,
+        applyScoreChange,
+        updateCardState,
+        removeCardFromInventory,
+      }) => {
+        const remaining = typeof card.state?.turnsRemaining === 'number' ? card.state.turnsRemaining : 0
+        if (remaining <= 0) return
+        const nextRemaining = remaining - 1
+        applyScoreChange(ownerPlayerIndex, -50, 'passiveItem')
+        updateCardState(ownerPlayerIndex, card.instanceId, (prevState) => ({
+          ...prevState,
+          turnsRemaining: nextRemaining,
+        }))
+        if (nextRemaining <= 0) {
+          removeCardFromInventory(ownerPlayerIndex, card.instanceId)
+        }
+      },
+    },
+    getPassiveDelta: ({ card }) => (hasCursedCoinTurns(card) > 0 ? -50 : 0),
+  },
+  tick: {
+    handlers: {
+      turnAdvanced: ({
+        ownerPlayerIndex,
+        players,
+        card,
+        applyScoreChange,
+        updateCardState,
+      }) => {
+        const player = players[ownerPlayerIndex]
+        if (!player) return
+        const penalty = calculateTickPenalty(player.score)
+        applyScoreChange(ownerPlayerIndex, -penalty, 'passiveItem')
+        updateCardState(ownerPlayerIndex, card.instanceId, (prevState) => ({
+          ...prevState,
+          lastPenalty: penalty,
+        }))
+      },
+    },
+    getPassiveDelta: ({ playerScore }) => -calculateTickPenalty(playerScore),
+  },
+  thieving_rat: {
+    handlers: {
+      activated: ({
+        players,
+        ownerPlayerIndex,
+        targetIndex,
+        transferCardBetweenPlayers,
+      }) => {
+        if (targetIndex === ownerPlayerIndex) return
+        const targetPlayer = players[targetIndex]
+        if (!targetPlayer || targetPlayer.inventory.length === 0) return
+        const randomIndex = Math.floor(Math.random() * targetPlayer.inventory.length)
+        const candidate = targetPlayer.inventory[randomIndex]
+        const movedCard = transferCardBetweenPlayers(
+          targetIndex,
+          ownerPlayerIndex,
+          candidate.instanceId,
+        )
+        if (!movedCard) return
+        return {
+          stolenCard: movedCard,
+          stolenFromIndex: targetIndex,
+        }
+      },
+    },
+  },
 }
 
 export function getCardEffectDefinition(cardId: string) {
   return CARD_EFFECTS[cardId]
-}
-
-export function getPassivePointsForCard(cardId: string): number {
-  return CARD_EFFECTS[cardId]?.passivePointsPerTurn ?? 0
 }
 
 export function runCardEffect<Event extends CardEffectEvent>(
@@ -95,7 +177,7 @@ export function runCardEffect<Event extends CardEffectEvent>(
   card: CardInstance,
   context: CardEffectContext,
   payload: CardEventPayloads[Event],
-) {
+ ) {
   const handler = CARD_EFFECTS[card.id]?.handlers?.[event] as
     | CardEffectHandler<Event>
     | undefined
@@ -105,6 +187,15 @@ export function runCardEffect<Event extends CardEffectEvent>(
       card,
       ...payload,
     } as unknown as CardEffectContext & { card: CardInstance } & CardEventPayloads[Event]
-    handler(handlerContext)
+    return handler(handlerContext)
   }
+  return undefined
+}
+
+export function calculatePassiveDeltaForPlayer(player: Player) {
+  return player.inventory.reduce((sum, card) => {
+    const effect = CARD_EFFECTS[card.id]
+    if (!effect?.getPassiveDelta) return sum
+    return sum + effect.getPassiveDelta({ card, playerScore: player.score, player })
+  }, 0)
 }

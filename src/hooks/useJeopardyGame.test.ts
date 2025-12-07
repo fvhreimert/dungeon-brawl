@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
+import { calculatePassiveDeltaForPlayer } from '@/features/cards/cardEffectRegistry'
 import { useJeopardyGame } from './useJeopardyGame'
 import { CARDS } from '@/data/cards'
 import type { QAItem, PlayerConfig } from '@/types/game'
@@ -170,7 +171,7 @@ describe('useJeopardyGame', () => {
       result.current.addCardToInventory(CARDS[0])
     })
 
-    expect(result.current.players[0].stats.passivePointsPerTurn).toBe(25)
+    expect(calculatePassiveDeltaForPlayer(result.current.players[0])).toBe(25)
 
     act(() => {
       result.current.handleTileClick(result.current.tiles[0].id)
@@ -195,7 +196,7 @@ describe('useJeopardyGame', () => {
     })
 
     expect(result.current.activePlayerIndex).toBe(0)
-    expect(result.current.players[0].score).toBe(25)
+    expect(result.current.players[0].score).toBe(50)
     expect(result.current.players[0].stats.passivePointsGained.thisTurn).toBe(25)
   })
 

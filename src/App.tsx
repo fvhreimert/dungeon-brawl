@@ -8,6 +8,8 @@ import { QuestionDialog } from './components/game/QuestionDialog'
 import { MadSeerModal } from '@/features/actions/madSeer/MadSeerModal'
 import { BloodSacrificeModal } from '@/features/actions/bloodSacrifice/BloodSacrificeModal'
 import { PlayerSelectModal } from '@/components/game/PlayerSelectModal'
+import { NeutralPlayerSelectModal } from '@/components/game/NeutralPlayerSelectModal'
+import { FelPlayerSelectModal } from '@/components/game/FelPlayerSelectModal'
 import { useFrogSounds } from '@/features/actions/frogOfFate/useFrogSounds'
 import { useDiceOfFortune } from '@/features/actions/diceOfFortune/useDiceOfFortune'
 import { useMadSeerSounds } from '@/features/actions/madSeer/useMadSeerSounds'
@@ -17,7 +19,7 @@ import { Scoreboard } from './components/game/Scoreboard'
 import { useJeopardyGame } from './hooks/useJeopardyGame'
 import { gameConfig } from './config/gameConfig'
 import type { QAItem, Tile, PlayerConfig, CardInstance } from './types/game'
-import { CARDS, type CardDefinition } from '@/data/cards'
+import { type CardDefinition } from '@/data/cards'
 
 import cardJesterIcon from '@/assets/images/actions/card_jester.png'
 import madSeerIcon from '@/assets/images/actions/mad_seer.png'
@@ -29,6 +31,13 @@ import frogIcon from '@/assets/images/actions/frog_of_fate.png'
 import diceIcon from '@/assets/images/actions/dice_of_fortune.png'
 import { CardRevealModal } from '@/features/actions/cardJester/CardRevealModal'
 import { InventoryModal } from '@/components/game/InventoryModal'
+import { StolenCardModal } from '@/features/cards/StolenCardModal'
+import {
+  buildCardDrawContext,
+  pickCardForPlayer,
+  getCardCatalogEntry,
+  type TargetSelectMode,
+} from '@/config/cardCatalog'
 
 import spider1 from '@/assets/images/actions/spiders/spider_1.png'
 import spider2 from '@/assets/images/actions/spiders/spider_2.png'
@@ -40,6 +49,11 @@ import spider7 from '@/assets/images/actions/spiders/spider_7.png'
 import spider8 from '@/assets/images/actions/spiders/spider_8.png'
 
 const SPIDERS = [null, spider1, spider2, spider3, spider4, spider5, spider6, spider7, spider8]
+
+type StolenCardReveal = {
+  card: CardInstance
+  fromPlayerName: string
+}
 
 function App() {
   const [spiderIndex, setSpiderIndex] = useState(1)
@@ -58,6 +72,8 @@ function App() {
   const [inventoryPlayerIndex, setInventoryPlayerIndex] = useState<number | null>(null)
   const [cardUsePending, setCardUsePending] = useState<CardInstance | null>(null)
   const [cardTargetSelecting, setCardTargetSelecting] = useState(false)
+  const [cardTargetMode, setCardTargetMode] = useState<TargetSelectMode>('standard')
+  const [stolenCardReveal, setStolenCardReveal] = useState<StolenCardReveal | null>(null)
 
 
   useGlobalClickSound()
@@ -106,8 +122,10 @@ function App() {
 
   const handleCardJesterClick = () => {
     if (madSeerActive || frogSelecting || selectedTile || diceRolling || bloodSacrificeActive) return
-    // Pick a random card
-    const randomCard = CARDS[Math.floor(Math.random() * CARDS.length)]
+    const drawContext = buildCardDrawContext(players, activePlayerIndex)
+    const entry = pickCardForPlayer(drawContext)
+    if (!entry) return
+    const randomCard = entry.definition
     setCurrentCard(randomCard)
     addCardToInventory(randomCard)
   }
@@ -117,20 +135,37 @@ function App() {
   }
 
   const handleCardUseRequest = (card: CardInstance) => {
+    setInventoryPlayerIndex(null)
     setCardUsePending(card)
+    const entry = getCardCatalogEntry(card.id)
+    setCardTargetMode(entry?.targetSelectMode ?? 'standard')
     setCardTargetSelecting(true)
   }
 
   const handleCardTargetSelect = (targetIndex: number) => {
     if (!cardUsePending) return
-    activateCard(cardUsePending.instanceId, targetIndex)
+    const effectResult = activateCard(cardUsePending.instanceId, targetIndex)
+    const stolenResult = effectResult as
+      | {
+          stolenCard?: CardInstance
+          stolenFromIndex?: number
+        }
+      | undefined
+    const stolenCard = stolenResult?.stolenCard
+    const stolenFromIndex = stolenResult?.stolenFromIndex
+    if (stolenCard && typeof stolenFromIndex === 'number') {
+      const fromName = players[stolenFromIndex]?.name ?? `Player ${stolenFromIndex + 1}`
+      setStolenCardReveal({ card: stolenCard, fromPlayerName: fromName })
+    }
     setCardUsePending(null)
     setCardTargetSelecting(false)
+    setCardTargetMode('standard')
   }
 
   const handleCardTargetCancel = () => {
     setCardUsePending(null)
     setCardTargetSelecting(false)
+    setCardTargetMode('standard')
   }
 
   const handleMadSeerStart = () => {
@@ -428,11 +463,35 @@ function App() {
       )}
 
       {cardTargetSelecting && cardUsePending && (
-        <PlayerSelectModal
-          players={players}
-          activePlayerIndex={activePlayerIndex}
-          onSelect={handleCardTargetSelect}
-          onCancel={handleCardTargetCancel}
+        cardTargetMode === 'neutral' ? (
+          <NeutralPlayerSelectModal
+            players={players}
+            activePlayerIndex={activePlayerIndex}
+            onSelect={handleCardTargetSelect}
+            onCancel={handleCardTargetCancel}
+          />
+        ) : cardTargetMode === 'fel' ? (
+          <FelPlayerSelectModal
+            players={players}
+            activePlayerIndex={activePlayerIndex}
+            onSelect={handleCardTargetSelect}
+            onCancel={handleCardTargetCancel}
+          />
+        ) : (
+          <PlayerSelectModal
+            players={players}
+            activePlayerIndex={activePlayerIndex}
+            onSelect={handleCardTargetSelect}
+            onCancel={handleCardTargetCancel}
+          />
+        )
+      )}
+
+      {stolenCardReveal && (
+        <StolenCardModal
+          card={stolenCardReveal.card}
+          fromPlayerName={stolenCardReveal.fromPlayerName}
+          onClose={() => setStolenCardReveal(null)}
         />
       )}
 

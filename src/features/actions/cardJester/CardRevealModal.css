@@ -129,6 +129,15 @@
     --col-backing: #1b301b;        
 }
 
+.pixel-card.theme-dark {
+    --col-parchment: #0c0c0c;
+    --col-text-dark: #f0f0f0;
+    --col-gold-main: #f2c84b;
+    --col-gold-dark: #5b3f1d;
+    --col-banner-dark: #100f10;
+    --col-backing: #161416;
+}
+
 /* --- Frame Overlay (Top Layer) --- */
 .frame-overlay {
     position: absolute;

@@ -15,7 +15,6 @@ import type {
 import type { CardDefinition } from '@/data/cards'
 import { gameConfig } from '@/config/gameConfig'
 import {
-  getPassivePointsForCard,
   runCardEffect,
 } from '@/features/cards/cardEffectRegistry'
 
@@ -31,11 +30,7 @@ const createEmptyTurnTotals = () => ({
   thisTurn: 0,
 })
 
-const calculatePassivePointsPerTurn = (inventory: CardInstance[]) =>
-  inventory.reduce((sum, card) => sum + getPassivePointsForCard(card.id), 0)
-
-const createDefaultPlayerStats = (inventory: CardInstance[]): PlayerStats => ({
-  passivePointsPerTurn: calculatePassivePointsPerTurn(inventory),
+const createDefaultPlayerStats = (): PlayerStats => ({
   passivePointsGained: createEmptyTurnTotals(),
   pointsLostToQuestions: createEmptyTurnTotals(),
   pointsLostToActiveCards: createEmptyTurnTotals(),
@@ -44,11 +39,14 @@ const createDefaultPlayerStats = (inventory: CardInstance[]): PlayerStats => ({
   isPuppeteered: false,
 })
 
-const buildPlayerWithStats = (config: PlayerConfig): Player => ({
-  ...config,
-  inventory: [...config.inventory],
-  stats: createDefaultPlayerStats(config.inventory),
-})
+const buildPlayerWithStats = (config: PlayerConfig): Player => {
+  const basePlayer = {
+    ...config,
+    inventory: [...config.inventory],
+  }
+  const stats = createDefaultPlayerStats()
+  return { ...basePlayer, stats }
+}
 
 const createCardInstance = (definition: CardDefinition): CardInstance => {
   const uid = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
@@ -212,6 +210,63 @@ export function useJeopardyGame({
     },
     [setPlayers],
   )
+  const transferCardBetweenPlayers = useCallback(
+    (fromIndex: number, toIndex: number, cardInstanceId: string) => {
+      const fromPlayer = playersRef.current[fromIndex]
+      const toPlayer = playersRef.current[toIndex]
+      if (!fromPlayer || !toPlayer) return null
+      const card = fromPlayer.inventory.find((entry) => entry.instanceId === cardInstanceId)
+      if (!card) return null
+      const fromInventory = fromPlayer.inventory.filter(
+        (entry) => entry.instanceId !== cardInstanceId,
+      )
+      const toInventory = [card, ...toPlayer.inventory]
+      setPlayers((prev) =>
+        prev.map((player, index) => {
+          if (index === fromIndex) {
+            const updated = {
+              ...player,
+              inventory: fromInventory,
+            }
+            return updated
+          }
+          if (index === toIndex) {
+            const updated = {
+              ...player,
+              inventory: toInventory,
+            }
+            return updated
+          }
+          return player
+        }),
+      )
+      return card
+    },
+    [setPlayers],
+  )
+  const removeCardFromInventory = useCallback(
+    (playerIndex: number, cardInstanceId: string) => {
+      let removedCard: CardInstance | null = null
+      setPlayers((prev) =>
+        prev.map((player, index) => {
+          if (index !== playerIndex) return player
+          const inventory = player.inventory.filter((card) => {
+            const shouldRemove = card.instanceId === cardInstanceId
+            if (shouldRemove) {
+              removedCard = card
+            }
+            return !shouldRemove
+          })
+          return {
+            ...player,
+            inventory,
+          }
+        }),
+      )
+      return removedCard
+    },
+    [setPlayers],
+  )
 
   const applyScoreChange = useCallback(
     (targetIndex: number, delta: number, reason: ScoreChangeReason = 'other') => {
@@ -219,10 +274,15 @@ export function useJeopardyGame({
       setPlayers((prev) =>
         prev.map((player, index) => {
           if (index !== targetIndex) return player
-          return {
+          const nextScore = player.score + delta
+          const updatedStats = updateStatsForScoreChange(player.stats, delta, reason)
+          const updatedPlayer = {
             ...player,
-            score: player.score + delta,
-            stats: updateStatsForScoreChange(player.stats, delta, reason),
+            score: nextScore,
+          }
+          return {
+            ...updatedPlayer,
+            stats: updatedStats,
           }
         }),
       )
@@ -240,13 +300,15 @@ export function useJeopardyGame({
               applyScoreChange: applyScoreChangeRef.current,
               updatePlayerStats,
               updateCardState,
+              transferCardBetweenPlayers,
+              removeCardFromInventory,
             },
             { damage: Math.abs(delta), reason },
           ),
         )
       }
     },
-    [activePlayerIndex, updatePlayerStats, updateCardState],
+    [activePlayerIndex, updatePlayerStats, updateCardState, transferCardBetweenPlayers, removeCardFromInventory],
   )
 
   useEffect(() => {
@@ -388,6 +450,10 @@ export function useJeopardyGame({
   const addCardToInventory = (card: CardDefinition) => {
     saveSnapshot()
     const cardInstance = createCardInstance(card)
+    if (cardInstance.id === 'cursed_coin') {
+      cardInstance.state = { turnsRemaining: 10 }
+      applyScoreChange(activePlayerIndex, 500, 'passiveItem')
+    }
     setPlayers((prev) =>
       prev.map((player, index) => {
         if (index !== activePlayerIndex) return player
@@ -395,10 +461,6 @@ export function useJeopardyGame({
         return {
           ...player,
           inventory,
-          stats: {
-            ...player.stats,
-            passivePointsPerTurn: calculatePassivePointsPerTurn(inventory),
-          },
         }
       }),
     )
@@ -411,7 +473,7 @@ export function useJeopardyGame({
     )
     if (!card) return
     saveSnapshot()
-    runCardEffect(
+    const result = runCardEffect(
       'activated',
       card,
       {
@@ -421,9 +483,15 @@ export function useJeopardyGame({
         applyScoreChange: applyScoreChangeRef.current,
         updatePlayerStats,
         updateCardState,
+        transferCardBetweenPlayers,
+        removeCardFromInventory,
       },
       { targetIndex: targetPlayerIndex },
     )
+    if (card.consumesOnActivate) {
+      removeCardFromInventory(ownerIndex, card.instanceId)
+    }
+    return result
   }
 
   const runTurnStartEffects = useCallback(
@@ -441,13 +509,50 @@ export function useJeopardyGame({
             applyScoreChange: applyScoreChangeRef.current,
             updatePlayerStats,
             updateCardState,
+            transferCardBetweenPlayers,
+            removeCardFromInventory,
           },
           {},
         ),
       )
     },
-    [activePlayerIndex, updatePlayerStats, updateCardState],
+    [activePlayerIndex, updatePlayerStats, updateCardState, transferCardBetweenPlayers, removeCardFromInventory],
   )
+
+  const runGlobalTurnEffects = useCallback(() => {
+    const priorityOrder: Record<string, number> = {
+      tick: 0,
+    }
+
+    playersRef.current.forEach((player, playerIndex) => {
+      const sortedInventory = [...player.inventory].sort(
+        (a, b) => (priorityOrder[a.id] ?? 1) - (priorityOrder[b.id] ?? 1),
+      )
+      sortedInventory.forEach((card) =>
+        runCardEffect(
+          'turnAdvanced',
+          card,
+          {
+            players: playersRef.current,
+            ownerPlayerIndex: playerIndex,
+            activePlayerIndex,
+            applyScoreChange: applyScoreChangeRef.current,
+            updatePlayerStats,
+            updateCardState,
+            transferCardBetweenPlayers,
+            removeCardFromInventory,
+          },
+          {},
+        ),
+      )
+    })
+  }, [
+    activePlayerIndex,
+    updatePlayerStats,
+    updateCardState,
+    transferCardBetweenPlayers,
+    removeCardFromInventory,
+  ])
 
   const hasMountedRef = useRef(false)
   useEffect(() => {
@@ -455,8 +560,9 @@ export function useJeopardyGame({
       hasMountedRef.current = true
       return
     }
+    runGlobalTurnEffects()
     runTurnStartEffects(activePlayerIndex)
-  }, [activePlayerIndex, runTurnStartEffects])
+  }, [activePlayerIndex, runTurnStartEffects, runGlobalTurnEffects])
 
   return {
     tiles,

@@ -79,6 +79,10 @@ export function InventoryModal({
       const gained = typeof card.state?.totalGained === 'number' ? card.state.totalGained : 0
       return `+25 pts/turn\n*${gained}* pts gained total`
     },
+    cursed_coin: (card) => {
+      const turns = typeof card.state?.turnsRemaining === 'number' ? card.state.turnsRemaining : 0
+      return `Loses 50 pts per turn\n*${turns}* turns remaining`
+    },
   }
 
   const getInventoryDescription = (card: CardInstance) =>

@@ -1,0 +1,97 @@
+.neutral-player-select-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 3, 3, 0.85);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  z-index: 80;
+  backdrop-filter: blur(3px);
+}
+
+.neutral-player-select-dialog {
+  width: min(420px, 90vw);
+  background: #0c0c0f;
+  border: 3px solid #4e4f6e;
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.75),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.08);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  color: #f1f2f8;
+  image-rendering: pixelated;
+}
+
+.neutral-player-select-title {
+  font-family: 'ArcadeClassic', sans-serif;
+  font-size: 28px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #f7cf6c;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.neutral-player-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.neutral-player-select-btn {
+  width: 100%;
+  justify-content: center;
+  text-align: center;
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: 0.85rem !important;
+  padding: 0.9rem !important;
+  background: linear-gradient(180deg, #1f1f2d 0%, #13131d 100%) !important;
+  border: 2px solid #6b6d91 !important;
+  color: #f1f2f8 !important;
+  box-shadow: 0 4px 0 #050510 !important;
+  transition: all 0.1s;
+  border-radius: 0;
+}
+
+.neutral-player-select-btn:hover {
+  background: linear-gradient(180deg, #34344e 0%, #1d1d2d 100%) !important;
+  border-color: #dedfce !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #050510 !important;
+}
+
+.neutral-player-select-btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 #050510 !important;
+}
+
+.neutral-player-select-btn:disabled {
+  opacity: 0.4;
+  border-color: #2a2c3f !important;
+  cursor: not-allowed;
+  box-shadow: 0 4px 0 #050510 !important;
+}
+
+.neutral-player-select-btn:disabled:hover,
+.neutral-player-select-btn:disabled:active {
+  transform: none;
+  box-shadow: 0 4px 0 #050510 !important;
+}
+
+.neutral-player-cancel-btn {
+  width: auto;
+  min-width: 150px;
+  background: linear-gradient(180deg, #2e2e35 0%, #1c1c24 100%) !important;
+  color: #d0d3ef !important;
+  border: 2px solid #4a4b68 !important;
+  box-shadow: 0 4px 0 #050510 !important;
+}
+
+.neutral-player-cancel-btn:active {
+  box-shadow: 0 0 0 #050510 !important;
+  transform: translateY(4px);
+}

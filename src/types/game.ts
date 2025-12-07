@@ -32,7 +32,6 @@ export type TurnTotals = {
 }
 
 export type PlayerStats = {
-  passivePointsPerTurn: number
   passivePointsGained: TurnTotals
   pointsLostToQuestions: TurnTotals
   pointsLostToActiveCards: TurnTotals
