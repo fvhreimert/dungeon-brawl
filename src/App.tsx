@@ -32,6 +32,7 @@ import diceIcon from '@/assets/images/actions/dice_of_fortune.png'
 import { CardRevealModal } from '@/features/actions/cardJester/CardRevealModal'
 import { InventoryModal } from '@/components/game/InventoryModal'
 import { StolenCardModal } from '@/features/cards/StolenCardModal'
+import { TravelingMerchantModal } from '@/features/cards/TravelingMerchantModal'
 import {
   buildCardDrawContext,
   pickCardForPlayer,
@@ -74,6 +75,7 @@ function App() {
   const [cardTargetSelecting, setCardTargetSelecting] = useState(false)
   const [cardTargetMode, setCardTargetMode] = useState<TargetSelectMode>('standard')
   const [stolenCardReveal, setStolenCardReveal] = useState<StolenCardReveal | null>(null)
+  const [merchantOffers, setMerchantOffers] = useState<CardDefinition[] | null>(null)
 
 
   useGlobalClickSound()
@@ -134,19 +136,34 @@ function App() {
     setInventoryPlayerIndex(playerIndex)
   }
 
+  type CardEffectResult = {
+    stolenCard?: CardInstance
+    stolenFromIndex?: number
+    merchantOffers?: CardDefinition[]
+  }
+
   const processCardEffectResult = (effectResult: unknown) => {
-    const stolenResult = effectResult as
-      | {
-          stolenCard?: CardInstance
-          stolenFromIndex?: number
-        }
-      | undefined
-    const stolenCard = stolenResult?.stolenCard
-    const stolenFromIndex = stolenResult?.stolenFromIndex
+    const result = effectResult as CardEffectResult | undefined
+
+    const stolenCard = result?.stolenCard
+    const stolenFromIndex = result?.stolenFromIndex
     if (stolenCard && typeof stolenFromIndex === 'number') {
       const fromName = players[stolenFromIndex]?.name ?? `Player ${stolenFromIndex + 1}`
       setStolenCardReveal({ card: stolenCard, fromPlayerName: fromName })
     }
+
+    if (Array.isArray(result?.merchantOffers) && result?.merchantOffers.length > 0) {
+      setMerchantOffers(result.merchantOffers)
+    }
+  }
+
+  const handleMerchantSelect = (card: CardDefinition) => {
+    addCardToInventory(card)
+    setMerchantOffers(null)
+  }
+
+  const handleMerchantClose = () => {
+    setMerchantOffers(null)
   }
 
   const handleCardUseRequest = (card: CardInstance) => {
@@ -460,6 +477,14 @@ function App() {
         <CardRevealModal
           card={currentCard}
           onClose={() => setCurrentCard(null)}
+        />
+      )}
+
+      {merchantOffers && (
+        <TravelingMerchantModal
+          offers={merchantOffers}
+          onSelect={handleMerchantSelect}
+          onClose={handleMerchantClose}
         />
       )}
 

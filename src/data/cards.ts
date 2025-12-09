@@ -32,6 +32,8 @@ import tickImg from '@/assets/images/cards/images/tick.png'
 import tickFrame from '@/assets/images/cards/frames/tick.png'
 import spinyShellImg from '@/assets/images/cards/images/spiny_shell.png'
 import spinyShellFrame from '@/assets/images/cards/frames/spiny_shell.png'
+import travelingMerchantImg from '@/assets/images/cards/images/traveling_merchant.png'
+import travelingMerchantFrame from '@/assets/images/cards/frames/traveling_merchant.png'
 import sheepImg from '@/assets/images/cards/images/sheep.png'
 import sheepFrame from '@/assets/images/cards/frames/sheep.png'
 
@@ -90,6 +92,16 @@ export const CARDS: CardDefinition[] = [
     theme: 'theme-blue',
     imagePath: spinyShellImg,
     framePath: spinyShellFrame,
+    consumesOnActivate: true,
+  },
+  {
+    id: 'traveling_merchant',
+    title: 'Traveling Merchant',
+    description: 'Peruse four wares before choosing one to keep.',
+    inventoryDescription: 'Choose one of four cards offered by the merchant.',
+    theme: 'theme-common',
+    imagePath: travelingMerchantImg,
+    framePath: travelingMerchantFrame,
     consumesOnActivate: true,
   },
   {

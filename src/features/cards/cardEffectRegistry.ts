@@ -1,4 +1,6 @@
 import type { Player, PlayerStats, ScoreChangeReason, CardInstance } from '@/types/game'
+import type { CardDefinition } from '@/data/cards'
+import { buildCardDrawContext, pickCardForPlayer } from '@/config/cardCatalog'
 
 export type CardEventPayloads = {
   turnStart: Record<string, never>
@@ -31,6 +33,16 @@ const getLeaderIndex = (players: Player[]) => {
     }
   })
   return leaderIndex
+}
+const buildMerchantOffers = (players: Player[], ownerPlayerIndex: number, count = 4) => {
+  const context = buildCardDrawContext(players, ownerPlayerIndex)
+  const choices: CardDefinition[] = []
+  for (let i = 0; i < count; i += 1) {
+    const entry = pickCardForPlayer(context)
+    if (!entry) continue
+    choices.push(entry.definition)
+  }
+  return choices
 }
 
 export type CardEffectContext = {
@@ -190,6 +202,17 @@ const CARD_EFFECTS: Record<string, CardEffectDefinition> = {
         if (!leader) return
         const damage = calculateShellDamage(leader.score)
         applyScoreChange(leaderIndex, -damage, 'activeCard')
+      },
+    },
+  },
+  traveling_merchant: {
+    handlers: {
+      activated: ({ players, ownerPlayerIndex }) => {
+        const offers = buildMerchantOffers(players, ownerPlayerIndex)
+        if (offers.length === 0) return
+        return {
+          merchantOffers: offers,
+        }
       },
     },
   },

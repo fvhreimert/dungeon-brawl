@@ -33,6 +33,7 @@ const CARD_CONFIG: Record<string, CardCatalogConfig> = {
   cursed_coin: { baseWeight: 1 },
   tick: { baseWeight: 1 },
   spiny_shell: { baseWeight: 1, targetSelectMode: 'none' },
+  traveling_merchant: { baseWeight: 1, targetSelectMode: 'none' },
 }
 
 export const CARD_CATALOG: CardCatalogEntry[] = CARDS.map((definition) => {
