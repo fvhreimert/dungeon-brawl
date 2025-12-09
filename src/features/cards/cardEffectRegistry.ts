@@ -17,6 +17,21 @@ export type CardEffectEvent = keyof CardEventPayloads
 const calculateTickPenalty = (score: number) => Math.max(1, Math.floor(Math.abs(score) * 0.01))
 const hasCursedCoinTurns = (card: CardInstance) =>
   typeof card.state?.turnsRemaining === 'number' ? card.state.turnsRemaining : 0
+const calculateShellDamage = (score: number) => {
+  const baseDamage = Math.floor(Math.abs(score) * 0.2)
+  return baseDamage > 0 ? baseDamage : 1
+}
+const getLeaderIndex = (players: Player[]) => {
+  let leaderIndex: number | null = null
+  let leaderScore = Number.NEGATIVE_INFINITY
+  players.forEach((player, index) => {
+    if (player.score > leaderScore) {
+      leaderScore = player.score
+      leaderIndex = index
+    }
+  })
+  return leaderIndex
+}
 
 export type CardEffectContext = {
   players: Player[]
@@ -163,6 +178,18 @@ const CARD_EFFECTS: Record<string, CardEffectDefinition> = {
           stolenCard: movedCard,
           stolenFromIndex: targetIndex,
         }
+      },
+    },
+  },
+  spiny_shell: {
+    handlers: {
+      activated: ({ players, applyScoreChange }) => {
+        const leaderIndex = getLeaderIndex(players)
+        if (leaderIndex === null) return
+        const leader = players[leaderIndex]
+        if (!leader) return
+        const damage = calculateShellDamage(leader.score)
+        applyScoreChange(leaderIndex, -damage, 'activeCard')
       },
     },
   },

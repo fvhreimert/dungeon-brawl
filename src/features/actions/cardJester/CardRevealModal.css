@@ -129,6 +129,15 @@
     --col-backing: #1b301b;        
 }
 
+.pixel-card.theme-blue {
+    --col-parchment: #1f3b6f;
+    --col-text-dark: #d0e7ff;
+    --col-gold-main: #5f9bff;
+    --col-gold-dark: #1b2f62;
+    --col-banner-dark: #0c224b;
+    --col-backing: #102843;
+}
+
 .pixel-card.theme-dark {
     --col-parchment: #0c0c0c;
     --col-text-dark: #f0f0f0;

@@ -7,6 +7,7 @@ export type CardTheme =
   | 'theme-gray'
   | 'theme-fel'
   | 'theme-dark'
+  | 'theme-blue'
 
 export interface CardDefinition {
   id: string
@@ -29,6 +30,10 @@ import cursedCoinImg from '@/assets/images/cards/images/cursed_coin.png'
 import cursedCoinFrame from '@/assets/images/cards/frames/cursed_coin.png'
 import tickImg from '@/assets/images/cards/images/tick.png'
 import tickFrame from '@/assets/images/cards/frames/tick.png'
+import spinyShellImg from '@/assets/images/cards/images/spiny_shell.png'
+import spinyShellFrame from '@/assets/images/cards/frames/spiny_shell.png'
+import sheepImg from '@/assets/images/cards/images/sheep.png'
+import sheepFrame from '@/assets/images/cards/frames/sheep.png'
 
 export const CARDS: CardDefinition[] = [
   {
@@ -76,5 +81,23 @@ export const CARDS: CardDefinition[] = [
     theme: 'theme-red',
     imagePath: tickImg,
     framePath: tickFrame,
+  },
+  {
+    id: 'spiny_shell',
+    title: 'Spiny Shell',
+    description: 'Hurl the shell at the leader and deal 20% of their points as damage.',
+    inventoryDescription: 'Activate to hit the highest player for 20% of their score.',
+    theme: 'theme-blue',
+    imagePath: spinyShellImg,
+    framePath: spinyShellFrame,
+    consumesOnActivate: true,
+  },
+  {
+    id: 'sheep',
+    title: 'Sheep',
+    description: 'Baaahhh',
+    theme: 'theme-common',
+    imagePath: sheepImg,
+    framePath: sheepFrame,
   },
 ]

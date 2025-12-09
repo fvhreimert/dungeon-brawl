@@ -134,17 +134,7 @@ function App() {
     setInventoryPlayerIndex(playerIndex)
   }
 
-  const handleCardUseRequest = (card: CardInstance) => {
-    setInventoryPlayerIndex(null)
-    setCardUsePending(card)
-    const entry = getCardCatalogEntry(card.id)
-    setCardTargetMode(entry?.targetSelectMode ?? 'standard')
-    setCardTargetSelecting(true)
-  }
-
-  const handleCardTargetSelect = (targetIndex: number) => {
-    if (!cardUsePending) return
-    const effectResult = activateCard(cardUsePending.instanceId, targetIndex)
+  const processCardEffectResult = (effectResult: unknown) => {
     const stolenResult = effectResult as
       | {
           stolenCard?: CardInstance
@@ -157,6 +147,28 @@ function App() {
       const fromName = players[stolenFromIndex]?.name ?? `Player ${stolenFromIndex + 1}`
       setStolenCardReveal({ card: stolenCard, fromPlayerName: fromName })
     }
+  }
+
+  const handleCardUseRequest = (card: CardInstance) => {
+    setInventoryPlayerIndex(null)
+    const entry = getCardCatalogEntry(card.id)
+    const mode = entry?.targetSelectMode ?? 'standard'
+    if (mode === 'none') {
+      const effectResult = activateCard(card.instanceId, activePlayerIndex)
+      processCardEffectResult(effectResult)
+      setCardTargetMode('standard')
+      setCardTargetSelecting(false)
+      return
+    }
+    setCardUsePending(card)
+    setCardTargetMode(mode)
+    setCardTargetSelecting(true)
+  }
+
+  const handleCardTargetSelect = (targetIndex: number) => {
+    if (!cardUsePending) return
+    const effectResult = activateCard(cardUsePending.instanceId, targetIndex)
+    processCardEffectResult(effectResult)
     setCardUsePending(null)
     setCardTargetSelecting(false)
     setCardTargetMode('standard')
