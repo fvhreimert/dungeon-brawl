@@ -38,6 +38,10 @@ import sheepImg from '@/assets/images/cards/images/sheep.png'
 import sheepFrame from '@/assets/images/cards/frames/sheep.png'
 import puppetMasterImg from '@/assets/images/cards/images/puppet_master.png'
 import puppetMasterFrame from '@/assets/images/cards/frames/puppet_master.png'
+import beggarImg from '@/assets/images/cards/images/beggar.png'
+import beggarFrame from '@/assets/images/cards/frames/beggar.png'
+import rouletteImg from '@/assets/images/cards/images/roulette.png'
+import rouletteFrame from '@/assets/images/cards/frames/roulette.png'
 
 export const CARDS: CardDefinition[] = [
   {
@@ -122,6 +126,25 @@ export const CARDS: CardDefinition[] = [
     theme: 'theme-dark',
     imagePath: puppetMasterImg,
     framePath: puppetMasterFrame,
+    consumesOnActivate: true,
+  },
+  {
+    id: 'beggar',
+    title: 'Beggar',
+    description: 'The beggar takes 10 points from all other players every turn.',
+    inventoryDescription: 'Steals 10 pts from each foe per turn.',
+    theme: 'theme-dungeon',
+    imagePath: beggarImg,
+    framePath: beggarFrame,
+  },
+  {
+    id: 'roulette',
+    title: 'Roulette',
+    description: 'Stake up to 500 points on a 50/50 gamble. Double or nothing!',
+    inventoryDescription: 'Activate to gamble points.',
+    theme: 'theme-gold',
+    imagePath: rouletteImg,
+    framePath: rouletteFrame,
     consumesOnActivate: true,
   },
 ]

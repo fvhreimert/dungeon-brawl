@@ -18,6 +18,7 @@ describe('useJeopardyGame', () => {
   ]
   const soulBurstCard = CARDS.find((card) => card.id === 'soul_burst')
   const puppetMasterCard = CARDS.find((card) => card.id === 'puppet_master')
+  const beggarCard = CARDS.find((card) => card.id === 'beggar')
 
   it('initializes correctly', () => {
     const { result } = renderHook(() =>
@@ -172,7 +173,7 @@ describe('useJeopardyGame', () => {
       result.current.addCardToInventory(CARDS[0])
     })
 
-    expect(calculatePassiveDeltaForPlayer(result.current.players[0])).toBe(25)
+    expect(calculatePassiveDeltaForPlayer(result.current.players[0], result.current.players)).toBe(25)
 
     act(() => {
       result.current.handleTileClick(result.current.tiles[0].id)
@@ -380,5 +381,70 @@ describe('useJeopardyGame', () => {
     expect(result.current.selectedTile?.id).toBe(iceTile.id)
     expect(result.current.players[1].stats.isPuppeteered).toBe(false)
     expect(result.current.players[1].stats.puppetLock).toBeNull()
+  })
+
+  it('beggar steals 10 pts from each opponent and triggers soul burst', () => {
+    if (!beggarCard || !soulBurstCard) {
+      expect(false).toBe(true)
+      return
+    }
+
+    const { result } = renderHook(() =>
+      useJeopardyGame({
+        categories: mockCategories,
+        pointValues: mockPointValues,
+        players: mockPlayers,
+        questionBank: mockQuestions,
+      })
+    )
+
+    // Give P1 the beggar card
+    act(() => {
+      result.current.addCardToInventory(beggarCard)
+    })
+
+    // Give P2 the soul burst card to test if beggar triggers damageTaken
+    act(() => {
+      result.current.handleTileClick(result.current.tiles[0].id)
+    })
+    act(() => {
+      result.current.handleRevealAnswer()
+    })
+    act(() => {
+      result.current.handlePass()
+    })
+
+    // Now P2's turn - give them soul burst
+    expect(result.current.activePlayerIndex).toBe(1)
+    act(() => {
+      result.current.addCardToInventory(soulBurstCard)
+    })
+
+    // Advance turn again to trigger beggar's turnAdvanced
+    act(() => {
+      result.current.handleTileClick(result.current.tiles[1].id)
+    })
+    act(() => {
+      result.current.handleRevealAnswer()
+    })
+    act(() => {
+      result.current.handlePass()
+    })
+
+    // After two turn advances with beggar:
+    // P1 gains 10 pts per turn (1 opponent) = 20 pts total
+    // P2 loses 10 pts per turn = -20 pts total
+    // But P2's soul burst should have stored 25% of the 10 pts damage = 2 pts (per turn advance after they got the card)
+    expect(result.current.players[0].score).toBe(20) // 10 pts per turn * 2 turns
+    expect(result.current.players[1].score).toBe(-20) // -10 pts per turn * 2 turns
+
+    // Check P2's soul burst stored damage (only 1 turn worth since they got it on turn 2)
+    const soulBurstInstance = result.current.players[1].inventory.find(
+      (card) => card.id === 'soul_burst'
+    )
+    expect(soulBurstInstance?.state?.storedDamage).toBe(2) // 25% of 10 = 2.5, floored to 2
+
+    // Check passive delta shows correct value for beggar owner
+    expect(calculatePassiveDeltaForPlayer(result.current.players[0], result.current.players)).toBe(10)
   })
 })

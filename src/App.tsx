@@ -35,6 +35,7 @@ import { InventoryModal } from '@/components/game/InventoryModal'
 import { StolenCardModal } from '@/features/cards/StolenCardModal'
 import { TravelingMerchantModal } from '@/features/cards/TravelingMerchantModal'
 import { PuppetMasterCategoryModal } from '@/features/cards/PuppetMasterCategoryModal'
+import { RouletteModal } from '@/features/cards/RouletteModal'
 import {
   buildCardDrawContext,
   pickCardForPlayer,
@@ -80,6 +81,7 @@ function App() {
   const [merchantOffers, setMerchantOffers] = useState<CardDefinition[] | null>(null)
   const [puppetTargetIndex, setPuppetTargetIndex] = useState<number | null>(null)
   const [puppetCategorySelecting, setPuppetCategorySelecting] = useState(false)
+  const [rouletteActive, setRouletteActive] = useState(false)
 
 
   useGlobalClickSound()
@@ -196,9 +198,30 @@ function App() {
       setCardTargetSelecting(false)
       return
     }
+    if (mode === 'roulette') {
+      setCardUsePending(card)
+      setRouletteActive(true)
+      return
+    }
     setCardUsePending(card)
     setCardTargetMode(mode)
     setCardTargetSelecting(true)
+  }
+
+  const handleRouletteConfirm = (won: boolean, amount: number) => {
+    if (!cardUsePending) return
+    const effectResult = activateCard(cardUsePending.instanceId, activePlayerIndex, {
+      won,
+      amount,
+    })
+    processCardEffectResult(effectResult)
+    setCardUsePending(null)
+    setRouletteActive(false)
+  }
+
+  const handleRouletteCancel = () => {
+    setCardUsePending(null)
+    setRouletteActive(false)
   }
 
   const handleCardTargetSelect = (targetIndex: number) => {
@@ -593,6 +616,14 @@ function App() {
           options={puppetCategoryOptions}
           onSelect={handlePuppetCategorySelect}
           onCancel={handlePuppetCategoryCancel}
+        />
+      )}
+
+      {rouletteActive && cardUsePending && (
+        <RouletteModal
+          maxStake={players[activePlayerIndex]?.score ?? 0}
+          onConfirm={handleRouletteConfirm}
+          onCancel={handleRouletteCancel}
         />
       )}
 

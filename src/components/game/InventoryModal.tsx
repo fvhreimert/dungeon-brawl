@@ -83,6 +83,10 @@ export function InventoryModal({
       const turns = typeof card.state?.turnsRemaining === 'number' ? card.state.turnsRemaining : 0
       return `Loses 50 pts per turn\n*${turns}* turns remaining`
     },
+    beggar: (card) => {
+      const stolen = typeof card.state?.totalStolen === 'number' ? card.state.totalStolen : 0
+      return `Steals 10 pts from each foe/turn\n*${stolen}* pts stolen total`
+    },
   }
 
   const getInventoryDescription = (card: CardInstance) =>

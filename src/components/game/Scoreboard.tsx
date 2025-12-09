@@ -16,7 +16,7 @@ export function Scoreboard({ players, activePlayerIndex, onInventoryClick }: Sco
   return (
     <section className="scoreboard">
       {players.map((player, index) => {
-        const passiveDelta = calculatePassiveDeltaForPlayer(player)
+        const passiveDelta = calculatePassiveDeltaForPlayer(player, players)
         const displayPassive = passiveDelta !== 0
         return (
           <div

@@ -7,7 +7,7 @@ This repository keeps cards decoupled from the rest of the game so new mechanics
 - `src/data/cards.ts` declares every card that can be drawn. Each `CardDefinition` includes `id`, `title`, `description` (used in the reveal modal), an optional `inventoryDescription`, visual assets, and a `theme` for the pixel frames.
 - A drawn card becomes a `CardInstance` (`src/types/game.ts`), which copies the definition, stamps on a unique `instanceId`, and can hold `state` that persists for that copy (stored damage, counters, etc.).
 - `CardInstance` metadata flows through the `cardEffectRegistry` (`src/features/cards/cardEffectRegistry.ts`). That registry wires events (`turnStart`, `damageTaken`, `activated` and any future hooks) to handlers that can mutate card state (`updateCardState`) or affect scores/players.
-- Passive pacing is centralized through `getPassiveDelta` helpers in the registry and the `calculatePassiveDeltaForPlayer` aggregator. Scoreboard styling pulls directly from that helper so the arrow/badge always matches the sum of the next `turnAdvanced` passives, while the other stats (passive gains, question losses, card hits) stay in `PlayerStats`.
+- Passive pacing is centralized through `getPassiveDelta` helpers in the registry and the `calculatePassiveDeltaForPlayer(player, players)` aggregator. This function also accounts for incoming effects from other players' cards (e.g., Beggar stealing from opponents). Scoreboard styling pulls directly from that helper so the arrow/badge always matches the sum of the next `turnAdvanced` passives, while the other stats (passive gains, question losses, card hits) stay in `PlayerStats`.
 
 ## Hook responsibilities
 
@@ -21,7 +21,7 @@ This repository keeps cards decoupled from the rest of the game so new mechanics
 - `InventoryModal` renders cards using the pixel frames and overlays; clicking a card triggers `onUseCard` when the card has an `activated` handler, so there are no separate “Use” buttons.
 - The modal also drives the dynamic inventory description: special cards (Niffler, Soul Burst) query their `CardInstance.state` and format strings like `+25 pts/turn\n*123* pts total` or `*25* pts stored\nActivate to steal stored pts from a foe.` General cards fall back to `inventoryDescription ?? description`.
 - Hover tooltips render through a portal anchored to the hovered card’s bounding rect, float above the modal, show the base `description`, and appear only after ~450ms without scrolling. Any scroll/resize/wheel event immediately hides the tooltip so it never clips or duplicates.
-- The scoreboard reads `calculatePassiveDeltaForPlayer(player)` so the pixel arrow and number always show the same sum of passives that will fire on the next `turnAdvanced` event; `PlayerStats` continues to hold the detailed totals for gains and losses.
+- The scoreboard reads `calculatePassiveDeltaForPlayer(player, players)` so the pixel arrow and number always show the same sum of passives that will fire on the next `turnAdvanced` event; `PlayerStats` continues to hold the detailed totals for gains and losses.
 
 ## Inventory Tooltip UX
 

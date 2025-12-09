@@ -4,7 +4,7 @@ import { CARDS, type CardDefinition } from '@/data/cards'
 export type CardWeightModifier = (context: CardDrawContext) => number
 export type CardDrawFilter = (context: CardDrawContext) => boolean
 
-export type TargetSelectMode = 'neutral' | 'standard' | 'fel' | 'none' | 'puppet'
+export type TargetSelectMode = 'neutral' | 'standard' | 'fel' | 'none' | 'puppet' | 'roulette'
 
 export interface CardCatalogConfig {
   baseWeight?: number
@@ -35,6 +35,8 @@ const CARD_CONFIG: Record<string, CardCatalogConfig> = {
   spiny_shell: { baseWeight: 1, targetSelectMode: 'none' },
   traveling_merchant: { baseWeight: 1, targetSelectMode: 'none' },
   puppet_master: { baseWeight: 1, targetSelectMode: 'puppet' },
+  beggar: { baseWeight: 1 },
+  roulette: { baseWeight: 1, targetSelectMode: 'roulette' },
 }
 
 export const CARD_CATALOG: CardCatalogEntry[] = CARDS.map((definition) => {

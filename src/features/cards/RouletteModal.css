@@ -1,0 +1,357 @@
+.roulette-backdrop {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 50% 40%, rgba(50, 30, 0, 0.7), rgba(10, 5, 0, 0.95));
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  z-index: 80;
+  backdrop-filter: blur(6px);
+}
+
+.roulette-dialog {
+  width: min(550px, 92vw);
+  background: linear-gradient(180deg, #1a1008 0%, #0d0804 100%);
+  border: 4px solid #c9a227;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.9),
+    0 0 0 4px #0a0502,
+    inset 0 0 0 2px #3d2f0b,
+    0 0 40px rgba(201, 162, 39, 0.3);
+  color: #ffe4a0;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  gap: 1.5rem;
+  image-rendering: pixelated;
+}
+
+/* Grid Texture Overlay */
+.roulette-dialog::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(201, 162, 39, 0.03) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(201, 162, 39, 0.02) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.roulette-title {
+  font-family: 'ArcadeClassic', sans-serif;
+  font-size: 36px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #ffd700;
+  text-shadow:
+    0 0 15px rgba(255, 215, 0, 0.6),
+    2px 2px 0 #4a3800;
+  z-index: 1;
+  text-align: center;
+}
+
+.roulette-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  z-index: 1;
+  position: relative;
+}
+
+.roulette-subtitle {
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: 0.7rem;
+  color: #c9a227;
+  text-align: center;
+  line-height: 1.6;
+  max-width: 400px;
+}
+
+/* Wheel Container */
+.roulette-wheel-container {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.roulette-wheel {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.4));
+  transition: filter 0.3s ease;
+}
+
+.roulette-wheel.idle {
+  animation: wheel-idle 8s infinite linear;
+}
+
+.roulette-wheel.spinning {
+  animation: wheel-spin 0.15s infinite linear, wheel-glow 0.5s infinite alternate;
+}
+
+.roulette-wheel.result.win {
+  animation: wheel-win 0.5s ease-out forwards;
+  filter: drop-shadow(0 0 30px rgba(50, 255, 50, 0.8));
+}
+
+.roulette-wheel.result.lose {
+  animation: wheel-lose 0.5s ease-out forwards;
+  filter: drop-shadow(0 0 30px rgba(255, 50, 50, 0.8)) grayscale(0.5);
+}
+
+@keyframes wheel-idle {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes wheel-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes wheel-glow {
+  0% { filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.6)) brightness(1); }
+  100% { filter: drop-shadow(0 0 40px rgba(255, 215, 0, 1)) brightness(1.2); }
+}
+
+@keyframes wheel-win {
+  0% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.15) rotate(10deg); }
+  100% { transform: scale(1.1) rotate(0deg); }
+}
+
+@keyframes wheel-lose {
+  0% { transform: scale(1); }
+  25% { transform: scale(0.95) rotate(-5deg); }
+  50% { transform: scale(0.9) rotate(5deg); }
+  75% { transform: scale(0.95) rotate(-3deg); }
+  100% { transform: scale(0.95) rotate(0deg); }
+}
+
+/* Result Overlay */
+.roulette-result-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'ArcadeClassic', sans-serif;
+  font-size: 24px;
+  text-transform: uppercase;
+  animation: result-pop 0.5s ease-out;
+  pointer-events: none;
+}
+
+.roulette-result-overlay.win {
+  color: #50ff50;
+  text-shadow: 0 0 20px rgba(50, 255, 50, 0.8), 2px 2px 0 #004400;
+}
+
+.roulette-result-overlay.lose {
+  color: #ff5050;
+  text-shadow: 0 0 20px rgba(255, 50, 50, 0.8), 2px 2px 0 #440000;
+}
+
+@keyframes result-pop {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Slider Container */
+.roulette-slider-container {
+  width: 100%;
+  max-width: 350px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 1.25rem;
+  border: 2px solid #6b4f00;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.roulette-label {
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  color: #ffd700;
+  font-size: 1rem;
+  text-shadow: 2px 2px 0px #3d2f0b;
+  text-transform: uppercase;
+}
+
+/* Custom Range Slider */
+.roulette-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 20px;
+  background: #1a1008;
+  outline: none;
+  border: 2px solid #6b4f00;
+  cursor: pointer;
+  image-rendering: pixelated;
+}
+
+.roulette-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #ffd700 0%, #c9a227 50%, #8b7500 100%);
+  cursor: pointer;
+  border: 3px solid #4a3800;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.roulette-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+}
+
+.roulette-slider::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #ffd700 0%, #c9a227 50%, #8b7500 100%);
+  cursor: pointer;
+  border: 3px solid #4a3800;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.roulette-range-labels {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: 0.6rem;
+  color: #8b7500;
+}
+
+/* Odds Display */
+.roulette-odds {
+  display: flex;
+  gap: 2rem;
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: 0.75rem;
+}
+
+.odds-row {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 2px solid;
+}
+
+.odds-row.win {
+  border-color: #2a6b2a;
+  background: rgba(42, 107, 42, 0.2);
+}
+
+.odds-row.lose {
+  border-color: #6b2a2a;
+  background: rgba(107, 42, 42, 0.2);
+}
+
+.odds-label {
+  color: #999;
+}
+
+.odds-row.win .odds-value {
+  color: #50ff50;
+}
+
+.odds-row.lose .odds-value {
+  color: #ff5050;
+}
+
+/* Spinning Text */
+.roulette-spinning-text {
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: 0.8rem;
+  color: #ffd700;
+  text-align: center;
+  animation: pulse-text 0.5s infinite alternate;
+}
+
+@keyframes pulse-text {
+  0% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+/* Result Text */
+.roulette-result-text {
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: 1rem;
+  text-align: center;
+  padding: 1rem;
+}
+
+.roulette-result-text.win {
+  color: #50ff50;
+  text-shadow: 0 0 10px rgba(50, 255, 50, 0.5);
+  animation: win-pulse 0.5s infinite alternate;
+}
+
+.roulette-result-text.lose {
+  color: #ff5050;
+  text-shadow: 0 0 10px rgba(255, 50, 50, 0.5);
+}
+
+@keyframes win-pulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.05); }
+}
+
+/* Actions */
+.roulette-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.roulette-btn-spin {
+  background: linear-gradient(180deg, #ffd700 0%, #c9a227 100%) !important;
+  border-color: #8b7500 !important;
+  color: #1a1008 !important;
+  min-width: 140px;
+}
+
+.roulette-btn-spin:hover {
+  filter: brightness(1.2);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+}
+
+.roulette-btn-cancel {
+  min-width: 120px;
+}
+
+.roulette-btn-collect {
+  min-width: 200px;
+  animation: collect-pulse 0.8s infinite alternate;
+}
+
+.roulette-btn-collect.win {
+  background: linear-gradient(180deg, #50ff50 0%, #2a8b2a 100%) !important;
+  border-color: #1a5a1a !important;
+  color: #001a00 !important;
+}
+
+.roulette-btn-collect.lose {
+  background: linear-gradient(180deg, #885050 0%, #552a2a 100%) !important;
+}
+
+@keyframes collect-pulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.02); }
+}

@@ -85,6 +85,7 @@ interface CardEffectDefinition {
     card: CardInstance
     playerScore: number
     player: Player
+    players: Player[]
   }) => number
 }
 
@@ -252,6 +253,68 @@ const CARD_EFFECTS: Record<string, CardEffectDefinition> = {
       },
     },
   },
+  beggar: {
+    handlers: {
+      turnAdvanced: ({
+        ownerPlayerIndex,
+        players,
+        applyScoreChange,
+        updateCardState,
+        card,
+      }) => {
+        const otherPlayerCount = players.length - 1
+        if (otherPlayerCount <= 0) return
+        // Take 10 points from each other player
+        players.forEach((_, playerIndex) => {
+          if (playerIndex === ownerPlayerIndex) return
+          applyScoreChange(playerIndex, -10, 'passiveItem')
+        })
+        // Give the owner 10 points per other player
+        const totalGained = otherPlayerCount * 10
+        applyScoreChange(ownerPlayerIndex, totalGained, 'passiveItem')
+        // Track total stolen
+        updateCardState(ownerPlayerIndex, card.instanceId, (prevState) => ({
+          ...prevState,
+          totalStolen:
+            (typeof prevState.totalStolen === 'number' ? prevState.totalStolen : 0) +
+            totalGained,
+        }))
+      },
+    },
+    getPassiveDelta: ({ player, players }) => {
+      // Find the owner's index by matching the player reference
+      const ownerIndex = players.findIndex((p) => p === player)
+      const otherPlayerCount = players.length - 1
+      if (otherPlayerCount <= 0) return 0
+      // Owner gains 10 per other player
+      if (ownerIndex >= 0) {
+        return otherPlayerCount * 10
+      }
+      return 0
+    },
+  },
+  roulette: {
+    handlers: {
+      activated: ({ ownerPlayerIndex, players, metadata, applyScoreChange }) => {
+        const won = metadata?.won === true
+        const amount = typeof metadata?.amount === 'number' ? metadata.amount : 0
+        if (amount <= 0) return
+        
+        const player = players[ownerPlayerIndex]
+        if (!player) return
+        
+        if (won) {
+          // Player wins: gain the staked amount (they keep their stake + win same amount)
+          applyScoreChange(ownerPlayerIndex, amount, 'activeCard')
+        } else {
+          // Player loses: lose the staked amount
+          applyScoreChange(ownerPlayerIndex, -amount, 'activeCard')
+        }
+        
+        return { rouletteResult: { won, amount } }
+      },
+    },
+  },
 }
 
 export function getCardEffectDefinition(cardId: string) {
@@ -278,10 +341,39 @@ export function runCardEffect<Event extends CardEffectEvent>(
   return undefined
 }
 
-export function calculatePassiveDeltaForPlayer(player: Player) {
+// Calculate passive delta from a player's own cards
+function calculateOwnPassiveDelta(player: Player, players: Player[]) {
   return player.inventory.reduce((sum, card) => {
     const effect = CARD_EFFECTS[card.id]
     if (!effect?.getPassiveDelta) return sum
-    return sum + effect.getPassiveDelta({ card, playerScore: player.score, player })
+    return sum + effect.getPassiveDelta({ card, playerScore: player.score, player, players })
   }, 0)
+}
+
+// Calculate incoming passive effects from OTHER players' cards (e.g., Beggar stealing from you)
+function calculateIncomingPassiveDelta(player: Player, players: Player[]) {
+  const playerIndex = players.indexOf(player)
+  if (playerIndex === -1) return 0
+
+  let incomingDelta = 0
+
+  // Check each other player's inventory for cards that affect this player
+  players.forEach((otherPlayer, otherIndex) => {
+    if (otherIndex === playerIndex) return
+
+    otherPlayer.inventory.forEach((card) => {
+      // Beggar steals 10 from each opponent
+      if (card.id === 'beggar') {
+        incomingDelta -= 10
+      }
+    })
+  })
+
+  return incomingDelta
+}
+
+export function calculatePassiveDeltaForPlayer(player: Player, players: Player[]) {
+  const ownDelta = calculateOwnPassiveDelta(player, players)
+  const incomingDelta = calculateIncomingPassiveDelta(player, players)
+  return ownDelta + incomingDelta
 }
