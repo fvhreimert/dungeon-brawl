@@ -12,6 +12,7 @@ type GameBoardProps = {
   frogLandingId?: string | null
   diceLockedTileIds?: string[] | null
   diceSurvivorId?: string | null
+  puppetLockCategory?: string | null
 }
 
 export function GameBoard({
@@ -25,12 +26,18 @@ export function GameBoard({
   frogLandingId = null,
   diceLockedTileIds = null,
   diceSurvivorId = null,
+  puppetLockCategory = null,
 }: GameBoardProps) {
   return (
     <section className="board-shell">
       <div className="category-row">
         {categories.map((category) => (
-          <div key={category} className="category-chip">
+          <div
+            key={category}
+            className={`category-chip ${
+              puppetLockCategory === category ? 'category-chip-puppet' : ''
+            }`}
+          >
             {category}
           </div>
         ))}
@@ -42,11 +49,17 @@ export function GameBoard({
           const isCrumbled = tile.modifiers?.isCrumbled || diceLockedTileIds?.includes(tile.id)
           const isSurvivor = diceSurvivorId && tile.id === diceSurvivorId
 
+          const isPuppetBlocked =
+            puppetLockCategory &&
+            tile.status === 'open' &&
+            tile.category !== puppetLockCategory
+
           const isEffectivelyDisabled = 
             boardLocked || 
             tile.status === 'done' || 
             !!isCrumbled || 
-            (!!diceSurvivorId && !isSurvivor && !highlightOpenTiles) 
+            (!!diceSurvivorId && !isSurvivor && !highlightOpenTiles) ||
+            !!isPuppetBlocked
 
           return (
             <button
@@ -67,6 +80,18 @@ export function GameBoard({
                 frogHighlightId === tile.id ? 'tile-frog-highlight' : ''
               } ${
                 frogLandingId === tile.id ? 'tile-frog-landing' : ''
+              } ${
+                puppetLockCategory &&
+                tile.status === 'open' &&
+                tile.category === puppetLockCategory
+                  ? 'tile-puppet-target'
+                  : ''
+              } ${
+                puppetLockCategory &&
+                tile.status === 'open' &&
+                tile.category !== puppetLockCategory
+                  ? 'tile-puppet-blocked'
+                  : ''
               } ${
                 // Multiplier highlights
                 // Prevent multiplier classes if crumbled to avoid style conflicts (e.g. animation, box-shadow)

@@ -23,6 +23,10 @@ export function Scoreboard({ players, activePlayerIndex, onInventoryClick }: Sco
             key={player.name}
             className={`score-card ${
               index === activePlayerIndex ? 'score-card-active' : ''
+            } ${player.stats.isPuppeteered ? 'score-card-puppeted' : ''} ${
+              player.stats.isPuppeteered && index === activePlayerIndex
+                ? 'score-card-puppeted-active'
+                : ''
             }`}
           >
             <div className="score-card-content">

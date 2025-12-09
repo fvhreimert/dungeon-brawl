@@ -1,4 +1,4 @@
-import type { Player, PlayerStats, ScoreChangeReason, CardInstance } from '@/types/game'
+import type { Player, PlayerStats, ScoreChangeReason, CardInstance, PuppetLock } from '@/types/game'
 import type { CardDefinition } from '@/data/cards'
 import { buildCardDrawContext, pickCardForPlayer } from '@/config/cardCatalog'
 
@@ -10,6 +10,7 @@ export type CardEventPayloads = {
   }
   activated: {
     targetIndex: number
+    metadata?: Record<string, unknown>
   }
   turnAdvanced: Record<string, never>
 }
@@ -69,6 +70,7 @@ export type CardEffectContext = {
     cardInstanceId: string,
   ) => CardInstance | null
   removeCardFromInventory: (playerIndex: number, cardInstanceId: string) => CardInstance | null
+  setPuppetLockForPlayer: (playerIndex: number, lock: PuppetLock | null) => void
 }
 
 type CardEffectHandler<Event extends CardEffectEvent> = (
@@ -213,6 +215,40 @@ const CARD_EFFECTS: Record<string, CardEffectDefinition> = {
         return {
           merchantOffers: offers,
         }
+      },
+    },
+  },
+  puppet_master: {
+    handlers: {
+      activated: ({
+        targetIndex,
+        ownerPlayerIndex,
+        card,
+        updatePlayerStats,
+        metadata,
+        setPuppetLockForPlayer,
+      }) => {
+        const category =
+          typeof metadata?.category === 'string' ? metadata.category : null
+        if (!category) return
+        setPuppetLockForPlayer(targetIndex, {
+          category,
+          sourceCardId: card.id,
+          sourceCardInstanceId: card.instanceId,
+          casterIndex: ownerPlayerIndex,
+          targetIndex,
+        })
+        updatePlayerStats(targetIndex, (stats) => ({
+          ...stats,
+          isPuppeteered: true,
+          puppetLock: {
+            category,
+            sourceCardId: card.id,
+            sourceCardInstanceId: card.instanceId,
+            casterIndex: ownerPlayerIndex,
+            targetIndex,
+          },
+        }))
       },
     },
   },

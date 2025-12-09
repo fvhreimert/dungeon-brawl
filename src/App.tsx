@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 import './components/actions/Actions.css'
 
@@ -10,6 +10,7 @@ import { BloodSacrificeModal } from '@/features/actions/bloodSacrifice/BloodSacr
 import { PlayerSelectModal } from '@/components/game/PlayerSelectModal'
 import { NeutralPlayerSelectModal } from '@/components/game/NeutralPlayerSelectModal'
 import { FelPlayerSelectModal } from '@/components/game/FelPlayerSelectModal'
+import { PuppetMasterPlayerSelectModal } from '@/components/game/PuppetMasterPlayerSelectModal'
 import { useFrogSounds } from '@/features/actions/frogOfFate/useFrogSounds'
 import { useDiceOfFortune } from '@/features/actions/diceOfFortune/useDiceOfFortune'
 import { useMadSeerSounds } from '@/features/actions/madSeer/useMadSeerSounds'
@@ -33,6 +34,7 @@ import { CardRevealModal } from '@/features/actions/cardJester/CardRevealModal'
 import { InventoryModal } from '@/components/game/InventoryModal'
 import { StolenCardModal } from '@/features/cards/StolenCardModal'
 import { TravelingMerchantModal } from '@/features/cards/TravelingMerchantModal'
+import { PuppetMasterCategoryModal } from '@/features/cards/PuppetMasterCategoryModal'
 import {
   buildCardDrawContext,
   pickCardForPlayer,
@@ -76,6 +78,8 @@ function App() {
   const [cardTargetMode, setCardTargetMode] = useState<TargetSelectMode>('standard')
   const [stolenCardReveal, setStolenCardReveal] = useState<StolenCardReveal | null>(null)
   const [merchantOffers, setMerchantOffers] = useState<CardDefinition[] | null>(null)
+  const [puppetTargetIndex, setPuppetTargetIndex] = useState<number | null>(null)
+  const [puppetCategorySelecting, setPuppetCategorySelecting] = useState(false)
 
 
   useGlobalClickSound()
@@ -99,12 +103,25 @@ function App() {
     performBloodSacrifice,
     addCardToInventory,
     activateCard,
+    activePuppetLockCategory,
   } = useJeopardyGame({
     categories: gameConfig.gameplay.categories,
     pointValues: gameConfig.gameplay.pointValues,
     players: gameConfig.players as PlayerConfig[],
     questionBank: questionData as QAItem[],
   })
+
+  const puppetCategoryOptions = useMemo(() => {
+    const counts = new Map<string, number>()
+    tiles.forEach((tile) => {
+      if (tile.status !== 'open') return
+      counts.set(tile.category, (counts.get(tile.category) ?? 0) + 1)
+    })
+    return gameConfig.gameplay.categories.map((category) => ({
+      name: category,
+      availableCount: counts.get(category) ?? 0,
+    }))
+  }, [tiles])
 
   const handleWebClick = () => {
     setSpiderIndex((prev) => (prev < 8 ? prev + 1 : 1))
@@ -168,6 +185,8 @@ function App() {
 
   const handleCardUseRequest = (card: CardInstance) => {
     setInventoryPlayerIndex(null)
+    setPuppetTargetIndex(null)
+    setPuppetCategorySelecting(false)
     const entry = getCardCatalogEntry(card.id)
     const mode = entry?.targetSelectMode ?? 'standard'
     if (mode === 'none') {
@@ -184,6 +203,12 @@ function App() {
 
   const handleCardTargetSelect = (targetIndex: number) => {
     if (!cardUsePending) return
+    if (cardTargetMode === 'puppet') {
+      setPuppetTargetIndex(targetIndex)
+      setCardTargetSelecting(false)
+      setPuppetCategorySelecting(true)
+      return
+    }
     const effectResult = activateCard(cardUsePending.instanceId, targetIndex)
     processCardEffectResult(effectResult)
     setCardUsePending(null)
@@ -195,6 +220,27 @@ function App() {
     setCardUsePending(null)
     setCardTargetSelecting(false)
     setCardTargetMode('standard')
+    setPuppetTargetIndex(null)
+    setPuppetCategorySelecting(false)
+  }
+
+  const handlePuppetCategorySelect = (category: string) => {
+    if (!cardUsePending || puppetTargetIndex === null) return
+    const effectResult = activateCard(cardUsePending.instanceId, puppetTargetIndex, {
+      category,
+    })
+    processCardEffectResult(effectResult)
+    setCardUsePending(null)
+    setCardTargetMode('standard')
+    setPuppetTargetIndex(null)
+    setPuppetCategorySelecting(false)
+  }
+
+  const handlePuppetCategoryCancel = () => {
+    setCardUsePending(null)
+    setCardTargetMode('standard')
+    setPuppetTargetIndex(null)
+    setPuppetCategorySelecting(false)
   }
 
   const handleMadSeerStart = () => {
@@ -213,6 +259,16 @@ function App() {
       // Or generally allow selecting ANY tile that isn't 'done' for Mad Seer.
       setMadSeerPreviewTile(tile)
       return
+    }
+
+    if (activePuppetLockCategory) {
+      const tile = tiles.find((t) => t.id === tileId)
+      const hasAvailableTiles = tiles.some(
+        (entry) => entry.status === 'open' && entry.category === activePuppetLockCategory,
+      )
+      if (hasAvailableTiles && tile && tile.category !== activePuppetLockCategory) {
+        return
+      }
     }
 
     // If Dice of Fortune just ran, logic is handled in GameBoard regarding 'disabled'.
@@ -400,6 +456,7 @@ function App() {
           frogHighlightId={frogHighlightId}
           frogLandingId={frogLandingId}
           diceSurvivorId={selectedSurvivorId} // Pass survivor ID to GameBoard
+          puppetLockCategory={activePuppetLockCategory}
         />
 
         <Scoreboard 
@@ -514,6 +571,13 @@ function App() {
             onSelect={handleCardTargetSelect}
             onCancel={handleCardTargetCancel}
           />
+        ) : cardTargetMode === 'puppet' ? (
+          <PuppetMasterPlayerSelectModal
+            players={players}
+            activePlayerIndex={activePlayerIndex}
+            onSelect={handleCardTargetSelect}
+            onCancel={handleCardTargetCancel}
+          />
         ) : (
           <PlayerSelectModal
             players={players}
@@ -522,6 +586,14 @@ function App() {
             onCancel={handleCardTargetCancel}
           />
         )
+      )}
+
+      {puppetCategorySelecting && cardUsePending && puppetTargetIndex !== null && (
+        <PuppetMasterCategoryModal
+          options={puppetCategoryOptions}
+          onSelect={handlePuppetCategorySelect}
+          onCancel={handlePuppetCategoryCancel}
+        />
       )}
 
       {stolenCardReveal && (

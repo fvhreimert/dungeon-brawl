@@ -1,0 +1,121 @@
+.puppet-category-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 26;
+}
+
+.puppet-category-dialog {
+  width: min(640px, 94vw);
+  background: linear-gradient(180deg, #100202 0%, #050000 100%);
+  border: 3px solid #5d1c07;
+  box-shadow:
+    0 0 50px rgba(0, 0, 0, 0.8),
+    0 0 0 4px #1b0501,
+    inset 0 0 30px rgba(255, 106, 38, 0.25);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  color: #fce4cc;
+  font-family: 'Jersey 20', sans-serif;
+}
+
+.puppet-category-title {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 26px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #ff7f32;
+  text-shadow:
+    0 0 12px rgba(255, 127, 50, 0.85),
+    0 2px 0 #0d0300;
+}
+
+.puppet-category-subtitle {
+  font-family: 'Jersey 20', sans-serif;
+  margin: 0;
+  line-height: 1.5;
+  color: #f7cfa5;
+}
+
+.puppet-category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.puppet-category-btn {
+  font-family: 'Press Start 2P', cursive;
+  border: 3px solid #ff7f32;
+  background: #1a0501;
+  color: #ffe5cf;
+  padding: 14px 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  font-weight: 700;
+  position: relative;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+  width: 100%;
+}
+
+.puppet-category-btn::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 2px dashed rgba(255, 127, 50, 0.35);
+  pointer-events: none;
+}
+
+.puppet-category-btn:hover:not(.puppet-category-btn-disabled) {
+  transform: translateY(-4px);
+  box-shadow:
+    0 10px 18px rgba(0, 0, 0, 0.6),
+    0 0 18px rgba(255, 127, 50, 0.45);
+}
+
+.puppet-category-name {
+  display: block;
+  font-size: 16px;
+  margin-bottom: 6px;
+}
+
+.puppet-category-remaining {
+  font-family: 'Jersey 20', sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.8px;
+  color: #ffbd92;
+}
+
+.puppet-category-btn-disabled {
+  border-color: #3d1b0d;
+  color: #7a5f4e;
+  background: #0b0302;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.puppet-category-btn-disabled .puppet-category-remaining {
+  color: #5a3f35;
+}
+
+.puppet-category-cancel {
+  font-family: 'Press Start 2P', cursive;
+  border: none;
+  background: none;
+  color: #f59f6e;
+  font-size: 14px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  cursor: pointer;
+  align-self: flex-start;
+  padding: 6px 0;
+}
+
+.puppet-category-cancel:hover {
+  color: #ffd7c1;
+}

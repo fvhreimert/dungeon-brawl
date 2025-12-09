@@ -38,6 +38,7 @@ export type PlayerStats = {
   pointsLostToPassiveItems: TurnTotals
   isSilenced: boolean
   isPuppeteered: boolean
+  puppetLock?: PuppetLock | null
 }
 
 export type PlayerConfig = {
@@ -52,10 +53,19 @@ export type Player = PlayerConfig & {
 
 export type ScoreChangeReason = 'question' | 'activeCard' | 'passiveItem' | 'other'
 
+export type PuppetLock = {
+  category: string
+  sourceCardId: string
+  sourceCardInstanceId: string
+  casterIndex: number
+  targetIndex: number
+}
+
 export type GameStateSnapshot = {
   tiles: Tile[]
   players: Player[]
   activePlayerIndex: number
+  puppetLocks: Record<number, PuppetLock>
 }
 
 export type GameStatEntry = {

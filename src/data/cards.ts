@@ -36,6 +36,8 @@ import travelingMerchantImg from '@/assets/images/cards/images/traveling_merchan
 import travelingMerchantFrame from '@/assets/images/cards/frames/traveling_merchant.png'
 import sheepImg from '@/assets/images/cards/images/sheep.png'
 import sheepFrame from '@/assets/images/cards/frames/sheep.png'
+import puppetMasterImg from '@/assets/images/cards/images/puppet_master.png'
+import puppetMasterFrame from '@/assets/images/cards/frames/puppet_master.png'
 
 export const CARDS: CardDefinition[] = [
   {
@@ -111,5 +113,15 @@ export const CARDS: CardDefinition[] = [
     theme: 'theme-common',
     imagePath: sheepImg,
     framePath: sheepFrame,
+  },
+  {
+    id: 'puppet_master',
+    title: 'Puppet Master',
+    description: 'Bind a foe to a single category for their next turn.',
+    inventoryDescription: 'Activate to curse a foe with a category lock.',
+    theme: 'theme-dark',
+    imagePath: puppetMasterImg,
+    framePath: puppetMasterFrame,
+    consumesOnActivate: true,
   },
 ]

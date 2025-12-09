@@ -17,6 +17,7 @@ describe('useJeopardyGame', () => {
     { category: 'TestCat', value: 200, question: 'Q2', answer: 'A2' },
   ]
   const soulBurstCard = CARDS.find((card) => card.id === 'soul_burst')
+  const puppetMasterCard = CARDS.find((card) => card.id === 'puppet_master')
 
   it('initializes correctly', () => {
     const { result } = renderHook(() =>
@@ -301,5 +302,83 @@ describe('useJeopardyGame', () => {
     expect(result.current.activePlayerIndex).toBe(0)
     expect(result.current.history).toHaveLength(0)
     expect(result.current.gameStats).toHaveLength(0)
+  })
+
+  it('locks a target player to a category with Puppet Master', () => {
+    if (!puppetMasterCard) {
+      expect(false).toBe(true)
+      return
+    }
+
+    const puppetCategories = ['Fire', 'Ice']
+    const puppetPointValues = [100, 200]
+    const puppetQuestions: QAItem[] = [
+      { category: 'Fire', value: 100, question: 'F1', answer: 'A' },
+      { category: 'Fire', value: 200, question: 'F2', answer: 'B' },
+      { category: 'Ice', value: 100, question: 'I1', answer: 'C' },
+      { category: 'Ice', value: 200, question: 'I2', answer: 'D' },
+    ]
+
+    const { result } = renderHook(() =>
+      useJeopardyGame({
+        categories: puppetCategories,
+        pointValues: puppetPointValues,
+        players: mockPlayers,
+        questionBank: puppetQuestions,
+      })
+    )
+
+    act(() => {
+      result.current.addCardToInventory(puppetMasterCard)
+    })
+
+    const cardInstance = result.current.players[0].inventory[0]
+
+    act(() => {
+      result.current.activateCard(cardInstance.instanceId, 1, { category: 'Ice' })
+    })
+
+    expect(result.current.players[1].stats.isPuppeteered).toBe(true)
+    expect(result.current.players[1].stats.puppetLock?.category).toBe('Ice')
+
+    const fireTile = result.current.tiles.find(
+      (tile) => tile.category === 'Fire' && tile.value === 100,
+    )
+    if (!fireTile) throw new Error('Missing fire tile')
+
+    act(() => {
+      result.current.handleTileClick(fireTile.id)
+    })
+    act(() => {
+      result.current.handleRevealAnswer()
+    })
+    act(() => {
+      result.current.handlePass()
+    })
+
+    expect(result.current.activePlayerIndex).toBe(1)
+
+    const blockedFireTile = result.current.tiles.find(
+      (tile) => tile.category === 'Fire' && tile.status === 'open',
+    )
+    if (!blockedFireTile) throw new Error('Missing blocked fire tile')
+
+    act(() => {
+      result.current.handleTileClick(blockedFireTile.id)
+    })
+    expect(result.current.selectedTile?.id).not.toBe(blockedFireTile.id)
+
+    const iceTile = result.current.tiles.find(
+      (tile) => tile.category === 'Ice' && tile.status === 'open',
+    )
+    if (!iceTile) throw new Error('Missing ice tile')
+
+    act(() => {
+      result.current.handleTileClick(iceTile.id)
+    })
+
+    expect(result.current.selectedTile?.id).toBe(iceTile.id)
+    expect(result.current.players[1].stats.isPuppeteered).toBe(false)
+    expect(result.current.players[1].stats.puppetLock).toBeNull()
   })
 })

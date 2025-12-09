@@ -11,6 +11,7 @@ import type {
   PlayerStats,
   ScoreChangeReason,
   CardInstance,
+  PuppetLock,
 } from '@/types/game'
 import type { CardDefinition } from '@/data/cards'
 import { gameConfig } from '@/config/gameConfig'
@@ -37,6 +38,7 @@ const createDefaultPlayerStats = (): PlayerStats => ({
   pointsLostToPassiveItems: createEmptyTurnTotals(),
   isSilenced: false,
   isPuppeteered: false,
+  puppetLock: null,
 })
 
 const buildPlayerWithStats = (config: PlayerConfig): Player => {
@@ -160,6 +162,8 @@ export function useJeopardyGame({
   const [answerRevealed, setAnswerRevealed] = useState(false)
   const [history, setHistory] = useState<GameStateSnapshot[]>([])
   const [gameStats, setGameStats] = useState<GameStatEntry[]>([])
+  const [puppetLocks, setPuppetLocks] = useState<Record<number, PuppetLock>>({})
+  const activePuppetLockCategory = puppetLocks[activePlayerIndex]?.category ?? null
 
   const selectedTile = selectedTileId
     ? tiles.find((tile) => tile.id === selectedTileId) ?? null
@@ -173,6 +177,7 @@ export function useJeopardyGame({
           tiles: [...tiles],
           players: [...players],
           activePlayerIndex,
+          puppetLocks: { ...puppetLocks },
         },
       ]
       return newHistory.slice(-5)
@@ -188,6 +193,39 @@ export function useJeopardyGame({
       )
     },
     [setPlayers],
+  )
+
+  const setPuppetLockForPlayer = useCallback(
+    (targetIndex: number, lock: PuppetLock | null) => {
+      setPuppetLocks((prev) => {
+        if (lock) {
+          return {
+            ...prev,
+            [targetIndex]: lock,
+          }
+        }
+        if (!(targetIndex in prev)) return prev
+        const next = { ...prev }
+        delete next[targetIndex]
+        return next
+      })
+    },
+    [],
+  )
+
+  const clearPuppetLock = useCallback(
+    (targetIndex: number) => {
+      updatePlayerStats(targetIndex, (stats) => {
+        if (!stats.isPuppeteered && !stats.puppetLock) return stats
+        return {
+          ...stats,
+          isPuppeteered: false,
+          puppetLock: null,
+        }
+      })
+      setPuppetLockForPlayer(targetIndex, null)
+    },
+    [updatePlayerStats, setPuppetLockForPlayer],
   )
 
   const updateCardState = useCallback(
@@ -302,18 +340,37 @@ export function useJeopardyGame({
               updateCardState,
               transferCardBetweenPlayers,
               removeCardFromInventory,
+              setPuppetLockForPlayer,
             },
             { damage: Math.abs(delta), reason },
           ),
         )
       }
     },
-    [activePlayerIndex, updatePlayerStats, updateCardState, transferCardBetweenPlayers, removeCardFromInventory],
+    [
+      activePlayerIndex,
+      updatePlayerStats,
+      updateCardState,
+      transferCardBetweenPlayers,
+      removeCardFromInventory,
+      setPuppetLockForPlayer,
+    ],
   )
 
   useEffect(() => {
     applyScoreChangeRef.current = applyScoreChange
   }, [applyScoreChange])
+
+  useEffect(() => {
+    const puppetLock = puppetLocks[activePlayerIndex]
+    if (!puppetLock) return
+    const hasAvailableTiles = tiles.some(
+      (tile) => tile.status === 'open' && tile.category === puppetLock.category,
+    )
+    if (!hasAvailableTiles) {
+      clearPuppetLock(activePlayerIndex)
+    }
+  }, [activePlayerIndex, tiles, clearPuppetLock, puppetLocks])
 
   const recordStat = (
     result: 'correct' | 'wrong' | 'pass',
@@ -340,6 +397,22 @@ export function useJeopardyGame({
   const handleTileClick = (tileId: string) => {
     const tile = tiles.find((t) => t.id === tileId)
     if (!tile || tile.status === 'done' || selectedTileId) return
+
+    const activePlayer = players[activePlayerIndex]
+    const puppetLock = puppetLocks[activePlayerIndex] ?? activePlayer?.stats.puppetLock
+    if (puppetLock) {
+      const hasAvailableTiles = tiles.some(
+        (entry) => entry.status === 'open' && entry.category === puppetLock.category,
+      )
+      if (!hasAvailableTiles) {
+        clearPuppetLock(activePlayerIndex)
+      } else if (tile.category !== puppetLock.category) {
+        return
+      } else {
+        clearPuppetLock(activePlayerIndex)
+      }
+    }
+
     setSelectedTileId(tileId)
     setAnswerRevealed(false)
   }
@@ -375,6 +448,7 @@ export function useJeopardyGame({
     )
 
     applyScoreChange(activePlayerIndex, scoreChange, 'question')
+    clearPuppetLock(activePlayerIndex)
     prepareNextPlayer()
   }
 
@@ -390,6 +464,7 @@ export function useJeopardyGame({
       ),
     )
 
+    clearPuppetLock(activePlayerIndex)
     prepareNextPlayer()
   }
 
@@ -401,6 +476,7 @@ export function useJeopardyGame({
     setTiles(previousState.tiles)
     setPlayers(previousState.players)
     setActivePlayerIndex(previousState.activePlayerIndex)
+    setPuppetLocks(previousState.puppetLocks)
 
     setHistory((prev) => prev.slice(0, -1))
     setGameStats((prev) => prev.slice(0, -1))
@@ -466,7 +542,11 @@ export function useJeopardyGame({
     )
   }
 
-  const activateCard = (cardInstanceId: string, targetPlayerIndex: number) => {
+  const activateCard = (
+    cardInstanceId: string,
+    targetPlayerIndex: number,
+    metadata?: Record<string, unknown>,
+  ) => {
     const ownerIndex = activePlayerIndex
     const card = playersRef.current[ownerIndex]?.inventory.find(
       (entry) => entry.instanceId === cardInstanceId,
@@ -485,8 +565,9 @@ export function useJeopardyGame({
         updateCardState,
         transferCardBetweenPlayers,
         removeCardFromInventory,
+        setPuppetLockForPlayer,
       },
-      { targetIndex: targetPlayerIndex },
+      { targetIndex: targetPlayerIndex, metadata },
     )
     if (card.consumesOnActivate) {
       removeCardFromInventory(ownerIndex, card.instanceId)
@@ -511,12 +592,20 @@ export function useJeopardyGame({
             updateCardState,
             transferCardBetweenPlayers,
             removeCardFromInventory,
+            setPuppetLockForPlayer,
           },
           {},
         ),
       )
     },
-    [activePlayerIndex, updatePlayerStats, updateCardState, transferCardBetweenPlayers, removeCardFromInventory],
+    [
+      activePlayerIndex,
+      updatePlayerStats,
+      updateCardState,
+      transferCardBetweenPlayers,
+      removeCardFromInventory,
+      setPuppetLockForPlayer,
+    ],
   )
 
   const runGlobalTurnEffects = useCallback(() => {
@@ -541,6 +630,7 @@ export function useJeopardyGame({
             updateCardState,
             transferCardBetweenPlayers,
             removeCardFromInventory,
+            setPuppetLockForPlayer,
           },
           {},
         ),
@@ -552,6 +642,7 @@ export function useJeopardyGame({
     updateCardState,
     transferCardBetweenPlayers,
     removeCardFromInventory,
+    setPuppetLockForPlayer,
   ])
 
   const hasMountedRef = useRef(false)
@@ -583,5 +674,6 @@ export function useJeopardyGame({
     performBloodSacrifice,
     addCardToInventory,
     activateCard,
+    activePuppetLockCategory,
   }
 }
