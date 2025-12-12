@@ -48,6 +48,10 @@ import compassImg from '@/assets/images/cards/images/compass.png'
 import compassFrame from '@/assets/images/cards/frames/compass.png'
 import treasureMapImg from '@/assets/images/cards/images/treasure_map.png'
 import treasureMapFrame from '@/assets/images/cards/frames/treasure_map.png'
+import sadGlacialElementalImg from '@/assets/images/cards/images/sad_glacial_elemental.png'
+import sadGlacialElementalFrame from '@/assets/images/cards/frames/sad_glacial_elemental.png'
+import coalitionImg from '@/assets/images/cards/images/coalition.png'
+import coalitionFrame from '@/assets/images/cards/frames/coalition.png'
 
 export const CARDS: CardDefinition[] = [
   {
@@ -179,5 +183,25 @@ export const CARDS: CardDefinition[] = [
     theme: 'theme-gold',
     imagePath: treasureMapImg,
     framePath: treasureMapFrame,
+  },
+  {
+    id: 'sad_glacial_elemental',
+    title: 'Sad Glacial Elemental',
+    description: 'Freeze a tile until your next turn. Others cannot select it.',
+    inventoryDescription: 'Activate to freeze a tile for one round.',
+    theme: 'theme-blue',
+    imagePath: sadGlacialElementalImg,
+    framePath: sadGlacialElementalFrame,
+    consumesOnActivate: true,
+  },
+  {
+    id: 'coalition',
+    title: 'Coalition',
+    description: 'Form an alliance with another player. Allies cannot target each other.',
+    inventoryDescription: 'Activate to form an alliance.',
+    theme: 'theme-gold',
+    imagePath: coalitionImg,
+    framePath: coalitionFrame,
+    consumesOnActivate: true,
   },
 ]

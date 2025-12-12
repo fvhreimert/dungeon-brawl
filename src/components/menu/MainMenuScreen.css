@@ -1,0 +1,321 @@
+.main-menu-screen {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #040404;
+  background-image: url('../../assets/images/textures/background.png');
+  background-repeat: repeat;
+  background-attachment: fixed;
+  background-size: 1480px 780px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  position: relative;
+}
+
+/* Extra dark overlay */
+.main-menu-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  pointer-events: none;
+}
+
+.main-menu-container {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  max-width: 500px;
+  padding: 24px;
+}
+
+/* Big title above menu - single line */
+.main-menu-title-standalone {
+  font-family: 'November', 'Press Start 2P', monospace;
+  font-size: clamp(36px, 6vw, 64px);
+  letter-spacing: 3px;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  background: linear-gradient(
+    180deg,
+    #FF4500 0%, #FF4500 12.5%,
+    #FF0000 12.5%, #FF0000 25%,
+    #E60000 25%, #E60000 37.5%,
+    #CC0000 37.5%, #CC0000 50%,
+    #B30000 50%, #B30000 62.5%,
+    #990000 62.5%, #990000 75%,
+    #800000 75%, #800000 87.5%,
+    #4D0000 87.5%, #4D0000 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(4px 4px 0 #000);
+  margin-bottom: 8px;
+}
+
+.main-menu-card {
+  width: 100%;
+}
+
+.main-menu-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 8px 0;
+}
+
+.main-menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.menu-button {
+  width: 100%;
+  font-size: 11px !important;
+  padding: 16px 24px !important;
+}
+
+/* Quiz Select */
+.quiz-select-card {
+  max-height: 80vh;
+  width: 100%;
+}
+
+.quiz-select-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.quiz-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 8px 4px;
+  width: 100%;
+}
+
+.quiz-item {
+  width: 100%;
+  text-align: center !important;
+  justify-content: center !important;
+  padding: 16px 24px !important;
+  font-size: 10px !important;
+}
+
+.back-button {
+  margin-top: 8px;
+  width: 100%;
+  padding: 16px 24px !important;
+}
+
+/* Player Setup */
+.player-setup-card {
+  max-width: 700px;
+  width: 100%;
+}
+
+.selected-quiz-name {
+  font-size: 10px;
+  color: #888;
+  margin-top: -16px;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.player-setup-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.player-count-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.player-count-label {
+  font-size: 12px;
+  color: #ccc;
+}
+
+.player-count-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.count-btn {
+  width: 40px !important;
+  height: 40px !important;
+  padding: 0 !important;
+  font-size: 16px !important;
+}
+
+.player-count-value {
+  font-size: 18px;
+  color: #fff;
+  min-width: 40px;
+  text-align: center;
+}
+
+.player-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 50vh;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.player-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+}
+
+.player-portrait-btn {
+  width: 56px;
+  height: 56px;
+  border: 3px solid #555;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.15s;
+  flex-shrink: 0;
+  background: #222;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.player-portrait-btn:hover {
+  border-color: #888;
+  transform: scale(1.05);
+}
+
+.player-portrait {
+  width: 48px;
+  height: 48px;
+  image-rendering: pixelated;
+}
+
+.player-name-input {
+  flex: 1;
+  background: #1a1a1a;
+  border: 3px solid #444;
+  color: #fff;
+  padding: 10px 14px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.player-name-input:focus {
+  border-color: #666;
+}
+
+.player-name-input::placeholder {
+  color: #666;
+}
+
+.player-setup-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.start-game-btn {
+  width: 100%;
+  font-size: 12px !important;
+  padding: 16px 24px !important;
+}
+
+/* Portrait Picker Modal */
+.portrait-picker-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.portrait-picker-dialog {
+  background: transparent;
+  padding: 24px;
+  max-width: 90vw;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.portrait-picker-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 14px;
+  color: #fff;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.portrait-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.portrait-option {
+  width: 56px;
+  height: 56px;
+  border: 3px solid #444;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.15s;
+  background: #222;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.portrait-option:hover:not(.used) {
+  border-color: #888;
+  transform: scale(1.1);
+}
+
+.portrait-option.selected {
+  border-color: #4ade80;
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.5);
+}
+
+.portrait-option.used {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.portrait-option img {
+  width: 48px;
+  height: 48px;
+  image-rendering: pixelated;
+}
+
+.portrait-picker-close {
+  width: 100%;
+}

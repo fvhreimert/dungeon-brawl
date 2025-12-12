@@ -13,6 +13,7 @@ type GameBoardProps = {
   diceLockedTileIds?: string[] | null
   diceSurvivorId?: string | null
   puppetLockCategory?: string | null
+  freezeSelectMode?: boolean
 }
 
 export function GameBoard({
@@ -27,9 +28,15 @@ export function GameBoard({
   diceLockedTileIds = null,
   diceSurvivorId = null,
   puppetLockCategory = null,
+  freezeSelectMode = false,
 }: GameBoardProps) {
+  const categoryCount = categories.length
+
   return (
-    <section className="board-shell">
+    <section 
+      className="board-shell"
+      style={{ '--category-count': categoryCount } as React.CSSProperties}
+    >
       <div className="category-row">
         {categories.map((category) => (
           <div
@@ -48,6 +55,8 @@ export function GameBoard({
           // Use persisted state OR animation state
           const isCrumbled = tile.modifiers?.isCrumbled || diceLockedTileIds?.includes(tile.id)
           const isSurvivor = diceSurvivorId && tile.id === diceSurvivorId
+          const frozenInfo = tile.modifiers?.frozen
+          const isFrozen = !!frozenInfo
 
           const isPuppetBlocked =
             puppetLockCategory &&
@@ -59,7 +68,10 @@ export function GameBoard({
             tile.status === 'done' || 
             !!isCrumbled || 
             (!!diceSurvivorId && !isSurvivor && !highlightOpenTiles) ||
-            !!isPuppetBlocked
+            !!isPuppetBlocked ||
+            isFrozen
+
+          const showFreezeTarget = freezeSelectMode && tile.status === 'open' && !isCrumbled && !isFrozen
 
           return (
             <button
@@ -67,6 +79,9 @@ export function GameBoard({
               key={tile.id}
               className={`tile question-tile ${
                 tile.status === 'done' ? 'tile-claimed' : ''
+              } ${
+                // Frozen tiles have their own strong visual
+                isFrozen && !isCrumbled ? 'tile-frozen' : ''
               } ${
                 // Order of classes is important for CSS cascade and override.
                 // Crumbled tiles should generally visually override everything.
@@ -95,12 +110,17 @@ export function GameBoard({
               } ${
                 // Multiplier highlights
                 // Prevent multiplier classes if crumbled to avoid style conflicts (e.g. animation, box-shadow)
-                tile.status === 'open' && (tile.multiplier ?? 1) > 1 && !isCrumbled
+                tile.status === 'open' && (tile.multiplier ?? 1) > 1 && !isCrumbled && !isFrozen
                   ? 'tile-mult-active'
                   : ''
               } ${
-                tile.status === 'open' && (tile.multiplier ?? 1) > 1 && !isCrumbled
+                tile.status === 'open' && (tile.multiplier ?? 1) > 1 && !isCrumbled && !isFrozen
                   ? `tile-mult-x${tile.multiplier}`
+                  : ''
+              } ${
+                // Freeze target highlights
+                showFreezeTarget
+                  ? 'tile-freeze-target'
                   : ''
               } ${
                 // Mad Seer highlights should come last to override others
@@ -114,8 +134,16 @@ export function GameBoard({
               disabled={isEffectivelyDisabled}
             >
               <span className="value">{tile.value}</span>
-              {tile.status === 'open' && (tile.multiplier ?? 1) > 1 && !isCrumbled && (
+              {tile.status === 'open' && (tile.multiplier ?? 1) > 1 && !isCrumbled && !isFrozen && (
                 <span className="multiplier-badge">x{tile.multiplier}</span>
+              )}
+              {isFrozen && !isCrumbled && (
+                <div className="tile-frozen-overlay">
+                  <div className="ice-particle" />
+                  <div className="ice-particle" />
+                  <div className="ice-particle" />
+                  <div className="ice-particle" />
+                </div>
               )}
             </button>
           )

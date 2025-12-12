@@ -12,6 +12,11 @@ import type {
   ScoreChangeReason,
   CardInstance,
   PuppetLock,
+  ActionId,
+  FrozenActions,
+  Alliance,
+  Alliances,
+  AllianceColor,
 } from '@/types/game'
 import type { CardDefinition } from '@/data/cards'
 import { gameConfig } from '@/config/gameConfig'
@@ -163,6 +168,8 @@ export function useJeopardyGame({
   const [history, setHistory] = useState<GameStateSnapshot[]>([])
   const [gameStats, setGameStats] = useState<GameStatEntry[]>([])
   const [puppetLocks, setPuppetLocks] = useState<Record<number, PuppetLock>>({})
+  const [frozenActions, setFrozenActions] = useState<FrozenActions>({})
+  const [alliances, setAlliances] = useState<Alliances>([])
   const activePuppetLockCategory = puppetLocks[activePlayerIndex]?.category ?? null
 
   const selectedTile = selectedTileId
@@ -178,6 +185,8 @@ export function useJeopardyGame({
           players: [...players],
           activePlayerIndex,
           puppetLocks: { ...puppetLocks },
+          frozenActions: { ...frozenActions },
+          alliances: [...alliances],
         },
       ]
       return newHistory.slice(-5)
@@ -477,6 +486,8 @@ export function useJeopardyGame({
     setPlayers(previousState.players)
     setActivePlayerIndex(previousState.activePlayerIndex)
     setPuppetLocks(previousState.puppetLocks)
+    setFrozenActions(previousState.frozenActions ?? {})
+    setAlliances(previousState.alliances ?? [])
 
     setHistory((prev) => prev.slice(0, -1))
     setGameStats((prev) => prev.slice(0, -1))
@@ -517,6 +528,125 @@ export function useJeopardyGame({
     )
   }
 
+  const freezeTile = useCallback(
+    (tileId: string, frozenByPlayerIndex: number, frozenByCardInstanceId: string) => {
+      saveSnapshot()
+      setTiles((prev) =>
+        prev.map((tile) => {
+          if (tile.id !== tileId || tile.status !== 'open') return tile
+          return {
+            ...tile,
+            modifiers: {
+              ...tile.modifiers,
+              frozen: {
+                frozenByPlayerIndex,
+                frozenByCardInstanceId,
+              },
+            },
+          }
+        }),
+      )
+    },
+    [],
+  )
+
+  const unfreezeTilesForPlayer = useCallback((playerIndex: number) => {
+    setTiles((prev) =>
+      prev.map((tile) => {
+        if (!tile.modifiers?.frozen) return tile
+        if (tile.modifiers.frozen.frozenByPlayerIndex !== playerIndex) return tile
+        const { frozen: _removed, ...restModifiers } = tile.modifiers
+        return {
+          ...tile,
+          modifiers: restModifiers,
+        }
+      }),
+    )
+  }, [])
+
+  const freezeAction = useCallback(
+    (actionId: ActionId, frozenByPlayerIndex: number, frozenByCardInstanceId: string) => {
+      saveSnapshot()
+      setFrozenActions((prev) => ({
+        ...prev,
+        [actionId]: {
+          frozenByPlayerIndex,
+          frozenByCardInstanceId,
+        },
+      }))
+    },
+    [],
+  )
+
+  const unfreezeActionsForPlayer = useCallback((playerIndex: number) => {
+    setFrozenActions((prev) => {
+      const next: FrozenActions = {}
+      for (const [actionId, info] of Object.entries(prev)) {
+        if (info && info.frozenByPlayerIndex !== playerIndex) {
+          next[actionId as ActionId] = info
+        }
+      }
+      return next
+    })
+  }, [])
+
+  const ALLIANCE_COLORS: AllianceColor[] = ['red', 'yellow', 'green', 'blue']
+
+  const getNextAllianceColor = useCallback((): AllianceColor => {
+    const usedColors = new Set(alliances.map((a) => a.color))
+    for (const color of ALLIANCE_COLORS) {
+      if (!usedColors.has(color)) return color
+    }
+    return 'red'
+  }, [alliances])
+
+  const createAlliance = useCallback(
+    (initiatorIndex: number, targetIndex: number, cardInstanceId: string) => {
+      const allianceDuration = players.length * 2
+      const color = getNextAllianceColor()
+      const newAlliance: Alliance = {
+        id: `alliance-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        color,
+        playerIndices: [initiatorIndex, targetIndex],
+        turnsRemaining: allianceDuration,
+        sourceCardInstanceId: cardInstanceId,
+      }
+      setAlliances((prev) => [...prev, newAlliance])
+      return newAlliance
+    },
+    [players.length, getNextAllianceColor],
+  )
+
+  const tickDownAlliances = useCallback(() => {
+    setAlliances((prev) => {
+      const updated = prev
+        .map((alliance) => ({
+          ...alliance,
+          turnsRemaining: alliance.turnsRemaining - 1,
+        }))
+        .filter((alliance) => alliance.turnsRemaining > 0)
+      return updated
+    })
+  }, [])
+
+  const arePlayersAllied = useCallback(
+    (playerIndex1: number, playerIndex2: number): boolean => {
+      return alliances.some(
+        (alliance) =>
+          alliance.playerIndices.includes(playerIndex1) &&
+          alliance.playerIndices.includes(playerIndex2),
+      )
+    },
+    [alliances],
+  )
+
+  const getPlayerAlliance = useCallback(
+    (playerIndex: number): Alliance | null => {
+      return alliances.find((alliance) => alliance.playerIndices.includes(playerIndex)) ?? null
+    },
+    [alliances],
+  )
+
   const performBloodSacrifice = (amount: number, targetPlayerIndex: number) => {
     saveSnapshot()
     applyScoreChange(activePlayerIndex, -amount, 'activeCard')
@@ -542,14 +672,16 @@ export function useJeopardyGame({
     )
   }
 
-  const combineTreasureSet = (playerIndex: number, cardInstanceIds: string[]) => {
+  const combineTreasureSet = (playerIndex: number, cardInstanceIds: string[], goldEarned: number) => {
     saveSnapshot()
     // Remove all the treasure cards
     cardInstanceIds.forEach((instanceId) => {
       removeCardFromInventory(playerIndex, instanceId)
     })
-    // Award the treasure reward
-    applyScoreChange(playerIndex, 1000, 'activeCard')
+    // Award the treasure reward (variable based on mini-game)
+    if (goldEarned > 0) {
+      applyScoreChange(playerIndex, goldEarned, 'activeCard')
+    }
   }
 
   const activateCard = (
@@ -661,9 +793,28 @@ export function useJeopardyGame({
       hasMountedRef.current = true
       return
     }
+    // Unfreeze tiles and actions that this player froze (their turn has come back around)
+    unfreezeTilesForPlayer(activePlayerIndex)
+    unfreezeActionsForPlayer(activePlayerIndex)
+    // Tick down alliance timers
+    tickDownAlliances()
     runGlobalTurnEffects()
     runTurnStartEffects(activePlayerIndex)
-  }, [activePlayerIndex, runTurnStartEffects, runGlobalTurnEffects])
+  }, [activePlayerIndex, runTurnStartEffects, runGlobalTurnEffects, unfreezeTilesForPlayer, unfreezeActionsForPlayer, tickDownAlliances])
+
+  const setActivePlayer = useCallback((playerIndex: number) => {
+    if (playerIndex >= 0 && playerIndex < players.length) {
+      saveSnapshot()
+      setActivePlayerIndex(playerIndex)
+    }
+  }, [players.length])
+
+  const adjustPlayerScore = useCallback((playerIndex: number, delta: number) => {
+    if (playerIndex >= 0 && playerIndex < players.length) {
+      saveSnapshot()
+      applyScoreChange(playerIndex, delta, 'other')
+    }
+  }, [players.length, applyScoreChange])
 
   return {
     tiles,
@@ -686,5 +837,14 @@ export function useJeopardyGame({
     activateCard,
     activePuppetLockCategory,
     combineTreasureSet,
+    freezeTile,
+    freezeAction,
+    frozenActions,
+    setActivePlayer,
+    adjustPlayerScore,
+    alliances,
+    createAlliance,
+    arePlayersAllied,
+    getPlayerAlliance,
   }
 }

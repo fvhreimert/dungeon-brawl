@@ -42,13 +42,34 @@
   width: 100%;
 }
 
-.neutral-player-select-btn {
+.neutral-player-select-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
   width: 100%;
+}
+
+.neutral-player-select-portrait {
+  width: 56px;
+  height: 56px;
+  image-rendering: pixelated;
+  border: 3px solid #6b6d91;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+  flex-shrink: 0;
+}
+
+.neutral-player-select-item.disabled .neutral-player-select-portrait {
+  opacity: 0.4;
+  border-color: #2a2c3f;
+}
+
+.neutral-player-select-btn {
+  flex: 1;
   justify-content: center;
   text-align: center;
   font-family: "Press Start 2P", system-ui, sans-serif;
-  font-size: 0.85rem !important;
-  padding: 0.9rem !important;
+  font-size: 0.95rem !important;
+  padding: 1.1rem 1.5rem !important;
   background: linear-gradient(180deg, #1f1f2d 0%, #13131d 100%) !important;
   border: 2px solid #6b6d91 !important;
   color: #f1f2f8 !important;

@@ -1,0 +1,65 @@
+{
+    "displayName": "Quiz 2",
+    "categories": [
+        {
+            "name": "MUSIK",
+            "questions": [
+                { "q": "Hvilket britisk band udgav sangen 'Bohemian Rhapsody' i 1975?", "a": "Queen" },
+                { "q": "Hvad er navnet på sangeren kendt som 'The King of Pop'?", "a": "Michael Jackson" },
+                { "q": "Hvilken østrigsk komponist skrev den ufuldendte 'Symfoni nr. 8' i h‑moll?", "a": "Franz Schubert" },
+                { "q": "Hvilken amerikansk sangerinde slog flere streaming‑rekorder i 2023 med albummet 'Midnights'?", "a": "Taylor Swift" },
+                { "q": "I hvilket årti opstod musikgenren hiphop i New York‑bydelen Bronx?", "a": "1970'erne" }
+            ]
+        },
+        {
+            "name": "INTERNETFÆNOMENER",
+            "questions": [
+                { "q": "Hvad betyder forkortelsen LOL? (200 points)", "a": "Laughing Out Loud" },
+                { "q": "Hvilken platform lanceret i 2005 gør det muligt at dele videoer globalt?", "a": "YouTube" },
+                { "q": "Hvad hedder det billedeformat, der bruges til korte animerede loops? ", "a": "GIF" },
+                { "q": "Hvilket socialt medie populariserede brugen af hashtags? ", "a": "Twitter (nu X)" },
+                { "q": "Hvad kaldes den decentraliserede teknologi bag kryptovalutaer som Bitcoin? ", "a": "Blockchain" }
+            ]
+        },
+        {
+            "name": "TEKNOLOGI & OPFINDELSER",
+            "questions": [
+                { "q": "Hvilket firma lancerede den første iPhone i 2007?", "a": "Apple" },
+                { "q": "Hvad står forkortelsen 'CPU' for?", "a": "Central Processing Unit" },
+                { "q": "Hvem opfandt World Wide Web i 1989?", "a": "Tim Berners‑Lee" },
+                { "q": "Hvilken open‑source kerne blev skabt af Linus Torvalds i 1991?", "a": "Linux" },
+                { "q": "Hvad kaldes den grundlæggende informationsenhed i en kvantecomputer?", "a": "Qubit" }
+            ]
+        },
+        {
+            "name": "ASTRONOMI",
+            "questions": [
+                { "q": "Hvad hedder Jordens eneste naturlige satellit? (200 points)", "a": "Månen" },
+                { "q": "Hvad kaldes det lysglimt, når en meteoroide brænder op i atmosfæren? ", "a": "Meteor (stjerneskud)" },
+                { "q": "Hvad hedder området mellem Mars og Jupiter med mange asteroider? ", "a": "Asteroidebæltet" },
+                { "q": "Hvad kaldes den eksplosive fase i en massiv stjernes livscyklus? ", "a": "Supernova" },
+                { "q": "Hvad hedder teorien om universets oprindelse i en voldsom udvidelse? ", "a": "Big Bang‑teorien" }
+            ]
+        },
+        {
+            "name": "RUMFART & ASTRONOMI",
+            "questions": [
+                { "q": "Hvilken planet er tættest på Solen?", "a": "Merkur" },
+                { "q": "Hvad hedder Jordens naturlige satellit?", "a": "Månen" },
+                { "q": "Hvilken NASA‑rover landede på Mars i 2021 for at lede efter spor af tidligere liv?", "a": "Perseverance" },
+                { "q": "Hvad hedder det rumteleskop, som blev opsendt i 2021 som afløser for Hubble?", "a": "James Webb Space Telescope" },
+                { "q": "Hvilken europæisk mission fra 2004 var den første til at lande et fartøj på en kometkerne?", "a": "Rosetta‑missionen (lander Philae)" }
+            ]
+        },
+        {
+            "name": "TRAVEL & PLACES",
+            "questions": [
+                { "q": "Hvilken europæisk by er kendt for sine kanaler og gondoler?", "a": "Venedig" },
+                { "q": "Hvad er verdens største ø, der ikke er et kontinent?", "a": "Grønland" },
+                { "q": "Hvilket vandfald ligger på grænsen mellem Canada og USA?", "a": "Niagara Falls" },
+                { "q": "I hvilket land finder man den antikke klippeby Petra?", "a": "Jordan" },
+                { "q": "Hvilken by huser verdens højeste bygning Burj Khalifa?", "a": "Dubai" }
+            ]
+        }
+    ]
+}

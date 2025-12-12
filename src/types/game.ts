@@ -9,9 +9,14 @@ export type QAItem = {
   answer: string
 }
 
+export type FrozenTileInfo = {
+  frozenByPlayerIndex: number
+  frozenByCardInstanceId: string
+}
+
 export type TileModifiers = {
   isCrumbled?: boolean
-  // Add more trackers here as needed (e.g., isFrozen, isPoisoned)
+  frozen?: FrozenTileInfo
 }
 
 export type Tile = QAItem & {
@@ -45,6 +50,7 @@ export type PlayerConfig = {
   name: string
   score: number
   inventory: CardInstance[]
+  portrait?: string
 }
 
 export type Player = PlayerConfig & {
@@ -61,11 +67,34 @@ export type PuppetLock = {
   targetIndex: number
 }
 
+export type ActionId = 'card_jester' | 'mad_seer' | 'blood_sacrifice' | 'frog_of_fate' | 'dice_of_fortune' | 'web'
+
+export type FrozenActionInfo = {
+  frozenByPlayerIndex: number
+  frozenByCardInstanceId: string
+}
+
+export type FrozenActions = Partial<Record<ActionId, FrozenActionInfo>>
+
+export type AllianceColor = 'red' | 'yellow' | 'green' | 'blue'
+
+export type Alliance = {
+  id: string
+  color: AllianceColor
+  playerIndices: number[]
+  turnsRemaining: number
+  sourceCardInstanceId: string
+}
+
+export type Alliances = Alliance[]
+
 export type GameStateSnapshot = {
   tiles: Tile[]
   players: Player[]
   activePlayerIndex: number
   puppetLocks: Record<number, PuppetLock>
+  frozenActions?: FrozenActions
+  alliances?: Alliances
 }
 
 export type GameStatEntry = {

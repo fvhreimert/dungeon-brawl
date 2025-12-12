@@ -24,6 +24,15 @@
 
 :root {
   font-family:
+    'Press Start 2P',
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+/* Use ArcadeClassic for specific elements that need it */
+.arcade-font {
+  font-family:
     'ArcadeClassic',
     'Press Start 2P',
     system-ui,

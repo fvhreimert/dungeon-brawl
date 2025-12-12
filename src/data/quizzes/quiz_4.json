@@ -1,0 +1,65 @@
+{
+    "displayName": "Quiz 4",
+    "categories": [
+        {
+            "name": "INTERNET & MEMES",
+            "questions": [
+                { "q": "Hvad betyder forkortelsen 'LOL', som ofte bruges i onlinesamtaler?", "a": "Laughing out loud" },
+                { "q": "Hvilket anonymt internetforum, grundlagt af Christopher Poole i 2003, er berømt for at skabe mange tidlige memer?", "a": "4chan" },
+                { "q": "Hvilken musikvideo fra 2012 blev den første YouTube‑video til at runde én milliard visninger?", "a": "Gangnam Style" },
+                { "q": "Hvilket meme med en Shiba‑inu‑hund og flerfarvet Comic Sans‑tekst lagde navn til kryptovalutaen Dogecoin?", "a": "Doge" },
+                { "q": "I hvilken amerikansk tegneserie fra 2005 optrådte figuren, der senere blev til memet 'Pepe the Frog'?", "a": "Boy's Club" }
+            ]
+        },
+        {
+            "name": "E‑SPORT",
+            "questions": [
+                { "q": "Hvilket Riot‑spil afholder hvert år verdensmesterskabet kendt som 'Worlds'?", "a": "League of Legends" },
+                { "q": "Hvad hedder Valve‑skydespillet, der i 2023 blev opdateret til version 2 og er kendt for sine 'Majors'‑turneringer?", "a": "Counter‑Strike" },
+                { "q": "I hvilket bil‑fodboldspil konkurrerer professionelle i ligaen RLCS?", "a": "Rocket League" },
+                { "q": "Hvilken ukrainsk spiller, kendt under aliaset 's1mple', regnes for en af de bedste CS‑spillere nogensinde?", "a": "Oleksandr Kostyliev" },
+                { "q": "Hvilket hold vandt Dota 2‑turneringen The International i både 2018 og 2019 og blev det første til at vinde to år i træk?", "a": "OG" }
+            ]
+        },
+        {
+            "name": "ANIME & MANGA",
+            "questions": [
+                { "q": "Hvad hedder hovedpersonen, der rejser med Pikachu i Pokémon‑animeen?", "a": "Ash Ketchum" },
+                { "q": "Hvilken Studio Ghibli‑film fra 2001 følger pigen Chihiro i en åndeverden?", "a": "Spirited Away" },
+                { "q": "Hvilken pirat‑manga af Eiichiro Oda er den bedst sælgende serie nogensinde?", "a": "One Piece" },
+                { "q": "Hvilken anime fra 2013 handler om menneskehedens kamp mod kæmpe titaner bag murede byer?", "a": "Attack on Titan" },
+                { "q": "Hvilken japansk cyberpunk‑film fra 1988 foregår i Neo‑Tokyo og har figuren Tetsuo i centrum?", "a": "Akira" }
+            ]
+        },
+        {
+            "name": "MODERNE TV SERIER",
+            "questions": [
+                { "q": "Hvad hedder den animerede serie om en alkoholiseret videnskabsmand og hans barnebarn fra 2013? (200 points)", "a": "Rick and Morty" },
+                { "q": "Hvilken streamingtjeneste producerede serien Stranger Things? (400 points)", "a": "Netflix" },
+                { "q": "I hvilken fantasyserie optræder Daenerys Targaryen som dragernes moder? (600 points)", "a": "Game of Thrones" },
+                { "q": "Hvilken dystopisk antologiserie skabt af Charlie Brooker udforsker teknologiens skyggesider? (800 points)", "a": "Black Mirror" },
+                { "q": "Hvad hedder den koreanske thriller‑serie fra 2021 om dødelige børnespil? (1000 points)", "a": "Squid Game" }
+            ]
+        },
+        {
+            "name": "APPS & SOCIAL MEDIA",
+            "questions": [
+                { "q": "Hvilken foto‑delingsapp, lanceret i 2010 og nu ejet af Meta, er kendt for Stories‑funktionen?", "a": "Instagram" },
+                { "q": "Hvad hedder videoplatformen ejet af ByteDance, som blev globalt lanceret i 2018 og er berømt for korte musikvideoer?", "a": "TikTok" },
+                { "q": "Hvad hedder den krypterede besked‑app, der benytter Signal‑protokollen og anbefales af Edward Snowden?", "a": "Signal" },
+                { "q": "I hvilket år hævede Twitter (nu X) grænsen fra 140 til 280 tegn pr. tweet?", "a": "2017" },
+                { "q": "Hvad hedder det decentraliserede sociale netværk, startet af Eugen Rochko i 2016, som består af forbundne instanser i 'Fediverse'?", "a": "Mastodon" }
+            ]
+        },
+        {
+            "name": "Filmklassikere",
+            "questions": [
+                { "q": "Hvilken film fra 1997 om et berømt skib blev instrueret af James Cameron? ", "a": "Titanic" },
+                { "q": "Hvem instruerede hajfilmen Jaws fra 1975? ", "a": "Steven Spielberg" },
+                { "q": "Hvilken sort‑hvid klassiker fra 1942 foregår i Marokko og har Humphrey Bogart i hovedrollen? ", "a": "Casablanca" },
+                { "q": "Hvad hedder Ridley Scotts sci‑fi‑film fra 1982 baseret på Philip K. Dicks roman? ", "a": "Blade Runner" },
+                { "q": "Hvilken japansk animationsfilm fra 2001 instrueret af Hayao Miyazaki vandt Oscar for bedste animationsfilm? ", "a": "Chihiro og heksene (Spirited Away)" }
+            ]
+        }
+    ]
+}

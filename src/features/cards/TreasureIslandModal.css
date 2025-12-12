@@ -1,0 +1,512 @@
+.treasure-island-backdrop {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 30%, rgba(30, 20, 10, 0.9), rgba(5, 3, 0, 0.98));
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  z-index: 100;
+  backdrop-filter: blur(4px);
+}
+
+.treasure-island-modal {
+  width: min(850px, 95vw);
+  background: linear-gradient(180deg, #3a2810 0%, #2a1c0a 20%, #1a1205 60%, #0f0a02 100%);
+  border: 4px solid #8b6914;
+  box-shadow: 0 0 0 2px #3a2508, 0 0 0 6px #5a4010, 0 20px 60px rgba(0, 0, 0, 0.95), inset 0 0 80px rgba(139, 105, 20, 0.1), 0 0 80px rgba(139, 105, 20, 0.2);
+  color: #f4d675;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.25rem 1.5rem 1.5rem;
+  gap: 0.75rem;
+  image-rendering: pixelated;
+}
+
+.corner-decor {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border: 3px solid #c9a227;
+  z-index: 2;
+}
+.corner-decor.top-left { top: 8px; left: 8px; border-right: none; border-bottom: none; }
+.corner-decor.top-right { top: 8px; right: 8px; border-left: none; border-bottom: none; }
+.corner-decor.bottom-left { bottom: 8px; left: 8px; border-right: none; border-top: none; }
+.corner-decor.bottom-right { bottom: 8px; right: 8px; border-left: none; border-top: none; }
+
+.treasure-island-header {
+  text-align: center;
+  z-index: 1;
+}
+
+.treasure-island-title {
+  font-family: 'ArcadeClassic', sans-serif;
+  font-size: 32px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #ffd700;
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.5), 3px 3px 0 #4a3000;
+  margin-bottom: 4px;
+}
+
+.treasure-island-subtitle {
+  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-size: 0.55rem;
+  color: #a08040;
+  letter-spacing: 1px;
+}
+
+.island-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  z-index: 1;
+}
+
+.island-with-meter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 700px;
+  position: relative;
+}
+
+.island-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 256 / 160;
+  border: 3px solid #6b4f00;
+  border-bottom: none;
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5);
+  background: #1a2535;
+  transition: filter 0.5s ease;
+}
+
+.island-container.cursed {
+  filter: grayscale(0.7) brightness(0.5);
+}
+
+.island-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+}
+
+/* Dig Cross */
+.dig-cross {
+  position: absolute;
+  width: 56px;
+  height: 56px;
+  transform: translate(-50%, -50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 10;
+}
+
+.dig-cross img {
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 8px rgba(255, 50, 50, 0.9)) drop-shadow(0 0 16px rgba(255, 50, 50, 0.5));
+  animation: cross-pulse 1.5s ease-in-out infinite;
+  transition: transform 0.15s ease;
+}
+
+.dig-cross:hover:not(:disabled) img {
+  filter: drop-shadow(0 0 14px rgba(255, 100, 100, 1)) drop-shadow(0 0 28px rgba(255, 50, 50, 0.8));
+  animation: none;
+  transform: scale(1.2);
+}
+
+.dig-cross img.throbbing {
+  animation: dig-throb 0.5s ease-out !important;
+}
+
+.dig-cross.found img {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+@keyframes cross-pulse {
+  0%, 100% { 
+    filter: drop-shadow(0 0 6px rgba(255, 50, 50, 0.7)) drop-shadow(0 0 12px rgba(255, 50, 50, 0.4));
+    transform: scale(1);
+  }
+  50% { 
+    filter: drop-shadow(0 0 14px rgba(255, 100, 100, 1)) drop-shadow(0 0 28px rgba(255, 50, 50, 0.7));
+    transform: scale(1.1);
+  }
+}
+
+@keyframes dig-throb {
+  0% { 
+    transform: scale(1);
+    filter: drop-shadow(0 0 8px rgba(255, 50, 50, 0.9)) drop-shadow(0 0 16px rgba(255, 50, 50, 0.5));
+  }
+  40% { 
+    transform: scale(1.6);
+    filter: drop-shadow(0 0 25px rgba(255, 200, 50, 1)) drop-shadow(0 0 50px rgba(255, 150, 50, 0.9));
+  }
+  100% { 
+    transform: scale(1);
+    filter: drop-shadow(0 0 8px rgba(255, 50, 50, 0.9)) drop-shadow(0 0 16px rgba(255, 50, 50, 0.5));
+  }
+}
+
+/* Curse Overlay - just the vignette */
+.curse-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+}
+
+.curse-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 10%, rgba(20, 5, 5, 0.5) 40%, rgba(10, 0, 0, 0.85) 70%, rgba(0, 0, 0, 0.95) 100%);
+  animation: vignette-pulse 2s ease-in-out infinite;
+}
+
+@keyframes vignette-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
+
+/* Curse image container - positioned over the island but outside the filtered element */
+.curse-image-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 25;
+  pointer-events: none;
+}
+
+.curse-image {
+  width: 85%;
+  max-width: 380px;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 15px rgba(0, 0, 0, 1)) drop-shadow(0 0 30px rgba(0, 0, 0, 1)) drop-shadow(0 0 50px rgba(0, 0, 0, 0.9));
+  animation: curse-zoom 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes curse-zoom {
+  0% { transform: scale(0.1) rotate(-20deg); opacity: 0; }
+  50% { transform: scale(1.15) rotate(5deg); }
+  70% { transform: scale(0.95) rotate(-2deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* 8bit Progress Bar */
+.curse-progress-8bit {
+  width: 100%;
+  height: 24px;
+  position: relative;
+  border: 3px solid #6b4f00;
+  border-top: none;
+  background: #0a0202;
+}
+
+.curse-progress-track {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.curse-progress-fill {
+  height: 100%;
+  background: #cc2020;
+  transition: width 0.4s ease-out;
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.3), inset 0 3px 0 rgba(255, 100, 100, 0.3);
+}
+
+.curse-progress-border {
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 2px 2px 0 #801010, inset -2px -2px 0 #400808;
+  pointer-events: none;
+}
+
+.curse-meter-label {
+  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-size: 1rem;
+  color: #cc4040;
+  text-align: center;
+  margin-top: 0.6rem;
+  text-transform: uppercase;
+}
+
+.curse-percent {
+  color: #ff4040;
+  text-shadow: 0 0 12px rgba(255, 64, 64, 0.8);
+  font-size: 1.2rem;
+}
+
+/* Status Text */
+.treasure-status {
+  min-height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-hint {
+  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-size: 0.55rem;
+  color: #a08040;
+  text-align: center;
+}
+
+.status-digging {
+  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-size: 0.65rem;
+  color: #f4d675;
+  animation: pulse-text 0.25s infinite alternate;
+}
+
+.status-treasure {
+  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-size: 0.65rem;
+  color: #50ff50;
+  text-shadow: 0 0 10px rgba(50, 255, 50, 0.6);
+  animation: treasure-flash 0.4s ease-out;
+}
+
+.status-cursed {
+  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-size: 0.65rem;
+  color: #ff4040;
+  text-shadow: 0 0 15px rgba(255, 64, 64, 0.8);
+  animation: curse-text-shake 0.5s ease-out;
+}
+
+@keyframes pulse-text { 0% { opacity: 0.5; } 100% { opacity: 1; } }
+@keyframes treasure-flash { 0% { transform: scale(1.2); opacity: 0.5; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes curse-text-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-3px); }
+  40% { transform: translateX(3px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+
+/* Treasure Chest Area */
+.treasure-chest-area {
+  width: 100%;
+  max-width: 700px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 3px solid #6b4f00;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 1;
+  transition: filter 0.5s ease;
+}
+
+.treasure-chest-area.cursed {
+  filter: grayscale(1) brightness(0.5);
+}
+
+.treasure-chest-area.cursed .chest-gold-value {
+  color: #808080;
+  text-shadow: none;
+}
+
+.chest-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chest-label {
+  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-size: 0.6rem;
+  color: #c9a227;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.chest-gold-value {
+  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-size: 0.9rem;
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+}
+
+.chest-contents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  min-height: 90px;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid #3d2f10;
+  justify-content: center;
+  align-items: center;
+}
+
+.chest-empty {
+  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-size: 0.5rem;
+  color: #4a3a20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  font-style: italic;
+}
+
+/* Treasure items - BIGGER with glow around pixels */
+.chest-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: item-pop 0.35s ease-out;
+  padding: 4px;
+}
+
+.chest-item img {
+  width: 64px;
+  height: 64px;
+  image-rendering: pixelated;
+}
+
+.chest-item .item-value {
+  position: absolute;
+  bottom: -4px;
+  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-size: 0.45rem;
+  padding: 2px 4px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid;
+}
+
+/* Rarity: Common - Gray */
+.chest-item.rarity-common img {
+  filter: drop-shadow(0 0 6px rgba(160, 160, 160, 0.7)) drop-shadow(0 0 12px rgba(128, 128, 128, 0.4));
+}
+.chest-item.rarity-common .item-value { 
+  color: #b0b0b0; 
+  border-color: #808080;
+}
+
+/* Rarity: Rare - Blue */
+.chest-item.rarity-rare img {
+  filter: drop-shadow(0 0 8px rgba(80, 140, 255, 0.8)) drop-shadow(0 0 16px rgba(64, 128, 255, 0.5));
+}
+.chest-item.rarity-rare .item-value { 
+  color: #70b0ff; 
+  border-color: #4080ff;
+}
+
+/* Rarity: Epic - Purple */
+.chest-item.rarity-epic img {
+  filter: drop-shadow(0 0 10px rgba(180, 80, 255, 0.8)) drop-shadow(0 0 20px rgba(160, 64, 255, 0.5));
+}
+.chest-item.rarity-epic .item-value { 
+  color: #d090ff; 
+  border-color: #a040ff;
+}
+
+/* Rarity: Legendary - Golden Orange */
+.chest-item.rarity-legendary img {
+  filter: drop-shadow(0 0 10px rgba(255, 160, 40, 0.9)) drop-shadow(0 0 20px rgba(255, 128, 32, 0.6));
+  animation: legendary-img-glow 1.5s ease-in-out infinite;
+}
+.chest-item.rarity-legendary .item-value { 
+  color: #ffc050; 
+  border-color: #ff8020;
+}
+
+@keyframes legendary-img-glow {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(255, 140, 40, 0.7)) drop-shadow(0 0 16px rgba(255, 128, 32, 0.4)); }
+  50% { filter: drop-shadow(0 0 14px rgba(255, 180, 60, 1)) drop-shadow(0 0 28px rgba(255, 160, 32, 0.7)); }
+}
+
+/* Rarity: Prismatic - Rainbow */
+.chest-item.rarity-prismatic img {
+  animation: prismatic-img-glow 2s linear infinite;
+}
+.chest-item.rarity-prismatic .item-value { 
+  animation: prismatic-text 2s linear infinite;
+  border-color: #ff40ff;
+}
+
+@keyframes prismatic-img-glow {
+  0% { filter: drop-shadow(0 0 12px rgba(255, 64, 64, 0.9)) drop-shadow(0 0 24px rgba(255, 64, 64, 0.5)); }
+  16% { filter: drop-shadow(0 0 12px rgba(255, 255, 64, 0.9)) drop-shadow(0 0 24px rgba(255, 255, 64, 0.5)); }
+  33% { filter: drop-shadow(0 0 12px rgba(64, 255, 64, 0.9)) drop-shadow(0 0 24px rgba(64, 255, 64, 0.5)); }
+  50% { filter: drop-shadow(0 0 12px rgba(64, 255, 255, 0.9)) drop-shadow(0 0 24px rgba(64, 255, 255, 0.5)); }
+  66% { filter: drop-shadow(0 0 12px rgba(64, 64, 255, 0.9)) drop-shadow(0 0 24px rgba(64, 64, 255, 0.5)); }
+  83% { filter: drop-shadow(0 0 12px rgba(255, 64, 255, 0.9)) drop-shadow(0 0 24px rgba(255, 64, 255, 0.5)); }
+  100% { filter: drop-shadow(0 0 12px rgba(255, 64, 64, 0.9)) drop-shadow(0 0 24px rgba(255, 64, 64, 0.5)); }
+}
+
+@keyframes prismatic-text {
+  0% { color: #ff8080; border-color: #ff4040; }
+  16% { color: #ffff80; border-color: #ffff40; }
+  33% { color: #80ff80; border-color: #40ff40; }
+  50% { color: #80ffff; border-color: #40ffff; }
+  66% { color: #8080ff; border-color: #4040ff; }
+  83% { color: #ff80ff; border-color: #ff40ff; }
+  100% { color: #ff8080; border-color: #ff4040; }
+}
+
+@keyframes item-pop {
+  0% { transform: scale(0) rotate(-20deg); opacity: 0; }
+  60% { transform: scale(1.15) rotate(5deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* Actions */
+.treasure-island-actions {
+  display: flex;
+  gap: 1rem;
+  min-height: 44px;
+  z-index: 1;
+}
+
+.collect-btn {
+  background: linear-gradient(180deg, #ffd700 0%, #c9a227 100%) !important;
+  border-color: #8b7500 !important;
+  color: #1a1008 !important;
+  min-width: 180px;
+  animation: collect-pulse 0.8s infinite alternate;
+}
+
+.collect-btn:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.6);
+}
+
+.curse-accept-btn {
+  min-width: 150px;
+  background: linear-gradient(180deg, #6a2020 0%, #4a1010 100%) !important;
+  animation: curse-btn-pulse 0.6s infinite alternate;
+}
+
+@keyframes collect-pulse {
+  0% { box-shadow: 0 4px 0 #5a4a1a, 0 0 12px rgba(255, 215, 0, 0.4); }
+  100% { box-shadow: 0 4px 0 #5a4a1a, 0 0 25px rgba(255, 215, 0, 0.7); }
+}
+
+@keyframes curse-btn-pulse {
+  0% { box-shadow: 0 4px 0 #2a0808, 0 0 8px rgba(255, 64, 64, 0.3); }
+  100% { box-shadow: 0 4px 0 #2a0808, 0 0 18px rgba(255, 64, 64, 0.6); }
+}

@@ -8,16 +8,16 @@
 }
 
 .score-card {
-  padding: 14px;
+  padding: 12px 12px 16px 12px;
   background: linear-gradient(180deg, #1a1a1a 0%, #141414 100%);
   border: 3px solid #333333;
   box-shadow:
     inset 0 0 0 3px #222222,
     0 5px 0 #000000,
     0 0 0 2px #0a0a0a;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
 }
 
 .score-card-active {
@@ -52,29 +52,101 @@
     0 0 28px rgba(255, 118, 45, 0.45);
 }
 
+.alliance-banners-container {
+  position: absolute;
+  top: -6px;
+  right: 6px;
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.alliance-banner-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.alliance-banner {
+  width: 28px;
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
+}
+
+.alliance-turns {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  color: #fff;
+  text-shadow:
+    -1px 0 #000,
+    1px 0 #000,
+    0 -1px #000,
+    0 1px #000,
+    -1px -1px #000,
+    1px -1px #000,
+    -1px 1px #000,
+    1px 1px #000;
+  line-height: 1;
+}
+
 .score-card-content {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.score-card-row {
+  display: flex;
   align-items: center;
+  gap: 12px;
+  padding-bottom: 4px;
+}
+
+.player-portrait {
+  width: 48px;
+  height: 48px;
+  image-rendering: pixelated;
+  border: 2px solid #333333;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  flex-shrink: 0;
 }
 
 .player-info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
 }
 
-.player-score-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.player-name {
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+  color: #e0e0e0;
+  text-align: center;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 4px;
 }
 
 .player-passive-value {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 20px;
+  font-size: 10px;
   line-height: 1;
   letter-spacing: 0.2px;
   font-weight: 600;
@@ -89,8 +161,8 @@
 }
 
 .player-passive-arrow {
-  width: 14px;
-  height: 20px;
+  width: 10px;
+  height: 12px;
   background-color: currentColor;
   mask-size: contain;
   -webkit-mask-size: contain;
@@ -106,23 +178,21 @@
   font-size: inherit;
   font-weight: 600;
 }
-.player-name {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 18px;
-  letter-spacing: 1.6px;
-  line-height: 1.1;
-  color: #e0e0e0;
+
+.player-score-clickable {
+  cursor: pointer;
+  padding: 2px 6px;
+  margin: -2px -6px;
+  border-radius: 4px;
+  transition: background-color 0.15s;
 }
 
-.player-name span {
-  color: #b51a2c;
-  text-shadow: 0 0 10px rgba(181, 26, 44, 0.5);
+.player-score-clickable:hover {
+  background-color: rgba(255, 179, 71, 0.1);
 }
 
 .player-score {
-  font-size: 32px;
+  font-size: 20px;
   line-height: 1;
   color: #ffb347;
   text-shadow:
@@ -153,6 +223,15 @@
     0 1px #3d0a0a,
     0 0 12px rgba(255, 142, 142, 0.6);
   animation: scorePulseDown 0.3s ease-out;
+}
+
+.player-score.score-negative {
+  color: #ff6b6b;
+  text-shadow:
+    -1px 0 #3d0a0a,
+    1px 0 #3d0a0a,
+    0 -1px #3d0a0a,
+    0 1px #3d0a0a;
 }
 
 @keyframes scorePulseUp {
@@ -191,6 +270,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .inventory-btn:hover {
@@ -206,21 +286,4 @@
   height: 32px;
   image-rendering: pixelated;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
-}
-
-.score-meter {
-  width: 100%;
-  height: 12px;
-  background: #0a0a0a;
-  border: 2px solid #333333;
-  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.35);
-  position: relative;
-  overflow: hidden;
-}
-
-.meter-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #4d1019 0%, #b51a2c 100%);
-  box-shadow: 0 0 16px rgba(181, 26, 44, 0.6);
-  transition: width 200ms ease;
 }

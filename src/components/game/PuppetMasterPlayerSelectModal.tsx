@@ -1,10 +1,11 @@
 import { Button as RetroButton } from '@/components/ui/8bit/button'
-import type { Player } from '@/types/game'
+import type { Player, Alliance } from '@/types/game'
 import './PuppetMasterPlayerSelectModal.css'
 
 type PuppetMasterPlayerSelectModalProps = {
   players: readonly Player[]
   activePlayerIndex: number
+  alliances?: readonly Alliance[]
   onSelect: (playerIndex: number) => void
   onCancel: () => void
 }
@@ -12,9 +13,18 @@ type PuppetMasterPlayerSelectModalProps = {
 export function PuppetMasterPlayerSelectModal({
   players,
   activePlayerIndex,
+  alliances = [],
   onSelect,
   onCancel,
 }: PuppetMasterPlayerSelectModalProps) {
+  const isAllied = (playerIndex: number): boolean => {
+    return alliances.some(
+      (alliance) =>
+        alliance.playerIndices.includes(activePlayerIndex) &&
+        alliance.playerIndices.includes(playerIndex),
+    )
+  }
+
   return (
     <div className="puppet-master-select-backdrop" onClick={onCancel}>
       <div className="puppet-master-select-dialog" onClick={(e) => e.stopPropagation()}>
@@ -27,16 +37,23 @@ export function PuppetMasterPlayerSelectModal({
         <div className="puppet-master-select-list">
           {players.map((player, index) => {
             if (index === activePlayerIndex) return null
+            const allied = isAllied(index)
             return (
-              <RetroButton
-                key={player.name}
-                font="retro"
-                variant="secondary"
-                className="puppet-master-select-btn"
-                onClick={() => onSelect(index)}
-              >
-                {player.name}
-              </RetroButton>
+              <div key={player.name} className={`puppet-master-select-item ${allied ? 'disabled' : ''}`}>
+                {player.portrait && (
+                  <img src={player.portrait} alt="" className="puppet-master-select-portrait" />
+                )}
+                <RetroButton
+                  font="retro"
+                  variant="secondary"
+                  className="puppet-master-select-btn"
+                  onClick={() => !allied && onSelect(index)}
+                  disabled={allied}
+                >
+                  {player.name}
+                  {allied && ' • allied'}
+                </RetroButton>
+              </div>
             )
           })}
         </div>

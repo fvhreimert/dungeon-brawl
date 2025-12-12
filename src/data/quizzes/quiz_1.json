@@ -1,0 +1,65 @@
+{
+    "displayName": "Quiz 1",
+    "categories": [
+        {
+            "name": "VIDENSKAB",
+            "questions": [
+                { "q": "Hvad er vandets kemiske formel?", "a": "H2O" },
+                { "q": "Hvilket grundstof har det kemiske symbol 'Au'?", "a": "Guld" },
+                { "q": "Hvad kaldes den proces, hvor planter omdanner sollys til kemisk energi?", "a": "Fotosyntese" },
+                { "q": "Hvilken teoretisk fysiker opstillede relativitetsteorien i 1905?", "a": "Albert Einstein" },
+                { "q": "Hvad kaldes det kvantemekaniske princip, der siger, at visse par af fysiske egenskaber ikke kan måles nøjagtigt samtidigt?", "a": "Heisenbergs usikkerhedsrelation" }
+            ]
+        },
+        {
+            "name": "NATUR",
+            "questions": [
+                { "q": "Hvilket dyr er kendt som verdens største pattedyr?", "a": "Blåhvalen" },
+                { "q": "Hvad kaldes den proces, hvor en larve bliver til en sommerfugl?", "a": "Metamorfose" },
+                { "q": "Hvad er navnet på det biom, der dækker store dele af det nordlige Rusland og Canada og består primært af nåletræer?", "a": "Taigaen" },
+                { "q": "Hvilken fugl kan nå over 300 km/t i et styrtdyk og er dermed verdens hurtigste dykker?", "a": "Vandrefalken" },
+                { "q": "Hvad er navnet på Jordens dybeste havgrav, der ligger i det vestlige Stillehav og har Challenger Deep som dybeste punkt?", "a": "Marianergraven" }
+            ]
+        },
+        {
+            "name": "FILM & TV",
+            "questions": [
+                { "q": "Hvad hedder den film fra 1997, hvor et luksusskib synker efter at have ramt et isbjerg?", "a": "Titanic" },
+                { "q": "Hvilken filmserie følger den unge troldmand Harry og hans venner på Hogwarts?", "a": "Harry Potter‑serien" },
+                { "q": "Hvilken science‑fiction‑film fra 1977 starter med teksten: \"A long time ago in a galaxy far, far away...\"", "a": "Star Wars: A New Hope" },
+                { "q": "Hvilken superheltefilm fra Marvel blev verdens mest indtjenende film i 2019?", "a": "Avengers: Endgame" },
+                { "q": "Hvad hedder instruktøren bag 'Ringenes Herre'‑trilogien?", "a": "Peter Jackson" }
+            ]
+        },
+        {
+            "name": "GEOGRAFI",
+            "questions": [
+                { "q": "Hvad er hovedstaden i Japan?", "a": "Tokyo" },
+                { "q": "Hvilket land har det største landareal i verden?", "a": "Rusland" },
+                { "q": "Hvilken flod, der løber gennem blandt andet Uganda, Sudan og Egypten, regnes ofte som verdens længste?", "a": "Nilen" },
+                { "q": "Hvilken bjergkæde i Rusland anses traditionelt for grænsen mellem Europa og Asien?", "a": "Uralbjergene" },
+                { "q": "Hvilket ø‑land består af over 17 000 øer og er verdens største ø‑nation målt på antal øer?", "a": "Indonesien" }
+            ]
+        },
+        {
+            "name": "GAME OF THRONES",
+            "questions": [
+                { "q": "Hvad kaldes karakteren, der omtales som 'Mother of Dragons'?", "a": "Daenerys Targaryen" },
+                { "q": "Hvilket hus har mottoet 'Winter is Coming'?", "a": "Huset Stark" },
+                { "q": "Hvad hedder den orden på Muren, som Jon Snow slutter sig til?", "a": "Nattens Vogtere" },
+                { "q": "Hvilken gift dræber kong Joffrey under det såkaldte 'Purple Wedding'?", "a": "The Strangler" },
+                { "q": "Hvad er det fulde navn på den 'galne konge', hvis styre ender med Robert's Rebellion?", "a": "Aerys II Targaryen" }
+            ]
+        },
+        {
+            "name": "MYTER",
+            "questions": [
+                { "q": "Hvad hedder tordenguden i nordisk mytologi, der svinger hammeren Mjølner?", "a": "Thor" },
+                { "q": "Hvilken græsk helt skulle udføre tolv arbejder for kong Eurystheus?", "a": "Herakles" },
+                { "q": "Hvad hedder havguden i græsk mytologi, der bærer en trefork?", "a": "Poseidon" },
+                { "q": "Hvilket væsen i græsk mytologi er halvt mand, halvt tyr og boede i Labyrinten på Kreta?", "a": "Minotauren" },
+                { "q": "Hvad kaldes det nordiske verdenstræ, der forbinder de ni verdener?", "a": "Yggdrasil" }
+            ]
+        }
+    ]
+}

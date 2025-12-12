@@ -1,0 +1,65 @@
+{
+    "displayName": "Quiz 3",
+    "categories": [
+        {
+            "name": "DYREVERDEN",
+            "questions": [
+                { "q": "Hvilket pattedyr er det eneste, der kan flyve aktivt?", "a": "Flagermus" },
+                { "q": "Hvad hedder verdens længste slangeart, som kan blive over 7 meter lang?", "a": "Netpython (Python reticulatus)" },
+                { "q": "Hvilket havdyr bruger ofte en sten som værktøj til at åbne skaldyr, mens det flyder på ryggen?", "a": "Havodder" },
+                { "q": "Hvilket insekt har det latinske navn Apis mellifera og er centralt for bestøvning?", "a": "Honningbien" },
+                { "q": "Hvad kaldes den evolutionære proces, hvor to ubeslægtede arter uafhængigt udvikler lignende egenskaber?", "a": "Konvergent evolution" }
+            ]
+        },
+        {
+            "name": "KUNST & ARKITEKTUR",
+            "questions": [
+                { "q": "Hvilken italiensk kunstner malede 'Mona Lisa'?", "a": "Leonardo da Vinci" },
+                { "q": "Hvad hedder den spanske arkitekt bag La Sagrada Família i Barcelona?", "a": "Antoni Gaudí" },
+                { "q": "Hvilket hollandsk museum huser Rembrandts maleri 'Nattevagten'?", "a": "Rijksmuseum" },
+                { "q": "Hvilken kunstretning forbindes med Marcel Duchamps værk 'Fountain' (1917)?", "a": "Dadaisme" },
+                { "q": "Hvilken japansk arkitekt, kendt for Church of the Light, modtog Pritzker‑prisen i 1995?", "a": "Tadao Ando" }
+            ]
+        },
+        {
+            "name": "MATEMATIK & TAL",
+            "questions": [
+                { "q": "Hvad kaldes en geometrisk figur med tre sider?", "a": "Trekant" },
+                { "q": "Hvilken matematisk konstant begynder 3,14159 …?", "a": "Pi" },
+                { "q": "Hvilken sætning beskriver forholdet a² + b² = c² i en retvinklet trekant?", "a": "Pythagoras' sætning" },
+                { "q": "Hvad kaldes tallet, der defineres som kvadratroden af –1?", "a": "Den imaginære enhed i" },
+                { "q": "Hvilken britisk matematiker beviste Fermats sidste sætning i 1994?", "a": "Andrew Wiles" }
+            ]
+        },
+        {
+            "name": "SUNDHED & KROPPEN",
+            "questions": [
+                { "q": "Hvilket organ pumper blodet rundt i kroppen?", "a": "Hjertet" },
+                { "q": "Hvad er menneskekroppens største organ?", "a": "Huden" },
+                { "q": "Hvilket vitamin producerer kroppen ved sollys på huden?", "a": "Vitamin D" },
+                { "q": "Hvad kaldes det lille kirtelorgan bag brystbenet, der er vigtigt for immunudvikling i barndommen?", "a": "Thymus" },
+                { "q": "Hvilket protein‑hoved i muskelfibre omdanner ATP til mekanisk arbejde under 'cross‑bridge cycling'?", "a": "Myosin‑hovedet" }
+            ]
+        },
+        {
+            "name": "BRÆTSPIL & KORTSPIL",
+            "questions": [
+                { "q": "Hvilket strategiske brætspil spilles med brikker som konge og dronning på et 8×8‑bræt?", "a": "Skak" },
+                { "q": "Hvad hedder kortspillet, hvor målet er at opnå en håndværdi på 21 uden at gå over?", "a": "Blackjack" },
+                { "q": "Hvilket kinesisk brætspil spilles med sorte og hvide sten på et 19×19‑bræt?", "a": "Go" },
+                { "q": "Hvilket ordspil benytter bogstavbrikker til at danne krydsende ord og er opkaldt efter et verbum for 'at kradse'?", "a": "Scrabble" },
+                { "q": "Hvilket kortspil fra 1920'erne spilles af fire spillere i to makkerpar og danner grundlag for turneringen Bermuda Bowl?", "a": "Contract Bridge" }
+            ]
+        },
+        {
+            "name": "NATUR BASICS",
+            "questions": [
+                { "q": "Hvad kaldes nedbør i form af iskrystaller? ", "a": "Sne" },
+                { "q": "Hvad er verdens største havpattedyr? ", "a": "Blåhvalen" },
+                { "q": "Hvilken gas optager planter under fotosyntese? ", "a": "Kuldioxid (CO₂)" },
+                { "q": "Hvilken bjergkæde løber langs Sydamerikas vestkyst? ", "a": "Andesbjergene" },
+                { "q": "Fra hvilket træ udvindes naturmaterialet kork?", "a": "Korkegen" }
+            ]
+        }
+    ]
+}

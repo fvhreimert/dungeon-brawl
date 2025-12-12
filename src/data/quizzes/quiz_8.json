@@ -1,0 +1,65 @@
+{
+    "displayName": "Quiz 8",
+    "categories": [
+        {
+            "name": "Eye of the spider",
+            "questions": [
+                { "q": "Hvilket værktøj bruger man til at mine obsidian?", "a": "Diamant- eller netherit-pickaxe" },
+                { "q": "Hvad hedder dimensionen, hvor Enderdragon bor?", "a": "The End" },
+                { "q": "Hvad sker der, hvis en creeper bliver ramt af lyn?", "a": "Den bliver til en ladet creeper (charged creeper)" },
+                { "q": "Hvordan laver man en Eye of Ender?", "a": "Blaze powder + Ender pearl" },
+                { "q": "Hvilket mob dropper Shulker Shells?", "a": "Shulkers" }
+            ]
+        },
+        {
+            "name": "Paparazzi",
+            "questions": [
+                { "q": "Hvem spillede Jack i filmen Titanic?", "a": "Leonardo DiCaprio" },
+                { "q": "Hvem er kendt for sangen 'Bad Romance'?", "a": "Lady Gaga" },
+                { "q": "Hvem spillede Wolverine i X-Men filmene?", "a": "Hugh Jackman" },
+                { "q": "Hvem har spillet både i 'Harry Potter' og i 'Swiss Army Man'?", "a": "Daniel Radcliffe" },
+                { "q": "Hvem blev kendt fra Hannah Montana?", "a": "Miley Cyrus" }
+            ]
+        },
+        {
+            "name": "Sten og rul",
+            "questions": [
+                { "q": "Hvilket band lavede 'Bohemian Rhapsody'?", "a": "Queen" },
+                { "q": "Hvem er kendt som forsangeren i Nirvana?", "a": "Kurt Cobain" },
+                { "q": "Hvilket rockband blev kendt for 'Hotel California'?", "a": "Eagles" },
+                { "q": "Hvem lavede 'Back In Black' og 'Thunderstruck'?", "a": "AC/DC" },
+                { "q": "Hvilket britisk band lavede albummet 'Dark Side of the Moon'?", "a": "Pink Floyd" }
+            ]
+        },
+        {
+            "name": "Frugt, Bær, Nød",
+            "questions": [
+                { "q": "Hvilken frugt har en gul skræl og ofte forbindes med aber?", "a": "Banan" },
+                { "q": "Hvilket bær er kendt for at være blå og bruges ofte i muffins?", "a": "Blåbær" },
+                { "q": "Hvilken nød er teknisk set et frø og bruges til at lave pesto?", "a": "Pinjekerne" },
+                { "q": "Hvilken eksotisk frugt har pigget skal og en stærk lugt?", "a": "Durian" },
+                { "q": "Hvad hedder den bærtype, der bruges til at lave tequila?", "a": "Agave" }
+            ]
+        },
+        {
+            "name": "Den dine RETtigheder",
+            "questions": [
+                { "q": "Jeg laves med hakket oksekød, løg, tomat, kidneybønner, chili og krydderier. Hvad hedder retten?", "a": "Chili con carne" },
+                { "q": "Jeg består af kartofler i skiver, fløde, hvidløg og bages i ovn – ofte serveret som tilbehør. Hvad hedder retten?", "a": "Flødekartofler" },
+                { "q": "Jeg er en italiensk pastaret med æg, bacon/pancetta, parmesan og sort peber – uden fløde. Hvad hedder jeg?", "a": "Spaghetti carbonara" },
+                { "q": "Jeg laves med ris, eddike, rå fisk og tang. Hvad hedder retten?", "a": "Sushi" },
+                { "q": "Jeg er en fransk simreret med oksekød, rødvin, løg og champignon. Hvad hedder jeg?", "a": "Boeuf bourguignon" }
+            ]
+        },
+        {
+            "name": "Store Historiske øjeblikke",
+            "questions": [
+                { "q": "Hvornår faldt Berlinmuren?", "a": "1989" },
+                { "q": "Hvem var den første mand på månen?", "a": "Neil Armstrong" },
+                { "q": "Hvornår startede Anden Verdenskrig?", "a": "1939" },
+                { "q": "Hvilken begivenhed indledte første verdenskrig i 1914?", "a": "Attentatet på Franz Ferdinand" },
+                { "q": "Hvad hed planen, der reorganiserede Europas økonomi efter 2. verdenskrig med amerikansk støtte?", "a": "Marshallplanen" }
+            ]
+        }
+    ]
+}

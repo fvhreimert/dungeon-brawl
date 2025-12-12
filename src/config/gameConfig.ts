@@ -1,10 +1,14 @@
 import type { PlayerConfig } from '@/types/game'
+import portrait1 from '@/assets/images/ui/portraits/Icons_01.png'
+import portrait2 from '@/assets/images/ui/portraits/Icons_02.png'
+import portrait3 from '@/assets/images/ui/portraits/Icons_03.png'
+import portrait4 from '@/assets/images/ui/portraits/Icons_04.png'
 
 const defaultPlayers: PlayerConfig[] = [
-  { name: 'Rogue', score: 1200, inventory: [] },
-  { name: 'Mage', score: 900, inventory: [] },
-  { name: 'Paladin', score: 700, inventory: [] },
-  { name: 'Necro', score: 300, inventory: [] },
+  { name: 'Rogue', score: 1200, inventory: [], portrait: portrait1 },
+  { name: 'Mage', score: 900, inventory: [], portrait: portrait2 },
+  { name: 'Paladin', score: 700, inventory: [], portrait: portrait3 },
+  { name: 'Necro', score: 300, inventory: [], portrait: portrait4 },
 ]
 
 export const gameConfig = {

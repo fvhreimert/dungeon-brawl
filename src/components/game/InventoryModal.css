@@ -236,10 +236,19 @@
   filter: drop-shadow(4px 4px 0 #000);
   cursor: pointer;
   transition: filter 180ms ease;
+  position: relative;
+  overflow: visible;
 }
 
 .card-wrapper:hover .pixel-card {
   filter: drop-shadow(8px 12px 0 rgba(0,0,0,0.8));
+}
+
+.card-stack-counter {
+  position: absolute;
+  top: 12px;
+  right: 18px;
+  z-index: 10000;
 }
 
 .inventory-footer {

@@ -7,11 +7,11 @@ const TREASURE_SET_IDS = ['shovel', 'compass', 'treasure_map'] as const
 
 interface TreasureSetModalProps {
   inventory: CardInstance[]
-  onCombine: (cardIds: string[]) => void
+  onStartDig: (cardIds: string[]) => void
   onClose: () => void
 }
 
-export function TreasureSetModal({ inventory, onCombine, onClose }: TreasureSetModalProps) {
+export function TreasureSetModal({ inventory, onStartDig, onClose }: TreasureSetModalProps) {
   const treasureCards = TREASURE_SET_IDS.map((id) =>
     inventory.find((card) => card.id === id) ?? null
   )
@@ -33,12 +33,12 @@ export function TreasureSetModal({ inventory, onCombine, onClose }: TreasureSetM
     }
   }, [onClose])
 
-  const handleCombine = () => {
+  const handleStartDig = () => {
     if (!hasAll) return
     const instanceIds = treasureCards
       .filter((card): card is CardInstance => card !== null)
       .map((card) => card.instanceId)
-    onCombine(instanceIds)
+    onStartDig(instanceIds)
   }
 
   return (
@@ -94,10 +94,10 @@ export function TreasureSetModal({ inventory, onCombine, onClose }: TreasureSetM
         </div>
 
         <div className="treasure-reward-section">
-          <div className="reward-label">Reward</div>
+          <div className="reward-label">Potential Reward</div>
           <div className="reward-value">
-            <span className="reward-amount">1000</span>
-            <span className="reward-pts">pts</span>
+            <span className="reward-amount">???</span>
+            <span className="reward-pts">gold</span>
           </div>
         </div>
 
@@ -108,9 +108,9 @@ export function TreasureSetModal({ inventory, onCombine, onClose }: TreasureSetM
               size="lg"
               font="retro"
               className="treasure-combine-btn"
-              onClick={handleCombine}
+              onClick={handleStartDig}
             >
-              Find Treasure
+              Dig for Treasure
             </RetroButton>
           ) : (
             <div className="treasure-incomplete-hint">

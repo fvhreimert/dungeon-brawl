@@ -1,0 +1,65 @@
+{
+    "displayName": "quiz 6",
+    "categories": [
+        {
+            "name": "FILM (KULT KLASSIKERE)",
+            "questions": [
+                { "q": "Hvilken instruktør står bag kultklassikeren 'Pulp Fiction' fra 1994?", "a": "Quentin Tarantino" },
+                { "q": "I kultfilmen 'The Big Lebowski', hvad er hovedpersonens foretrukne drink?", "a": "White Russian" },
+                { "q": "Hvad er den første regel i Fight Club i filmen af samme navn?", "a": "Man taler ikke om Fight Club" },
+                { "q": "Hvilket uhyggeligt væsen i et kaninkostume vejleder hovedpersonen i kultfilmen 'Donnie Darko'?", "a": "Frank" },
+                { "q": "Hvilken dyster fremtidsfilm af Stanley Kubrick følger den unge Alex DeLarge og hans 'droogs'?", "a": "A Clockwork Orange" }
+            ]
+        },
+        {
+            "name": "LEAGUE OF LEGENDS",
+            "questions": [
+                { "q": "Hvilken region er kendt for at have vundet flest World Championships i League of Legends?", "a": "Sydkorea (LCK)" },
+                { "q": "Hvad hedder den primære valuta i spillet, som man bruger til at købe champions?", "a": "Blue Essence" },
+                { "q": "Hvilken champion er kendt som 'The Unforgiven' og bruger vinden som sit våben?", "a": "Yasuo" },
+                { "q": "Hvad hedder det mægtigste neutral monster på Summoner's Rift, som giver en stærk, midlertidig buff til hele holdet?", "a": "Baron Nashor" },
+                { "q": "Hvilket firma udviklede League of Legends?", "a": "Riot Games" }
+            ]
+        },
+        {
+            "name": "RAP OG HIP HOP I DET 21. ÅRHUNDREDE",
+            "questions": [
+                { "q": "Hvilken rapper fra Compton, Californien, udgav det anmelderroste album 'To Pimp a Butterfly' i 2015?", "a": "Kendrick Lamar" },
+                { "q": "Hvilken canadisk artist står bag hits som 'Hotline Bling' og 'God's Plan'?", "a": "Drake" },
+                { "q": "Hvilket dansk rap-kollektiv bestående af Gilli, Kesi og Benny Jamz hittede stort med sangen 'Ibiza'?", "a": "B.O.C" },
+                { "q": "Hvilken kvindelig rapper, kendt for sange som 'WAP' og 'Bodak Yellow', kommer fra The Bronx, New York?", "a": "Cardi B" },
+                { "q": "Hvem udgav i 2000 albummet 'The Marshall Mathers LP', som blev et af de hurtigst sælgende rapalbums nogensinde?", "a": "Eminem" }
+            ]
+        },
+        {
+            "name": "LANDES KENDETEGN",
+            "questions": [
+                { "q": "Dette land er kendt for fjorde, vikinger og nordlys.", "a": "Norge" },
+                { "q": "Dette land er berømt for sin antikke historie med faraoer, pyramiderne i Giza og den mægtige Nil-flod.", "a": "Egypten" },
+                { "q": "Dette land i Sydamerika er kendt for samba, karneval i Rio de Janeiro og Amazonas-regnskoven.", "a": "Brasilien" },
+                { "q": "Dette asiatiske land er kendt for K-pop, kimchi og teknologigiganter som Samsung.", "a": "Sydkorea" },
+                { "q": "Dette land er kendt for sit ikoniske operahus, kænguruer og 'The Outback'.", "a": "Australien" }
+            ]
+        },
+        {
+            "name": "GÆT ET DANSK DYR",
+            "questions": [
+                { "q": "Jeg er et lille, stikkende pattedyr, der ruller mig sammen til en kugle, når jeg føler mig truet. Jeg er aktiv om natten.", "a": "Pindsvin" },
+                { "q": "Jeg er Danmarks største landrovdyr. Jeg lever i skove og kan genkendes på min rødlige pels og buskede hale.", "a": "Ræv" },
+                { "q": "Jeg er et stort havpattedyr, der ofte kan ses i de danske farvande. Jeg er grå og har karakteristiske knopper på hovedet.", "a": "Gråsæl" },
+                { "q": "Jeg er Danmarks nationalfugl og kendt for min smukke sang.", "a": "Solsort (tidligere Sanglærke)" },
+                { "q": "Jeg er et stort hjortedyr med et imponerende gevir, som jeg smider hvert år. Jeg er kongen af de danske skove.", "a": "Kronhjort" }
+            ]
+        },
+        {
+            "name": "VIRAL INTERNET",
+            "questions": [
+                { "q": "Hvilken social medie-app blev ekstremt populær i slutningen af 2010'erne for sine korte dansevideoer og challenges?", "a": "TikTok" },
+                { "q": "Hvilket meme fra 2013, baseret på et billede af en Shiba Inu-hund, førte til skabelsen af en kryptovaluta?", "a": "Doge" },
+                { "q": "Hvilken farve var kjolen i det virale fænomen fra 2015, som fik internettet til at diskutere, om den var blå og sort eller hvid og guld?", "a": "Blå og sort" },
+                { "q": "Hvad hed den virale sang fra 2012 af den sydkoreanske kunstner PSY, som blev den første YouTube-video til at nå en milliard visninger?", "a": "Gangnam Style" },
+                { "q": "Hvilket viralt challenge fra 2014 involverede at hælde en spand isvand over sit hoved for at skabe opmærksomhed om sygdommen ALS?", "a": "Ice Bucket Challenge" }
+            ]
+        }
+    ]
+}

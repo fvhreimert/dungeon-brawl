@@ -1,0 +1,65 @@
+{
+    "displayName": "Quiz 5",
+    "categories": [
+        {
+            "name": "BLANDET VIDEN",
+            "questions": [
+                { "q": "Hvor mange kontinenter regner man typisk med på Jorden? ", "a": "7" },
+                { "q": "Hvilket grundstof har atomnummer 6? ", "a": "Carbon" },
+                { "q": "Hvad hedder verdens største koralrevssystem? ", "a": "Great Barrier Reef" },
+                { "q": "Hvilken litermåleenhed svarer til én tusindedel liter? ", "a": "Milliliter" },
+                { "q": "Hvad kaldes talfølgen, hvor hvert tal er summen af de to foregående og begynder med 0 og 1? ", "a": "Fibonacci‑følgen" }
+            ]
+        },
+        {
+            "name": "TEKNOLOGI",
+            "questions": [
+                { "q": "Hvad står forkortelsen GB for i computersammenhæng? ", "a": "Gigabyte" },
+                { "q": "Hvilken pegeenhed bruger man til en stationær computer? ", "a": "Mus" },
+                { "q": "Hvilken korttrådløs teknologi forbinder fx hovedtelefoner til mobil? ", "a": "Bluetooth" },
+                { "q": "Hvilket navigationssystem forkortes GPS? ", "a": "Global Positioning System" },
+                { "q": "Hvilken enhed for elektrisk modstand har symbolet Ω? ", "a": "Ohm" }
+            ]
+        },
+        {
+            "name": "POP CULTURE",
+            "questions": [
+                { "q": "Hvem står bag hittet “Bad Guy” fra 2019?", "a": "Billie Eilish" },
+                { "q": "Hvilken streamingtjeneste producerer serien “Stranger Things”?", "a": "Netflix" },
+                { "q": "I hvilken film optræder den fiktive nation Wakanda?", "a": "Black Panther" },
+                { "q": "Hvilken forfatter skabte Sherlock Holmes?", "a": "Arthur Conan Doyle" },
+                { "q": "Hvem malede “Stjernenatten” (The Starry Night)?", "a": "Vincent van Gogh" }
+            ]
+        },
+        {
+            "name": "TECHNOLOGY",
+            "questions": [
+                { "q": "Hvad står HTTP for?", "a": "HyperText Transfer Protocol" },
+                { "q": "Hvilket firma udviklede den første PlayStation‑konsol?", "a": "Sony" },
+                { "q": "I hvilket årti blev den første e‑mail sendt?", "a": "1970'erne (1971)" },
+                { "q": "Hvilket programmeringssprog deler navn med en slangeart?", "a": "Python" },
+                { "q": "Hvem opfandt World Wide Web?", "a": "Tim Berners‑Lee" }
+            ]
+        },
+        {
+            "name": "RANDOM FACTS",
+            "questions": [
+                { "q": "Hvad er hovedstaden i Japan?", "a": "Tokyo" },
+                { "q": "Hvad er hovedingrediensen i traditionel hummus?", "a": "Kikærter" },
+                { "q": "Hvilket naturmateriale er det hårdeste kendte?", "a": "Diamant" },
+                { "q": "Hvilken planet har den korteste døgnlængde?", "a": "Jupiter" },
+                { "q": "Hvilket sprog har flest modersmålstalere i verden?", "a": "Mandarin­kinesisk" }
+            ]
+        },
+        {
+            "name": "SCIENCE SNAPSHOT",
+            "questions": [
+                { "q": "Hvilken kraft holder planeter i kredsløb om Solen?", "a": "Tyngdekraft" },
+                { "q": "Hvad er den almindelige betegnelse for natriumchlorid?", "a": "Salt" },
+                { "q": "Hvilken teknologi muliggør præcis genredigering med Cas9‑enzymet?", "a": "CRISPR" },
+                { "q": "I hvilket medium bevæger lys sig hurtigst?", "a": "Vakuum" },
+                { "q": "Hvilken astronom opstillede lovene om planet­bevægelser?", "a": "Johannes Kepler" }
+            ]
+        }
+    ]
+}

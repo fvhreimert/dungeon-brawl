@@ -1,0 +1,953 @@
+import { useEffect, useMemo, useState } from 'react'
+import '@/App.css'
+import '@/components/actions/Actions.css'
+
+import { GameBoard } from '@/components/game/GameBoard'
+import { QuestionDialog } from '@/components/game/QuestionDialog'
+import { MadSeerModal } from '@/features/actions/madSeer/MadSeerModal'
+import { BloodSacrificeModal } from '@/features/actions/bloodSacrifice/BloodSacrificeModal'
+import { PlayerSelectModal } from '@/components/game/PlayerSelectModal'
+import { NeutralPlayerSelectModal } from '@/components/game/NeutralPlayerSelectModal'
+import { FelPlayerSelectModal } from '@/components/game/FelPlayerSelectModal'
+import { PuppetMasterPlayerSelectModal } from '@/components/game/PuppetMasterPlayerSelectModal'
+import { CoalitionPlayerSelectModal } from '@/components/game/CoalitionPlayerSelectModal'
+import { ScoreAdjustModal } from '@/components/game/ScoreAdjustModal'
+import { useFrogSounds } from '@/features/actions/frogOfFate/useFrogSounds'
+import { useDiceOfFortune } from '@/features/actions/diceOfFortune/useDiceOfFortune'
+import { useMadSeerSounds } from '@/features/actions/madSeer/useMadSeerSounds'
+import { useBloodSacrificeSounds } from '@/features/actions/bloodSacrifice/useBloodSacrificeSounds'
+import { Scoreboard } from '@/components/game/Scoreboard'
+import { useJeopardyGame } from '@/hooks/useJeopardyGame'
+import { gameConfig } from '@/config/gameConfig'
+import type { QAItem, Tile, PlayerConfig, CardInstance, ActionId } from '@/types/game'
+import { type CardDefinition } from '@/data/cards'
+
+import cardJesterIcon from '@/assets/images/actions/card_jester.png'
+import madSeerIcon from '@/assets/images/actions/mad_seer.png'
+import bloodSacrificeIcon from '@/assets/images/actions/blood_sacrifice.png'
+import minimizeIcon from '@/assets/images/ui/minimize.png'
+import expandIcon from '@/assets/images/ui/expand.png'
+import webIcon from '@/assets/images/actions/web.png'
+import frogIcon from '@/assets/images/actions/frog_of_fate.png'
+import diceIcon from '@/assets/images/actions/dice_of_fortune.png'
+import { CardRevealModal } from '@/features/actions/cardJester/CardRevealModal'
+import { InventoryModal } from '@/components/game/InventoryModal'
+import { StolenCardModal } from '@/features/cards/StolenCardModal'
+import { TravelingMerchantModal } from '@/features/cards/TravelingMerchantModal'
+import { PuppetMasterCategoryModal } from '@/features/cards/PuppetMasterCategoryModal'
+import { RouletteModal } from '@/features/cards/RouletteModal'
+import { TreasureSetModal } from '@/features/cards/TreasureSetModal'
+import { TreasureIslandModal } from '@/features/cards/TreasureIslandModal'
+import {
+  buildCardDrawContext,
+  pickCardForPlayer,
+  getCardCatalogEntry,
+  type TargetSelectMode,
+} from '@/config/cardCatalog'
+
+import spider1 from '@/assets/images/actions/spiders/spider_1.png'
+import spider2 from '@/assets/images/actions/spiders/spider_2.png'
+import spider3 from '@/assets/images/actions/spiders/spider_3.png'
+import spider4 from '@/assets/images/actions/spiders/spider_4.png'
+import spider5 from '@/assets/images/actions/spiders/spider_5.png'
+import spider6 from '@/assets/images/actions/spiders/spider_6.png'
+import spider7 from '@/assets/images/actions/spiders/spider_7.png'
+import spider8 from '@/assets/images/actions/spiders/spider_8.png'
+
+const SPIDERS = [null, spider1, spider2, spider3, spider4, spider5, spider6, spider7, spider8]
+
+type StolenCardReveal = {
+  card: CardInstance
+  fromPlayerName: string
+}
+
+export type GameProps = {
+  categories: string[]
+  pointValues: number[]
+  players: PlayerConfig[]
+  questionBank: QAItem[]
+}
+
+export function Game({ categories, pointValues, players: initialPlayers, questionBank }: GameProps) {
+  const [spiderIndex, setSpiderIndex] = useState(1)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [madSeerActive, setMadSeerActive] = useState(false)
+  const [madSeerPreviewTile, setMadSeerPreviewTile] = useState<Tile | null>(null)
+  const [frogSelecting, setFrogSelecting] = useState(false)
+  const [frogHighlightId, setFrogHighlightId] = useState<string | null>(null)
+  const [frogLandingId, setFrogLandingId] = useState<string | null>(null)
+  
+  const [bloodSacrificeActive, setBloodSacrificeActive] = useState(false)
+  const [bloodSacrificeAmount, setBloodSacrificeAmount] = useState<number | null>(null)
+  const [bloodSacrificeTargetSelecting, setBloodSacrificeTargetSelecting] = useState(false)
+
+  const [currentCard, setCurrentCard] = useState<CardDefinition | null>(null)
+  const [inventoryPlayerIndex, setInventoryPlayerIndex] = useState<number | null>(null)
+  const [cardUsePending, setCardUsePending] = useState<CardInstance | null>(null)
+  const [cardTargetSelecting, setCardTargetSelecting] = useState(false)
+  const [cardTargetMode, setCardTargetMode] = useState<TargetSelectMode>('standard')
+  const [stolenCardReveal, setStolenCardReveal] = useState<StolenCardReveal | null>(null)
+  const [merchantOffers, setMerchantOffers] = useState<CardDefinition[] | null>(null)
+  const [puppetTargetIndex, setPuppetTargetIndex] = useState<number | null>(null)
+  const [puppetCategorySelecting, setPuppetCategorySelecting] = useState(false)
+  const [rouletteActive, setRouletteActive] = useState(false)
+  const [treasureSetActive, setTreasureSetActive] = useState(false)
+  const [treasureIslandActive, setTreasureIslandActive] = useState(false)
+  const [treasureCardIds, setTreasureCardIds] = useState<string[]>([])
+  const [freezeSelectMode, setFreezeSelectMode] = useState(false)
+  const [scoreAdjustPlayerIndex, setScoreAdjustPlayerIndex] = useState<number | null>(null)
+
+  const { playStart: playFrogStart, playHop, playLand } = useFrogSounds()
+  const { playStart: playMadSeerStart } = useMadSeerSounds()
+  const { playStart: playBloodSacrificeStart, playLand: playBloodSacrificeLand } = useBloodSacrificeSounds()
+  const { triggerDice, isRolling: diceRolling, selectedSurvivorId, clearDiceEffect } = useDiceOfFortune()
+  const {
+    tiles,
+    players,
+    activePlayerIndex,
+    selectedTile,
+    answerRevealed,
+    handleTileClick,
+    handleRevealAnswer,
+    handleAnswer,
+    handleCloseDialog,
+    handleUndo,
+    applyTileMultiplier,
+    updateTileModifiers,
+    performBloodSacrifice,
+    addCardToInventory,
+    activateCard,
+    activePuppetLockCategory,
+    combineTreasureSet,
+    freezeTile,
+    freezeAction,
+    frozenActions,
+    setActivePlayer,
+    adjustPlayerScore,
+    alliances,
+    createAlliance,
+  } = useJeopardyGame({
+    categories,
+    pointValues,
+    players: initialPlayers,
+    questionBank,
+  })
+
+  const puppetCategoryOptions = useMemo(() => {
+    const counts = new Map<string, number>()
+    tiles.forEach((tile) => {
+      if (tile.status !== 'open') return
+      counts.set(tile.category, (counts.get(tile.category) ?? 0) + 1)
+    })
+    return categories.map((category) => ({
+      name: category,
+      availableCount: counts.get(category) ?? 0,
+    }))
+  }, [tiles, categories])
+
+  const handleWebClick = () => {
+    if (freezeSelectMode && cardUsePending) {
+      if (frozenActions.web) return
+      freezeAction('web', activePlayerIndex, cardUsePending.instanceId)
+      activateCard(cardUsePending.instanceId, activePlayerIndex, { actionId: 'web' })
+      setFreezeSelectMode(false)
+      setCardUsePending(null)
+      return
+    }
+    if (frozenActions.web) return
+    setSpiderIndex((prev) => (prev < 8 ? prev + 1 : 1))
+  }
+
+  const handleActionFreezeClick = (actionId: ActionId) => {
+    if (!freezeSelectMode || !cardUsePending) return false
+    if (frozenActions[actionId]) return false
+    freezeAction(actionId, activePlayerIndex, cardUsePending.instanceId)
+    activateCard(cardUsePending.instanceId, activePlayerIndex, { actionId })
+    setFreezeSelectMode(false)
+    setCardUsePending(null)
+    return true
+  }
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((err) => {
+        console.error(`Error attempting to enable fullscreen: ${err.message} (${err.name})`)
+      })
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen()
+      }
+    }
+  }
+
+  const handleCardJesterClick = () => {
+    if (handleActionFreezeClick('card_jester')) return
+    if (frozenActions.card_jester) return
+    if (madSeerActive || frogSelecting || selectedTile || diceRolling || bloodSacrificeActive) return
+    const drawContext = buildCardDrawContext(players, activePlayerIndex)
+    const entry = pickCardForPlayer(drawContext)
+    if (!entry) return
+    const randomCard = entry.definition
+    setCurrentCard(randomCard)
+    addCardToInventory(randomCard)
+  }
+
+  const handleInventoryClick = (playerIndex: number) => {
+    setInventoryPlayerIndex(playerIndex)
+  }
+
+  type CardEffectResult = {
+    stolenCard?: CardInstance
+    stolenFromIndex?: number
+    merchantOffers?: CardDefinition[]
+    createAlliance?: {
+      initiatorIndex: number
+      targetIndex: number
+      cardInstanceId: string
+    }
+  }
+
+  const processCardEffectResult = (effectResult: unknown) => {
+    const result = effectResult as CardEffectResult | undefined
+
+    const stolenCard = result?.stolenCard
+    const stolenFromIndex = result?.stolenFromIndex
+    if (stolenCard && typeof stolenFromIndex === 'number') {
+      const fromName = players[stolenFromIndex]?.name ?? `Player ${stolenFromIndex + 1}`
+      setStolenCardReveal({ card: stolenCard, fromPlayerName: fromName })
+    }
+
+    if (Array.isArray(result?.merchantOffers) && result?.merchantOffers.length > 0) {
+      setMerchantOffers(result.merchantOffers)
+    }
+
+    if (result?.createAlliance) {
+      const { initiatorIndex, targetIndex, cardInstanceId } = result.createAlliance
+      createAlliance(initiatorIndex, targetIndex, cardInstanceId)
+    }
+  }
+
+  const handleMerchantSelect = (card: CardDefinition) => {
+    addCardToInventory(card)
+    setMerchantOffers(null)
+  }
+
+  const handleMerchantClose = () => {
+    setMerchantOffers(null)
+  }
+
+  const handleCardUseRequest = (card: CardInstance) => {
+    setInventoryPlayerIndex(null)
+    setPuppetTargetIndex(null)
+    setPuppetCategorySelecting(false)
+    const entry = getCardCatalogEntry(card.id)
+    const mode = entry?.targetSelectMode ?? 'standard'
+    if (mode === 'none') {
+      const effectResult = activateCard(card.instanceId, activePlayerIndex)
+      processCardEffectResult(effectResult)
+      setCardTargetMode('standard')
+      setCardTargetSelecting(false)
+      return
+    }
+    if (mode === 'roulette') {
+      setCardUsePending(card)
+      setRouletteActive(true)
+      return
+    }
+    if (mode === 'treasure') {
+      setTreasureSetActive(true)
+      return
+    }
+    if (mode === 'freeze') {
+      setCardUsePending(card)
+      setFreezeSelectMode(true)
+      return
+    }
+    setCardUsePending(card)
+    setCardTargetMode(mode)
+    setCardTargetSelecting(true)
+  }
+
+  const handleRouletteConfirm = (won: boolean, amount: number) => {
+    if (!cardUsePending) return
+    const effectResult = activateCard(cardUsePending.instanceId, activePlayerIndex, {
+      won,
+      amount,
+    })
+    processCardEffectResult(effectResult)
+    setCardUsePending(null)
+    setRouletteActive(false)
+  }
+
+  const handleRouletteCancel = () => {
+    setCardUsePending(null)
+    setRouletteActive(false)
+  }
+
+  const handleCardTargetSelect = (targetIndex: number) => {
+    if (!cardUsePending) return
+    if (cardTargetMode === 'puppet') {
+      setPuppetTargetIndex(targetIndex)
+      setCardTargetSelecting(false)
+      setPuppetCategorySelecting(true)
+      return
+    }
+    const effectResult = activateCard(cardUsePending.instanceId, targetIndex)
+    processCardEffectResult(effectResult)
+    setCardUsePending(null)
+    setCardTargetSelecting(false)
+    setCardTargetMode('standard')
+  }
+
+  const handleCardTargetCancel = () => {
+    setCardUsePending(null)
+    setCardTargetSelecting(false)
+    setCardTargetMode('standard')
+    setPuppetTargetIndex(null)
+    setPuppetCategorySelecting(false)
+  }
+
+  const handlePuppetCategorySelect = (category: string) => {
+    if (!cardUsePending || puppetTargetIndex === null) return
+    const effectResult = activateCard(cardUsePending.instanceId, puppetTargetIndex, {
+      category,
+    })
+    processCardEffectResult(effectResult)
+    setCardUsePending(null)
+    setCardTargetMode('standard')
+    setPuppetTargetIndex(null)
+    setPuppetCategorySelecting(false)
+  }
+
+  const handlePuppetCategoryCancel = () => {
+    setCardUsePending(null)
+    setCardTargetMode('standard')
+    setPuppetTargetIndex(null)
+    setPuppetCategorySelecting(false)
+  }
+
+  const handleMadSeerStart = () => {
+    if (handleActionFreezeClick('mad_seer')) return
+    if (frozenActions.mad_seer) return
+    if (selectedTile || frogSelecting || diceRolling) return
+    playMadSeerStart()
+    setMadSeerActive(true)
+    setMadSeerPreviewTile(null)
+  }
+
+  const handleTileSelect = (tileId: string) => {
+    // Handle freeze selection mode
+    if (freezeSelectMode && cardUsePending) {
+      const tile = tiles.find((t) => t.id === tileId)
+      if (!tile || tile.status !== 'open' || tile.modifiers?.isCrumbled || tile.modifiers?.frozen) return
+      
+      // Freeze the tile
+      freezeTile(tileId, activePlayerIndex, cardUsePending.instanceId)
+      
+      // Activate the card (consumes it)
+      const effectResult = activateCard(cardUsePending.instanceId, activePlayerIndex, { tileId })
+      processCardEffectResult(effectResult)
+      
+      // Reset freeze mode
+      setFreezeSelectMode(false)
+      setCardUsePending(null)
+      return
+    }
+
+    // Handle Mad Seer logic first
+    if (madSeerActive) {
+      const tile = tiles.find((t) => t.id === tileId)
+      if (!tile || tile.status === 'done') return
+      setMadSeerPreviewTile(tile)
+      return
+    }
+
+    if (activePuppetLockCategory) {
+      const tile = tiles.find((t) => t.id === tileId)
+      const hasAvailableTiles = tiles.some(
+        (entry) => entry.status === 'open' && entry.category === activePuppetLockCategory,
+      )
+      if (hasAvailableTiles && tile && tile.category !== activePuppetLockCategory) {
+        return
+      }
+    }
+
+    // If Dice of Fortune just ran, logic is handled in GameBoard regarding 'disabled'.
+    if (selectedSurvivorId) {
+      if (tileId === selectedSurvivorId) {
+        handleTileClick(tileId)
+        // Clear persistent crumbled state
+        clearDiceEffect(tiles, updateTileModifiers)
+      }
+      return
+    }
+
+    handleTileClick(tileId)
+  }
+
+  const handleMadSeerAccept = () => {
+    if (!madSeerPreviewTile) return
+    handleTileClick(madSeerPreviewTile.id)
+    if (selectedSurvivorId && madSeerPreviewTile.id === selectedSurvivorId) {
+        clearDiceEffect(tiles, updateTileModifiers)
+    }
+    setMadSeerPreviewTile(null)
+    setMadSeerActive(false)
+  }
+
+  const handleMadSeerReject = () => {
+    setMadSeerPreviewTile(null)
+    setMadSeerActive(false)
+  }
+
+  const handleBloodSacrificeStart = () => {
+    if (handleActionFreezeClick('blood_sacrifice')) return
+    if (frozenActions.blood_sacrifice) return
+    if (selectedTile || frogSelecting || diceRolling || madSeerActive) return
+    playBloodSacrificeStart()
+    setBloodSacrificeActive(true)
+  }
+
+  const handleBloodSacrificeConfirm = (amount: number) => {
+    setBloodSacrificeAmount(amount)
+    setBloodSacrificeActive(false)
+    setBloodSacrificeTargetSelecting(true)
+  }
+
+  const handleBloodSacrificeTargetSelect = (targetIndex: number) => {
+    if (bloodSacrificeAmount === null) return
+    performBloodSacrifice(bloodSacrificeAmount, targetIndex)
+    playBloodSacrificeLand()
+    setBloodSacrificeTargetSelecting(false)
+    setBloodSacrificeAmount(null)
+  }
+
+  const handleBloodSacrificeCancel = () => {
+    setBloodSacrificeActive(false)
+    setBloodSacrificeTargetSelecting(false)
+    setBloodSacrificeAmount(null)
+  }
+
+  const getOpenTiles = () => tiles.filter((tile) => tile.status === 'open')
+
+  const runFrogSelection = async () => {
+    const openTiles = getOpenTiles()
+    if (openTiles.length === 0) return
+
+    setFrogSelecting(true)
+    setFrogLandingId(null)
+    const sequence: string[] = []
+    const shuffled = [...openTiles].sort(() => Math.random() - 0.5)
+    shuffled.forEach((tile) => sequence.push(tile.id))
+    for (let i = 0; i < 10; i++) {
+      sequence.push(openTiles[Math.floor(Math.random() * openTiles.length)].id)
+    }
+
+    for (let i = 0; i < sequence.length; i++) {
+      setFrogHighlightId(sequence[i])
+      playHop()
+      const progress = i / sequence.length
+      const delay = 120 + progress * 140
+      await new Promise((resolve) => setTimeout(resolve, delay))
+    }
+
+    const finalTileId = sequence[sequence.length - 1]
+    setFrogHighlightId(null)
+    setFrogLandingId(finalTileId)
+    applyTileMultiplier(finalTileId, 2)
+    playLand()
+    setTimeout(() => {
+      setFrogLandingId(null)
+      setFrogSelecting(false)
+    }, 900)
+  }
+
+  const handleFrogClick = () => {
+    if (handleActionFreezeClick('frog_of_fate')) return
+    if (frozenActions.frog_of_fate) return
+    if (madSeerActive || frogSelecting || selectedTile || diceRolling) return
+    playFrogStart()
+    runFrogSelection()
+  }
+
+  const handleDiceClick = () => {
+    if (handleActionFreezeClick('dice_of_fortune')) return
+    if (frozenActions.dice_of_fortune) return
+    if (madSeerActive || frogSelecting || selectedTile || diceRolling || selectedSurvivorId) return
+    triggerDice(tiles, updateTileModifiers)
+  }
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'z') {
+        e.preventDefault()
+        handleUndo()
+      }
+    }
+
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement)
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('fullscreenchange', handleFullscreenChange)
+    }
+  }, [handleUndo])
+
+  // Always use DUNGEON BRAWL as the title
+  const displayTitle = gameConfig.meta.title
+
+  return (
+    <div className="app">
+      <div className="layout-column left">
+        <div 
+          className={`action-item ${
+            frozenActions.card_jester ? 'action-frozen' : ''
+          } ${
+            freezeSelectMode && !frozenActions.card_jester ? 'action-freeze-target' : ''
+          }`} 
+          onClick={handleCardJesterClick}
+        >
+          {frozenActions.card_jester && (
+            <div className="action-frozen-overlay back">
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+            </div>
+          )}
+          <img src={cardJesterIcon} alt="Card Jester" className="card-jester-icon" />
+          <span className="action-label action-label-orange">Card Jester</span>
+          {frozenActions.card_jester && (
+            <div className="action-frozen-overlay front">
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+            </div>
+          )}
+        </div>
+        <div 
+          className={`action-item ${
+            madSeerActive ? 'madseer-armed' : ''
+          } ${
+            frozenActions.mad_seer ? 'action-frozen' : ''
+          } ${
+            freezeSelectMode && !frozenActions.mad_seer ? 'action-freeze-target' : ''
+          }`} 
+          onClick={handleMadSeerStart}
+        >
+          {frozenActions.mad_seer && (
+            <div className="action-frozen-overlay back">
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+            </div>
+          )}
+          <img src={madSeerIcon} alt="Mad Seer" className="mad-seer-icon" />
+          <span className="action-label action-label-purple">Mad Seer</span>
+          {frozenActions.mad_seer && (
+            <div className="action-frozen-overlay front">
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+            </div>
+          )}
+        </div>
+        <div 
+          className={`action-item ${
+            frozenActions.blood_sacrifice ? 'action-frozen' : ''
+          } ${
+            freezeSelectMode && !frozenActions.blood_sacrifice ? 'action-freeze-target' : ''
+          }`} 
+          onClick={handleBloodSacrificeStart}
+        >
+          {frozenActions.blood_sacrifice && (
+            <div className="action-frozen-overlay back">
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+            </div>
+          )}
+          <img src={bloodSacrificeIcon} alt="Blood Sacrifice" className="blood-sacrifice-icon" />
+          <span className="action-label action-label-red">Blood Sacrifice</span>
+          {frozenActions.blood_sacrifice && (
+            <div className="action-frozen-overlay front">
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="dungeon-frame">
+        <header className="title-wrap relative">
+          <h1 className="title">{displayTitle}</h1>
+          <button 
+            onClick={toggleFullscreen}
+            className="fullscreen-toggle"
+            style={{
+              position: 'absolute',
+              right: 0,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: '10px',
+              opacity: 0.3,
+              transition: 'opacity 0.2s',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = '0.7'}
+            aria-label={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+          >
+            <img 
+              src={isFullscreen ? minimizeIcon : expandIcon} 
+              alt={isFullscreen ? "Minimize" : "Maximize"} 
+              style={{ width: '24px', height: '24px' }}
+            />
+          </button>
+        </header>
+
+        <GameBoard
+          categories={categories}
+          tiles={tiles}
+          onTileSelect={handleTileSelect}
+          highlightOpenTiles={madSeerActive}
+          highlightedTileId={madSeerPreviewTile?.id ?? null}
+          boardLocked={!!selectedTile || !!madSeerPreviewTile || frogSelecting || diceRolling}
+          frogHighlightId={frogHighlightId}
+          frogLandingId={frogLandingId}
+          diceSurvivorId={selectedSurvivorId}
+          puppetLockCategory={activePuppetLockCategory}
+          freezeSelectMode={freezeSelectMode}
+        />
+
+        <Scoreboard 
+            players={players} 
+            activePlayerIndex={activePlayerIndex}
+            alliances={alliances}
+            onInventoryClick={handleInventoryClick}
+            onSetActivePlayer={setActivePlayer}
+            onAdjustScoreClick={(playerIndex) => setScoreAdjustPlayerIndex(playerIndex)}
+        />
+      </div>
+
+      <div className="layout-column right">
+        <div 
+          className={`web-wrapper ${
+            frozenActions.web ? 'action-frozen' : ''
+          } ${
+            freezeSelectMode && !frozenActions.web ? 'action-freeze-target' : ''
+          }`} 
+          onClick={handleWebClick}
+        >
+          <img 
+            src={webIcon} 
+            alt="Web" 
+          className="web-icon" 
+        />
+        <img 
+          src={SPIDERS[spiderIndex] || ''}
+          alt="Spider"
+            className={`spider-icon ${spiderIndex === 8 ? 'no-contour' : ''}`}
+            style={{
+              width: spiderIndex === 8
+                ? '230px'
+                : `${55 + (spiderIndex - 1) * 11}px`,
+              top: spiderIndex === 8
+                ? '97px'
+                : `${27 + (spiderIndex - 1) * 11}px`,
+              right: spiderIndex === 8
+                ? '97px'
+                : `${27 + (spiderIndex - 1) * 8}px`
+            }}
+          />
+          {frozenActions.web && (
+            <div className="action-frozen-overlay back web-frozen-overlay">
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+            </div>
+          )}
+          {frozenActions.web && (
+            <div className="action-frozen-overlay front web-frozen-overlay">
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+            </div>
+          )}
+        </div>
+        {/* Invisible spacer to match Card Jester's height/position in the left column */}
+        <div className="action-item" style={{ visibility: 'hidden' }}>
+          <img src={cardJesterIcon} alt="Card Jester" className="card-jester-icon" />
+          <span className="action-label action-label-orange">Card Jester</span>
+        </div>
+        
+        <div 
+          className={`action-item ${
+            frogSelecting ? 'frog-animating' : ''
+          } ${
+            frozenActions.frog_of_fate ? 'action-frozen' : ''
+          } ${
+            freezeSelectMode && !frozenActions.frog_of_fate ? 'action-freeze-target' : ''
+          }`} 
+          onClick={handleFrogClick}
+        >
+          {frozenActions.frog_of_fate && (
+            <div className="action-frozen-overlay back">
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+            </div>
+          )}
+          <img src={frogIcon} alt="Frog of Fate" className="frog-of-fate-icon" />
+          <span className="action-label action-label-green">Frog of Fate</span>
+          {frozenActions.frog_of_fate && (
+            <div className="action-frozen-overlay front">
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+            </div>
+          )}
+        </div>
+        <div 
+          className={`action-item ${
+            diceRolling ? 'dice-animating' : ''
+          } ${
+            frozenActions.dice_of_fortune ? 'action-frozen' : ''
+          } ${
+            freezeSelectMode && !frozenActions.dice_of_fortune ? 'action-freeze-target' : ''
+          }`} 
+          onClick={handleDiceClick}
+        >
+          {frozenActions.dice_of_fortune && (
+            <div className="action-frozen-overlay back">
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+            </div>
+          )}
+          <img src={diceIcon} alt="Dice of Fortune" className="dice-of-fortune-icon" />
+          <span className="action-label action-label-gold">Dice of Fortune</span>
+          {frozenActions.dice_of_fortune && (
+            <div className="action-frozen-overlay front">
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+              <div className="ice-particle" />
+            </div>
+          )}
+        </div>
+      </div>
+
+      {madSeerPreviewTile && madSeerActive && (
+        <MadSeerModal
+          tile={madSeerPreviewTile}
+          onAccept={handleMadSeerAccept}
+          onReject={handleMadSeerReject}
+        />
+      )}
+
+      {bloodSacrificeActive && (
+        <BloodSacrificeModal
+          onConfirm={handleBloodSacrificeConfirm}
+          onCancel={handleBloodSacrificeCancel}
+        />
+      )}
+
+      {bloodSacrificeTargetSelecting && (
+        <PlayerSelectModal
+          players={players}
+          activePlayerIndex={activePlayerIndex}
+          alliances={alliances}
+          onSelect={handleBloodSacrificeTargetSelect}
+          onCancel={handleBloodSacrificeCancel}
+        />
+      )}
+
+      {currentCard && (
+        <CardRevealModal
+          card={currentCard}
+          onClose={() => setCurrentCard(null)}
+        />
+      )}
+
+      {merchantOffers && (
+        <TravelingMerchantModal
+          offers={merchantOffers}
+          onSelect={handleMerchantSelect}
+          onClose={handleMerchantClose}
+        />
+      )}
+
+      {inventoryPlayerIndex !== null && (
+        <InventoryModal
+          player={players[inventoryPlayerIndex]}
+          onClose={() => setInventoryPlayerIndex(null)}
+          isActivePlayer={inventoryPlayerIndex === activePlayerIndex}
+          onUseCard={
+            inventoryPlayerIndex === activePlayerIndex ? handleCardUseRequest : undefined
+          }
+        />
+      )}
+
+      {treasureSetActive && (
+        <TreasureSetModal
+          inventory={players[activePlayerIndex]?.inventory ?? []}
+          onStartDig={(cardIds) => {
+            setTreasureCardIds(cardIds)
+            setTreasureSetActive(false)
+            setTreasureIslandActive(true)
+          }}
+          onClose={() => setTreasureSetActive(false)}
+        />
+      )}
+
+      {treasureIslandActive && (
+        <TreasureIslandModal
+          onComplete={(goldEarned) => {
+            combineTreasureSet(activePlayerIndex, treasureCardIds, goldEarned)
+            setTreasureIslandActive(false)
+            setTreasureCardIds([])
+          }}
+          onCancel={() => {
+            setTreasureIslandActive(false)
+            setTreasureCardIds([])
+          }}
+        />
+      )}
+
+      {cardTargetSelecting && cardUsePending && (
+        cardTargetMode === 'neutral' ? (
+          <NeutralPlayerSelectModal
+            players={players}
+            activePlayerIndex={activePlayerIndex}
+            alliances={alliances}
+            onSelect={handleCardTargetSelect}
+            onCancel={handleCardTargetCancel}
+          />
+        ) : cardTargetMode === 'fel' ? (
+          <FelPlayerSelectModal
+            players={players}
+            activePlayerIndex={activePlayerIndex}
+            alliances={alliances}
+            onSelect={handleCardTargetSelect}
+            onCancel={handleCardTargetCancel}
+          />
+        ) : cardTargetMode === 'puppet' ? (
+          <PuppetMasterPlayerSelectModal
+            players={players}
+            activePlayerIndex={activePlayerIndex}
+            alliances={alliances}
+            onSelect={handleCardTargetSelect}
+            onCancel={handleCardTargetCancel}
+          />
+        ) : cardTargetMode === 'coalition' ? (
+          <CoalitionPlayerSelectModal
+            players={players}
+            activePlayerIndex={activePlayerIndex}
+            alliances={alliances}
+            onSelect={handleCardTargetSelect}
+            onCancel={handleCardTargetCancel}
+          />
+        ) : (
+          <PlayerSelectModal
+            players={players}
+            activePlayerIndex={activePlayerIndex}
+            alliances={alliances}
+            onSelect={handleCardTargetSelect}
+            onCancel={handleCardTargetCancel}
+          />
+        )
+      )}
+
+      {puppetCategorySelecting && cardUsePending && puppetTargetIndex !== null && (
+        <PuppetMasterCategoryModal
+          options={puppetCategoryOptions}
+          onSelect={handlePuppetCategorySelect}
+          onCancel={handlePuppetCategoryCancel}
+        />
+      )}
+
+      {rouletteActive && cardUsePending && (
+        <RouletteModal
+          maxStake={players[activePlayerIndex]?.score ?? 0}
+          onConfirm={handleRouletteConfirm}
+          onCancel={handleRouletteCancel}
+        />
+      )}
+
+      {stolenCardReveal && (
+        <StolenCardModal
+          card={stolenCardReveal.card}
+          fromPlayerName={stolenCardReveal.fromPlayerName}
+          onClose={() => setStolenCardReveal(null)}
+        />
+      )}
+
+      {scoreAdjustPlayerIndex !== null && (
+        <ScoreAdjustModal
+          player={players[scoreAdjustPlayerIndex]}
+          onConfirm={(delta) => {
+            adjustPlayerScore(scoreAdjustPlayerIndex, delta)
+            setScoreAdjustPlayerIndex(null)
+          }}
+          onCancel={() => setScoreAdjustPlayerIndex(null)}
+        />
+      )}
+
+      {selectedTile && (
+        <QuestionDialog
+          tile={selectedTile}
+          answerRevealed={answerRevealed}
+          onReveal={handleRevealAnswer}
+          onAnswer={handleAnswer}
+          onClose={handleCloseDialog}
+        />
+      )}
+    </div>
+  )
+}

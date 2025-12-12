@@ -1,0 +1,65 @@
+{
+    "displayName": "Quiz 7",
+    "categories": [
+        {
+            "name": "Dyr",
+            "questions": [
+                { "q": "Jeg er kendt som menneskets bedste ven og bruges ofte som service- eller familiehund", "a": "Hunden" },
+                { "q": "Jeg er det højeste landlevende dyr og mit navn starter med 'G'", "a": "Giraffen" },
+                { "q": "Jeg er en farlig, stribet jæger fra Asien – men ikke en løve", "a": "Tigeren" },
+                { "q": "Jeg kan ændre farve for at camouflere mig, og jeg har øjne der bevæger sig uafhængigt", "a": "Kameleonen" },
+                { "q": "Jeg lever i dybhavet, har lysende lokkemiddel og et gigantisk gab", "a": "Anglerfish / havtaske" }
+            ]
+        },
+        {
+            "name": "Lande",
+            "questions": [
+                { "q": "Jeg er kendt for nordlys og flotte fjorde", "a": "Norge" },
+                { "q": "Jeg er hjemlandet for pizza, pasta og Colosseum", "a": "Italien" },
+                { "q": "Jeg har verdens største befolkning og Den Forbudte By", "a": "Kina" },
+                { "q": "Jeg har Atacamaørkenen, Andesbjergene og påskeøen", "a": "Chile" },
+                { "q": "Jeg er det eneste land i verden, der er både en by og et land", "a": "Singapore" }
+            ]
+        },
+        {
+            "name": "Hip hop / Rap",
+            "questions": [
+                { "q": "Jeg lavede albummet 'The College Dropout' i 2004", "a": "Kanye West" },
+                { "q": "Jeg døde i 1996 og er kendt for numre som 'Changes' og 'California Love'", "a": "Tupac Shakur" },
+                { "q": "Jeg er en kvindelig rapper fra New York og hedder egentlig Belcalis Almanzar", "a": "Cardi B" },
+                { "q": "Jeg blev verdensberømt for mit mixtape 'So Far Gone' og er fra Canada", "a": "Drake" },
+                { "q": "Jeg udgav 'To Pimp a Butterfly' og vandt Pulitzer-prisen for min lyrik", "a": "Kendrick Lamar" }
+            ]
+        },
+        {
+            "name": "League of Legends champions",
+            "questions": [
+                { "q": "Jeg er en ninjakriger fra Ionia med et skygge-tema og navnet starter med 'Z'", "a": "Zed" },
+                { "q": "Jeg er en lille yordle med stor hammer og kæmper i top lane", "a": "Poppy" },
+                { "q": "Jeg er en support-champion, der kan time-rejse og hedder som en gammel ur-lyd", "a": "Zilean" },
+                { "q": "Jeg er en tidligere operativ agent fra Piltover med en stor sniper-riffel", "a": "Caitlyn" },
+                { "q": "Jeg er kendt som 'The Voidreaver' og kan evolve mine evner", "a": "Kha'Zix" }
+            ]
+        },
+        {
+            "name": "Film klassikere",
+            "questions": [
+                { "q": "Jeg råbte 'Here's Johnny!' i en gyserklassiker fra 1980", "a": "The Shining" },
+                { "q": "Jeg sagde 'I am your father' og bærer sort rustning og hjelm", "a": "Darth Vader (Star Wars)" },
+                { "q": "Jeg er en film om mafiabossen Vito Corleone fra 1972", "a": "The Godfather" },
+                { "q": "Jeg er en sci-fi film fra 1982 instrueret af Ridley Scott med replikanter", "a": "Blade Runner" },
+                { "q": "Jeg er en filosofisk sci-fi film fra 1999 hvor blå og rød pille spiller en rolle", "a": "The Matrix" }
+            ]
+        },
+        {
+            "name": "Drugs",
+            "questions": [
+                { "q": "Jeg er en legal rusmiddel i mange lande og brygges ofte på byg og humle", "a": "Øl" },
+                { "q": "Jeg blev ulovlig i mange lande i det 20. århundrede og udvindes fra hamp", "a": "Cannabis" },
+                { "q": "Jeg er syntetisk og bruges ofte i rave-miljøer, også kendt som MDMA", "a": "Ecstasy" },
+                { "q": "Jeg er en kraftig psykedelisk substans med 4 bogsstaver og forbindes med 60'erne", "a": "LSD" },
+                { "q": "Jeg er en af de mest potente naturlige hallucinogener og udvindes fra en sydamerikansk plante", "a": "DMT" }
+            ]
+        }
+    ]
+}

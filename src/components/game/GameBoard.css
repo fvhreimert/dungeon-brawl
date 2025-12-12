@@ -10,21 +10,21 @@
 
 .category-row {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(var(--category-count, 5), 1fr);
   gap: 10px;
   margin-bottom: 14px;
 }
 
 .category-chip {
-  padding: 16px 10px;
+  padding: 14px 8px;
   background: linear-gradient(180deg, #333333 0%, #222222 100%);
   border: 3px solid #4a4a4a;
   color: #b51a2c;
   text-align: center;
   text-transform: uppercase;
-  letter-spacing: 1.4px;
-  font-size: 20px;
-  line-height: 1.05;
+  letter-spacing: 0.5px;
+  font-size: 11px;
+  line-height: 1.3;
   text-shadow: 0 2px 0 #000000;
   box-shadow:
     0 4px 0 #000000,
@@ -51,20 +51,20 @@
 
 @media (max-width: 720px) {
   .category-chip {
-    font-size: 11px;
+    font-size: 8px;
   }
 }
 
 .question-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  grid-template-rows: repeat(5, minmax(90px, 1fr));
+  grid-template-columns: repeat(var(--category-count, 5), 1fr);
+  grid-auto-rows: minmax(90px, 1fr);
   gap: 12px;
 }
 
 @media (max-width: 720px) {
   .question-grid {
-    grid-template-rows: repeat(5, 70px);
+    grid-auto-rows: 70px;
   }
 }
 
@@ -115,9 +115,9 @@
 }
 
 .question-tile .value {
-  font-size: clamp(24px, 3.5vw, 36px);
-  line-height: 0.95;
-  letter-spacing: 2px;
+  font-size: clamp(16px, 2.5vw, 24px);
+  line-height: 1;
+  letter-spacing: 1px;
   text-shadow:
     -1px 0 #2b030c,
     1px 0 #2b030c,
@@ -126,7 +126,7 @@
 }
 
 .hint {
-  font-size: 10px;
+  font-size: 8px;
   color: #888888;
 }
 
@@ -234,11 +234,10 @@
   position: absolute;
   top: 4px;
   right: 4px;
-  padding: 4px 6px 4px 7px;
+  padding: 3px 5px 3px 6px;
   border: 2px solid #0c0c0c;
   border-radius: 0;
-  font-family: 'Press Start 2P', cursive;
-  font-size: 11px;
+  font-size: 8px;
   text-transform: uppercase;
   background: #0d0d0d;
   color: #ffffff;
@@ -685,4 +684,211 @@
 
 .tile-crumbled .multiplier-badge {
   display: none;
+}
+
+/* Frozen tile effect - Sad Glacial Elemental */
+.tile-frozen {
+  position: relative;
+  background: linear-gradient(180deg, #1a3a4a 0%, #0a1a2a 100%) !important;
+  border-color: #4ac8ff !important;
+  box-shadow:
+    0 0 15px rgba(74, 200, 255, 0.6),
+    0 0 30px rgba(74, 200, 255, 0.3),
+    inset 0 0 10px rgba(74, 200, 255, 0.4) !important;
+  animation: frozenPulse 2s ease-in-out infinite;
+  cursor: not-allowed !important;
+  overflow: hidden;
+}
+
+.tile-frozen::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 3px solid rgba(150, 220, 255, 0.7);
+  box-shadow: 
+    0 0 20px rgba(150, 220, 255, 0.5),
+    inset 0 0 15px rgba(150, 220, 255, 0.3);
+  animation: frozenAura 1.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.tile-frozen::after {
+  border-color: rgba(150, 220, 255, 0.9) !important;
+  box-shadow: 0 0 12px rgba(150, 220, 255, 0.6);
+  opacity: 1;
+  animation: frozenInnerPulse 1.8s ease-in-out infinite;
+}
+
+.tile-frozen .value {
+  color: #c8eeff !important;
+  text-shadow:
+    0 0 10px rgba(150, 220, 255, 0.9),
+    0 0 20px rgba(100, 180, 255, 0.6),
+    2px 2px 0 #0a1520 !important;
+  animation: frozenTextShimmer 3s ease-in-out infinite;
+}
+
+/* Ice crystal overlay effect */
+.tile-frozen-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 2;
+}
+
+/* Pixel ice particles */
+.ice-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: rgba(200, 238, 255, 0.9);
+  box-shadow: 0 0 4px rgba(150, 220, 255, 0.8);
+  animation: iceFloat 3s ease-in-out infinite;
+}
+
+.ice-particle:nth-child(1) { top: 15%; left: 20%; animation-delay: 0s; }
+.ice-particle:nth-child(2) { top: 25%; left: 75%; animation-delay: 0.5s; }
+.ice-particle:nth-child(3) { top: 70%; left: 15%; animation-delay: 1s; }
+.ice-particle:nth-child(4) { top: 80%; left: 80%; animation-delay: 1.5s; }
+
+@keyframes frozenPulse {
+  0% {
+    box-shadow:
+      0 0 10px rgba(74, 200, 255, 0.5),
+      0 0 20px rgba(74, 200, 255, 0.2),
+      inset 0 0 8px rgba(74, 200, 255, 0.3);
+  }
+  50% {
+    box-shadow:
+      0 0 20px rgba(74, 200, 255, 0.7),
+      0 0 40px rgba(74, 200, 255, 0.4),
+      inset 0 0 15px rgba(74, 200, 255, 0.5);
+  }
+  100% {
+    box-shadow:
+      0 0 10px rgba(74, 200, 255, 0.5),
+      0 0 20px rgba(74, 200, 255, 0.2),
+      inset 0 0 8px rgba(74, 200, 255, 0.3);
+  }
+}
+
+@keyframes frozenAura {
+  0% {
+    opacity: 0.4;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.02);
+  }
+  100% {
+    opacity: 0.4;
+    transform: scale(0.98);
+  }
+}
+
+@keyframes frozenInnerPulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+@keyframes frozenTextShimmer {
+  0% { filter: brightness(1); }
+  50% { filter: brightness(1.3); }
+  100% { filter: brightness(1); }
+}
+
+@keyframes iceFloat {
+  0% { 
+    transform: translateY(0) scale(1);
+    opacity: 0.6;
+  }
+  50% { 
+    transform: translateY(-6px) scale(1.2);
+    opacity: 1;
+  }
+  100% { 
+    transform: translateY(0) scale(1);
+    opacity: 0.6;
+  }
+}
+
+/* Freeze selection mode - icy highlight on all tiles */
+.tile-freeze-target {
+  position: relative;
+  background: radial-gradient(circle at 50% 35%, rgba(74, 200, 255, 0.25), #141414 70%);
+  border-color: #3a8aaa;
+  box-shadow:
+    0 0 0 2px rgba(74, 200, 255, 0.3),
+    0 6px 16px rgba(74, 200, 255, 0.35),
+    inset 0 0 0 3px #0f1a22;
+  animation: freezeTargetPulse 2.2s ease-in-out infinite;
+}
+
+.tile-freeze-target:hover {
+  box-shadow:
+    0 0 0 3px rgba(150, 220, 255, 0.5),
+    0 10px 22px rgba(74, 200, 255, 0.45),
+    inset 0 0 0 3px #0a1520;
+}
+
+.tile-freeze-target:hover::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 2px solid rgba(150, 220, 255, 0.5);
+  box-shadow: 0 0 14px rgba(150, 220, 255, 0.4);
+  opacity: 0.9;
+  animation: freezeTargetHover 1.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.tile-freeze-target::after {
+  border-color: rgba(74, 200, 255, 0.5);
+  box-shadow: 0 0 10px rgba(74, 200, 255, 0.3);
+  opacity: 1;
+}
+
+.tile-freeze-target .value {
+  color: #c8eeff;
+  text-shadow:
+    0 0 6px rgba(150, 220, 255, 0.8),
+    2px 2px 0 #0a1015;
+}
+
+@keyframes freezeTargetPulse {
+  0% {
+    transform: translateY(0) scale(1);
+    box-shadow:
+      0 0 0 2px rgba(74, 200, 255, 0.25),
+      0 5px 12px rgba(74, 200, 255, 0.25),
+      inset 0 0 0 3px #0f1a22;
+  }
+  50% {
+    transform: translateY(-1px) scale(1.01);
+    box-shadow:
+      0 0 0 3px rgba(74, 200, 255, 0.4),
+      0 8px 16px rgba(74, 200, 255, 0.35),
+      inset 0 0 0 3px #0a1520;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    box-shadow:
+      0 0 0 2px rgba(74, 200, 255, 0.25),
+      0 5px 12px rgba(74, 200, 255, 0.25),
+      inset 0 0 0 3px #0f1a22;
+  }
+}
+
+@keyframes freezeTargetHover {
+  0% {
+    transform: scale(0.99);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.02);
+    opacity: 1;
+  }
 }

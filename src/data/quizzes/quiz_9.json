@@ -1,0 +1,65 @@
+{
+  "displayName": "Quiz 9",
+  "categories": [
+    {
+      "name": "Populære TV-serier",
+      "questions": [
+        { "q": "Denne sitcom udspiller sig i Manhattan, hvor en gruppe venner ofte mødes på caféen Central Perk", "a": "Friends" },
+        { "q": "I denne fantasy-serie kæmper adelsfamilier om magten i Westeros, mens drager og White Walkers truer i kulissen", "a": "Game of Thrones" },
+        { "q": "En kræftsyg kemilærer begynder at fremstille blå krystaller under dæknavnet 'Heisenberg'", "a": "Breaking Bad" },
+        { "q": "En gruppe børn på cykler i 1980’ernes Indiana opdager et hemmeligt regeringslaboratorium og en pige med telekinese", "a": "Stranger Things" },
+        { "q": "I denne politiske dramaserie manipulerer en hensynsløs kongresmand og hans kone sig vej helt til toppen af amerikansk magt", "a": "House of Cards" }
+      ]
+    },
+    {
+      "name": "Teknologi",
+      "questions": [
+        { "q": "Denne virksomhed blev grundlagt i en garage i 1976 af Steve Jobs og Steve Wozniak", "a": "Apple" },
+        { "q": "Dette styresystem bruges på størstedelen af verdens smartphones og er udviklet af Google", "a": "Android" },
+        { "q": "Denne type netværksteknologi dækker korte afstande og er opkaldt efter en dansk vikingekonge", "a": "Bluetooth" },
+        { "q": "Dette kryptografiske koncept ligger til grund for Bitcoin og beskrives som en distribueret, uforanderlig database", "a": "Blockchain" },
+        { "q": "Denne britiske videnskabsmand regnes som 'internettets far' og opfandt World Wide Web i 1989", "a": "Tim Berners-Lee" }
+      ]
+    },
+    {
+      "name": "Internetkultur",
+      "questions": [
+        { "q": "Hvad betyder udtrykket 'Rickrolling', som blev populært på internettet i midten af 2000’erne?", "a": "At narre nogen til at åbne et link, der fører til Rick Astleys 'Never Gonna Give You Up'" },
+        { "q": "Hvilket forum blev stiftet i 2003 og er kendt for at have opfundet en stor del af tidlige internetmemes som 'Pepe the Frog'?", "a": "4chan" },
+        { "q": "Hvad kaldes det, når folk bevidst poster provokerende eller irrelevante kommentarer online for at skabe konflikt?", "a": "Trolling" },
+        { "q": "Hvilket internetfænomen blev kendt som 'Dressgate' i 2015, hvor folk var uenige om farven på en kjole?", "a": "Om kjolen var blå og sort eller hvid og guld" },
+        { "q": "Hvilket begreb bruges til at beskrive den anonyme aktivistiske hackergruppe, der blev kendt for aktioner mod Scientology og senere regeringer?", "a": "Anonymous" }
+      ]
+    },
+    {
+      "name": "Historie",
+      "questions": [
+        { "q": "Hvilket år startede 2. verdenskrig?", "a": "1939" },
+        { "q": "Hvem var den første danske kvindelige statsminister?", "a": "Helle Thorning-Schmidt" },
+        { "q": "Hvilken dansk konge underskrev grundloven i 1849?", "a": "Frederik VII" },
+        { "q": "Hvilket imperium blev opløst efter nederlaget i 1. verdenskrig og resulterede i dannelsen af bl.a. Tyrkiet?", "a": "Det Osmanniske Rige" },
+        { "q": "Hvad hed traktaten, der i 1919 formelt afsluttede 1. verdenskrig mellem Tyskland og de allierede magter?", "a": "Versaillestraktaten" }
+      ]
+    },
+    {
+      "name": "Aktier",
+      "questions": [
+        { "q": "Hvad kaldes det danske indeks over de 25 mest handlede aktier på Nasdaq Copenhagen?", "a": "OMXC25" },
+        { "q": "Hvad betyder forkortelsen 'IPO' i aktiemarkedssammenhæng?", "a": "Initial Public Offering (børsnotering)" },
+        { "q": "Hvilket amerikansk selskab blev i 2018 det første til at nå en markedsværdi på 1.000 milliarder dollars?", "a": "Apple" },
+        { "q": "Hvilket begreb bruges om en periode med generelt stigende aktiekurser?", "a": "Bull market" },
+        { "q": "Hvad hedder den amerikanske investor, kendt som 'Oraklet fra Omaha' og leder af Berkshire Hathaway?", "a": "Warren Buffett" }
+      ]
+    },
+    {
+      "name": "Geografi",
+      "questions": [
+        { "q": "Hvad er hovedstaden i Frankrig?", "a": "Paris" },
+        { "q": "Hvilket land ligger både i Europa og Asien?", "a": "Tyrkiet" },
+        { "q": "Hvilken ørken er den største sandørken i verden?", "a": "Sahara" },
+        { "q": "Hvilket land har verdens længste kystlinje?", "a": "Canada" },
+        { "q": "Hvad hedder den utilgængelige højslette i Centralasien, kendt som 'verdens tag', hvor bl.a. Himalaya ligger?", "a": "Tibetplateauet" }
+      ]
+    }
+  ]
+}

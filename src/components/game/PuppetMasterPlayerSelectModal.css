@@ -76,13 +76,29 @@
   z-index: 1;
 }
 
-.puppet-master-select-btn {
+.puppet-master-select-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
   width: 100%;
+}
+
+.puppet-master-select-portrait {
+  width: 56px;
+  height: 56px;
+  image-rendering: pixelated;
+  border: 3px solid #7d2b11;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+  flex-shrink: 0;
+}
+
+.puppet-master-select-btn {
+  flex: 1;
   justify-content: center;
   text-align: center;
   font-family: 'Press Start 2P', cursive !important;
-  font-size: 0.9rem !important;
-  padding: 1rem !important;
+  font-size: 1rem !important;
+  padding: 1.2rem 1.5rem !important;
   background: #2c0c03 !important;
   border: 2px solid #7d2b11 !important;
   color: #ffe0c5 !important;

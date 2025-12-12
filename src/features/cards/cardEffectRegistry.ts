@@ -330,6 +330,28 @@ const CARD_EFFECTS: Record<string, CardEffectDefinition> = {
       activated: () => ({ openTreasureSet: true }),
     },
   },
+  sad_glacial_elemental: {
+    handlers: {
+      activated: ({ metadata }) => {
+        const tileId = typeof metadata?.tileId === 'string' ? metadata.tileId : null
+        if (!tileId) return
+        return { freezeTileId: tileId }
+      },
+    },
+  },
+  coalition: {
+    handlers: {
+      activated: ({ ownerPlayerIndex, targetIndex, card }) => {
+        return {
+          createAlliance: {
+            initiatorIndex: ownerPlayerIndex,
+            targetIndex,
+            cardInstanceId: card.instanceId,
+          },
+        }
+      },
+    },
+  },
 }
 
 export function getCardEffectDefinition(cardId: string) {

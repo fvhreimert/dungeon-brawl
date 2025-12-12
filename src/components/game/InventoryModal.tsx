@@ -1,7 +1,8 @@
 import { createPortal } from 'react-dom'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Player, CardInstance } from '@/types/game'
 import { getCardEffectDefinition } from '@/features/cards/cardEffectRegistry'
+import { Badge } from '@/components/ui/8bit/badge'
 import './InventoryModal.css'
 import crossIcon from '@/assets/images/ui/cross.png'
 
@@ -10,6 +11,37 @@ interface InventoryModalProps {
   onClose: () => void
   onUseCard?: (card: CardInstance) => void
   isActivePlayer?: boolean
+}
+
+type StackedCard = {
+  card: CardInstance
+  count: number
+  instances: CardInstance[]
+}
+
+const NON_STACKABLE_CARDS = new Set(['soul_burst', 'cursed_coin'])
+
+function groupCards(inventory: CardInstance[]): StackedCard[] {
+  const stacks: StackedCard[] = []
+  const stackMap = new Map<string, StackedCard>()
+
+  for (const card of inventory) {
+    if (NON_STACKABLE_CARDS.has(card.id)) {
+      stacks.push({ card, count: 1, instances: [card] })
+    } else {
+      const existing = stackMap.get(card.id)
+      if (existing) {
+        existing.count++
+        existing.instances.push(card)
+      } else {
+        const stack: StackedCard = { card, count: 1, instances: [card] }
+        stackMap.set(card.id, stack)
+        stacks.push(stack)
+      }
+    }
+  }
+
+  return stacks
 }
 
 export function InventoryModal({
@@ -75,22 +107,16 @@ export function InventoryModal({
       const stored = typeof card.state?.storedDamage === 'number' ? card.state.storedDamage : 0
       return `Activate to steal *${stored}* pts from a foe.`
     },
-    niffler: (card) => {
-      const gained = typeof card.state?.totalGained === 'number' ? card.state.totalGained : 0
-      return `+25 pts/turn\n*${gained}* pts gained total`
-    },
     cursed_coin: (card) => {
       const turns = typeof card.state?.turnsRemaining === 'number' ? card.state.turnsRemaining : 0
       return `Loses 50 pts per turn\n*${turns}* turns remaining`
-    },
-    beggar: (card) => {
-      const stolen = typeof card.state?.totalStolen === 'number' ? card.state.totalStolen : 0
-      return `Steals 10 pts from each foe/turn\n*${stolen}* pts stolen total`
     },
   }
 
   const getInventoryDescription = (card: CardInstance) =>
     inventoryDescriptionResolvers[card.id]?.(card) ?? card.inventoryDescription ?? card.description
+
+  const stackedCards = useMemo(() => groupCards(player.inventory), [player.inventory])
 
   const hoveredCard = hoveredCardId
     ? player.inventory.find((card) => card.instanceId === hoveredCardId)
@@ -163,7 +189,8 @@ export function InventoryModal({
               </div>
             ) : (
               <div className="card-grid">
-                {player.inventory.map((card, index) => {
+                {stackedCards.map((stack, index) => {
+                  const { card, count } = stack
                   const effect = getCardEffectDefinition(card.id)
                   const canActivate =
                     isActivePlayer &&
@@ -203,6 +230,13 @@ export function InventoryModal({
                           className="frame-overlay"
                           style={{ backgroundImage: `url('${card.framePath}')` }}
                         />
+                        {count > 1 && (
+                          <div className="card-stack-counter">
+                            <Badge font="retro" variant="secondary">
+                              x{count}
+                            </Badge>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )
