@@ -42,6 +42,12 @@ import beggarImg from '@/assets/images/cards/images/beggar.png'
 import beggarFrame from '@/assets/images/cards/frames/beggar.png'
 import rouletteImg from '@/assets/images/cards/images/roulette.png'
 import rouletteFrame from '@/assets/images/cards/frames/roulette.png'
+import shovelImg from '@/assets/images/cards/images/shovel.png'
+import shovelFrame from '@/assets/images/cards/frames/shovel.png'
+import compassImg from '@/assets/images/cards/images/compass.png'
+import compassFrame from '@/assets/images/cards/frames/compass.png'
+import treasureMapImg from '@/assets/images/cards/images/treasure_map.png'
+import treasureMapFrame from '@/assets/images/cards/frames/treasure_map.png'
 
 export const CARDS: CardDefinition[] = [
   {
@@ -146,5 +152,32 @@ export const CARDS: CardDefinition[] = [
     imagePath: rouletteImg,
     framePath: rouletteFrame,
     consumesOnActivate: true,
+  },
+  {
+    id: 'shovel',
+    title: 'Shovel',
+    description: 'A sturdy shovel. Part of the Treasure Set.',
+    inventoryDescription: 'Collect all 3 treasure items to find riches.',
+    theme: 'theme-gold',
+    imagePath: shovelImg,
+    framePath: shovelFrame,
+  },
+  {
+    id: 'compass',
+    title: 'Compass',
+    description: 'Points toward fortune. Part of the Treasure Set.',
+    inventoryDescription: 'Collect all 3 treasure items to find riches.',
+    theme: 'theme-gold',
+    imagePath: compassImg,
+    framePath: compassFrame,
+  },
+  {
+    id: 'treasure_map',
+    title: 'Treasure Map',
+    description: 'X marks the spot. Part of the Treasure Set.',
+    inventoryDescription: 'Collect all 3 treasure items to find riches.',
+    theme: 'theme-gold',
+    imagePath: treasureMapImg,
+    framePath: treasureMapFrame,
   },
 ]

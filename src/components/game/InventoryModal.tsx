@@ -212,7 +212,7 @@ export function InventoryModal({
           </div>
 
           <div className="inventory-footer">
-              <div className="close-hint">Press ESC to close</div>
+            <div className="close-hint">Press ESC to close</div>
           </div>
         </div>
       </div>

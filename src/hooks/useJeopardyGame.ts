@@ -542,6 +542,16 @@ export function useJeopardyGame({
     )
   }
 
+  const combineTreasureSet = (playerIndex: number, cardInstanceIds: string[]) => {
+    saveSnapshot()
+    // Remove all the treasure cards
+    cardInstanceIds.forEach((instanceId) => {
+      removeCardFromInventory(playerIndex, instanceId)
+    })
+    // Award the treasure reward
+    applyScoreChange(playerIndex, 1000, 'activeCard')
+  }
+
   const activateCard = (
     cardInstanceId: string,
     targetPlayerIndex: number,
@@ -675,5 +685,6 @@ export function useJeopardyGame({
     addCardToInventory,
     activateCard,
     activePuppetLockCategory,
+    combineTreasureSet,
   }
 }

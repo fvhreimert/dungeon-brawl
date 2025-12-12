@@ -249,7 +249,39 @@
     /* Border handled by list's bottom border or container logic */
     display: flex;
     justify-content: center;
+    align-items: center;
+    gap: 16px;
     position: relative;
+}
+
+.treasure-set-btn {
+    font-family: 'Press Start 2P', 'Segoe UI', sans-serif;
+    font-size: 11px;
+    color: #1a1508;
+    background: linear-gradient(180deg, #c9a227 0%, #8a6d14 100%);
+    border: 2px solid #f4d675;
+    padding: 8px 16px;
+    cursor: pointer;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+    box-shadow:
+        0 3px 0 #5a4a1a,
+        0 0 12px rgba(201, 162, 39, 0.3);
+    transition: all 0.15s ease;
+}
+
+.treasure-set-btn:hover {
+    background: linear-gradient(180deg, #d4b030 0%, #9a7d1a 100%);
+    transform: translateY(-1px);
+    box-shadow:
+        0 4px 0 #5a4a1a,
+        0 0 18px rgba(201, 162, 39, 0.5);
+}
+
+.treasure-set-btn:active {
+    transform: translateY(2px);
+    box-shadow:
+        0 1px 0 #5a4a1a,
+        0 0 8px rgba(201, 162, 39, 0.2);
 }
 
 .close-hint {

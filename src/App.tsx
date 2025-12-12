@@ -36,6 +36,7 @@ import { StolenCardModal } from '@/features/cards/StolenCardModal'
 import { TravelingMerchantModal } from '@/features/cards/TravelingMerchantModal'
 import { PuppetMasterCategoryModal } from '@/features/cards/PuppetMasterCategoryModal'
 import { RouletteModal } from '@/features/cards/RouletteModal'
+import { TreasureSetModal } from '@/features/cards/TreasureSetModal'
 import {
   buildCardDrawContext,
   pickCardForPlayer,
@@ -82,6 +83,7 @@ function App() {
   const [puppetTargetIndex, setPuppetTargetIndex] = useState<number | null>(null)
   const [puppetCategorySelecting, setPuppetCategorySelecting] = useState(false)
   const [rouletteActive, setRouletteActive] = useState(false)
+  const [treasureSetActive, setTreasureSetActive] = useState(false)
 
 
   useGlobalClickSound()
@@ -106,6 +108,7 @@ function App() {
     addCardToInventory,
     activateCard,
     activePuppetLockCategory,
+    combineTreasureSet,
   } = useJeopardyGame({
     categories: gameConfig.gameplay.categories,
     pointValues: gameConfig.gameplay.pointValues,
@@ -201,6 +204,10 @@ function App() {
     if (mode === 'roulette') {
       setCardUsePending(card)
       setRouletteActive(true)
+      return
+    }
+    if (mode === 'treasure') {
+      setTreasureSetActive(true)
       return
     }
     setCardUsePending(card)
@@ -576,6 +583,17 @@ function App() {
           onUseCard={
             inventoryPlayerIndex === activePlayerIndex ? handleCardUseRequest : undefined
           }
+        />
+      )}
+
+      {treasureSetActive && (
+        <TreasureSetModal
+          inventory={players[activePlayerIndex]?.inventory ?? []}
+          onCombine={(cardIds) => {
+            combineTreasureSet(activePlayerIndex, cardIds)
+            setTreasureSetActive(false)
+          }}
+          onClose={() => setTreasureSetActive(false)}
         />
       )}
 

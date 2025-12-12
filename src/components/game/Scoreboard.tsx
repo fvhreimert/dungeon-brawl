@@ -4,6 +4,7 @@ import inventoryIcon from '@/assets/images/ui/buttons/inventory.png'
 import arrowUp from '@/assets/images/ui/buttons/arrow-up.png'
 import arrowDown from '@/assets/images/ui/buttons/arrow-down.png'
 import { calculatePassiveDeltaForPlayer } from '@/features/cards/cardEffectRegistry'
+import { AnimatedScore } from './AnimatedScore'
 import './Scoreboard.css'
 
 type ScoreboardProps = {
@@ -36,7 +37,7 @@ export function Scoreboard({ players, activePlayerIndex, onInventoryClick }: Sco
                   {player.name}
                 </div>
                 <div className="player-score-row">
-                  <div className="player-score">{player.score}</div>
+                  <AnimatedScore score={player.score} />
                   {displayPassive && (
                     <div
                       className={`player-passive-value ${

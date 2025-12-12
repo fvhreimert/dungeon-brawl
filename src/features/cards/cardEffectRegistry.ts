@@ -315,6 +315,21 @@ const CARD_EFFECTS: Record<string, CardEffectDefinition> = {
       },
     },
   },
+  shovel: {
+    handlers: {
+      activated: () => ({ openTreasureSet: true }),
+    },
+  },
+  compass: {
+    handlers: {
+      activated: () => ({ openTreasureSet: true }),
+    },
+  },
+  treasure_map: {
+    handlers: {
+      activated: () => ({ openTreasureSet: true }),
+    },
+  },
 }
 
 export function getCardEffectDefinition(cardId: string) {

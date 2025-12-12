@@ -130,6 +130,56 @@
     1px 0 #2b030c,
     0 -1px #2b030c,
     0 1px #2b030c;
+  transition: transform 0.1s ease-out;
+}
+
+.player-score.score-increasing {
+  color: #8effb9;
+  text-shadow:
+    -1px 0 #0a3d1a,
+    1px 0 #0a3d1a,
+    0 -1px #0a3d1a,
+    0 1px #0a3d1a,
+    0 0 12px rgba(142, 255, 185, 0.6);
+  animation: scorePulseUp 0.3s ease-out;
+}
+
+.player-score.score-decreasing {
+  color: #ff8e8e;
+  text-shadow:
+    -1px 0 #3d0a0a,
+    1px 0 #3d0a0a,
+    0 -1px #3d0a0a,
+    0 1px #3d0a0a,
+    0 0 12px rgba(255, 142, 142, 0.6);
+  animation: scorePulseDown 0.3s ease-out;
+}
+
+@keyframes scorePulseUp {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes scorePulseDown {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(0.95) translateY(2px);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .inventory-btn {
