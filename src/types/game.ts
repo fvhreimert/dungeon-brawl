@@ -67,7 +67,7 @@ export type PuppetLock = {
   targetIndex: number
 }
 
-export type ActionId = 'card_jester' | 'mad_seer' | 'blood_sacrifice' | 'frog_of_fate' | 'dice_of_fortune' | 'web'
+export type ActionId = 'card_jester' | 'mad_seer' | 'blood_sacrifice' | 'frog_of_fate' | 'golden_idol' | 'web'
 
 export type FrozenActionInfo = {
   frozenByPlayerIndex: number

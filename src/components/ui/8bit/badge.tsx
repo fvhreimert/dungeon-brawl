@@ -1,26 +1,9 @@
-import { type VariantProps, cva } from "class-variance-authority";
+import { type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
 import { Badge as ShadcnBadge } from "@/components/ui/badge";
-
-export const badgeVariants = cva("", {
-  variants: {
-    font: {
-      normal: "",
-      retro: "retro",
-    },
-    variant: {
-      default: "border-primary bg-primary",
-      destructive: "border-destructive bg-destructive",
-      outline: "border-background bg-background",
-      secondary: "border-secondary bg-secondary",
-    },
-  },
-  defaultVariants: {
-    variant: "default",
-  },
-});
+import { badgeVariants } from "./badgeVariants";
 
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,

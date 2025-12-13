@@ -1,4 +1,4 @@
-import { type VariantProps, cva } from "class-variance-authority";
+import { type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
@@ -13,18 +13,7 @@ import {
 } from "@/components/ui/card";
 
 import "./styles/retro.css";
-
-export const cardVariants = cva("", {
-  variants: {
-    font: {
-      normal: "",
-      retro: "retro",
-    },
-  },
-  defaultVariants: {
-    font: "retro",
-  },
-});
+import { cardVariants } from "./cardVariants";
 
 export interface BitCardProps
   extends React.ComponentProps<"div">,

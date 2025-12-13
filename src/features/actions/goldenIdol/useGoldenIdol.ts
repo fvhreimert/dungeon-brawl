@@ -1,52 +1,52 @@
 import { useState, useCallback } from 'react'
 import type { Tile } from '@/types/game'
-import diceStart from '@/assets/sounds/actions/dice_of_fortune/dice_start.mp3'
-import diceTick from '@/assets/sounds/actions/dice_of_fortune/dice_tick.wav'
-import diceLand from '@/assets/sounds/actions/dice_of_fortune/dice_land.mp3'
+import idolStart from '@/assets/sounds/actions/dice_of_fortune/dice_start.mp3'
+import idolTick from '@/assets/sounds/actions/dice_of_fortune/dice_tick.wav'
+import idolLand from '@/assets/sounds/actions/dice_of_fortune/dice_land.mp3'
 
-const START_DICE_SOUND = diceStart
-const TICK_DICE_SOUND = diceTick
-const LAND_DICE_SOUND = diceLand
+const START_IDOL_SOUND = idolStart
+const TICK_IDOL_SOUND = idolTick
+const LAND_IDOL_SOUND = idolLand
 
 function createAudio(src: string) {
   const audio = new Audio(src)
   return audio
 }
 
-export function useDiceOfFortune() {
-  const [isRolling, setIsRolling] = useState(false)
+export function useGoldenIdol() {
+  const [isActive, setIsActive] = useState(false)
   const [selectedSurvivorId, setSelectedSurvivorId] = useState<string | null>(null)
 
-  const playStartDice = useCallback(() => {
-    const audio = createAudio(START_DICE_SOUND)
+  const playStartIdol = useCallback(() => {
+    const audio = createAudio(START_IDOL_SOUND)
     audio.volume = 0.4
     audio.play().catch(() => {})
   }, [])
 
   const playTick = useCallback(() => {
-    const audio = createAudio(TICK_DICE_SOUND)
+    const audio = createAudio(TICK_IDOL_SOUND)
     audio.volume = 0.3
     audio.playbackRate = 0.9 + Math.random() * 0.2 // vary pitch slightly
     audio.play().catch(() => {})
   }, [])
 
   const playLand = useCallback(() => {
-    const audio = createAudio(LAND_DICE_SOUND)
+    const audio = createAudio(LAND_IDOL_SOUND)
     audio.volume = 0.5
     audio.play().catch(() => {})
   }, [])
 
-  const triggerDice = useCallback(async (
+  const triggerIdol = useCallback(async (
     tiles: Tile[],
     updateTileModifiers: (id: string, mods: { isCrumbled: boolean }) => void
   ) => {
     const openTiles = tiles.filter(t => t.status === 'open')
     if (openTiles.length < 2) return
 
-    setIsRolling(true)
+    setIsActive(true)
     setSelectedSurvivorId(null)
 
-    playStartDice()
+    playStartIdol()
 
     const survivorIndex = Math.floor(Math.random() * openTiles.length)
     const survivor = openTiles[survivorIndex]
@@ -54,11 +54,13 @@ export function useDiceOfFortune() {
     const shuffledVictims = [...victims].sort(() => Math.random() - 0.5)
 
     // Crumble loop
+    const maxDelay = Math.min(600, shuffledVictims.length * 50 + 150)
+    
     for (let i = 0; i < shuffledVictims.length; i++) {
       const victim = shuffledVictims[i]
       
       const progress = i / shuffledVictims.length
-      const delay = 50 + (Math.pow(progress, 2) * 600)
+      const delay = 50 + (Math.pow(progress, 2) * maxDelay)
       
       await new Promise(resolve => setTimeout(resolve, delay))
       
@@ -70,7 +72,7 @@ export function useDiceOfFortune() {
     await new Promise(resolve => setTimeout(resolve, 800))
 
     // Set the survivor ID first, which will trigger the yellow indicator
-    setIsRolling(false) // Exit rolling state
+    setIsActive(false) // Exit active state
     setSelectedSurvivorId(survivor.id) // This triggers the yellow indicator
     
     playLand() // Play land sound *after* the state for the indicator is set.
@@ -79,10 +81,10 @@ export function useDiceOfFortune() {
     await new Promise(resolve => setTimeout(resolve, 200)) 
 
 
-  }, [playStartDice, playTick, playLand])
+  }, [playStartIdol, playTick, playLand])
 
-  const clearDiceEffect = useCallback((tiles: Tile[], updateTileModifiers: (id: string, mods: { isCrumbled?: boolean }) => void) => {
-    setIsRolling(false)
+  const clearIdolEffect = useCallback((tiles: Tile[], updateTileModifiers: (id: string, mods: { isCrumbled?: boolean }) => void) => {
+    setIsActive(false)
     setSelectedSurvivorId(null)
     // Clear all crumbled flags
     tiles.forEach(t => {
@@ -93,9 +95,9 @@ export function useDiceOfFortune() {
   }, [])
 
   return {
-    isRolling,
+    isActive,
     selectedSurvivorId,
-    triggerDice,
-    clearDiceEffect,
+    triggerIdol,
+    clearIdolEffect,
   }
 }

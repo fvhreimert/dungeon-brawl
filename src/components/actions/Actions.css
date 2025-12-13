@@ -203,6 +203,8 @@
   letter-spacing: 1px;
   text-shadow: 1px 1px 0 #000; /* Slight shadow for readability */
   transition: all 0.2s ease-out;
+  position: relative;
+  z-index: 20;
 }
 
 .action-item:hover .action-label {
@@ -272,7 +274,7 @@
   text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
 }
 
-.dice-of-fortune-icon {
+.golden-idol-icon {
   width: 100%;
   height: auto;
   object-fit: contain;
@@ -282,10 +284,10 @@
   filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
   transition: transform 0.2s ease-out;
   z-index: 10;
-  margin-bottom: -47px;
+  margin-bottom: -10px;
 }
 
-.action-item:hover .dice-of-fortune-icon {
+.action-item:hover .golden-idol-icon {
   transform: translateY(-5px) scale(1.05);
   /* Layered pixel glow: Inner transparent gold, Outer even more transparent gold */
   filter: 
@@ -300,14 +302,14 @@
     drop-shadow(0 -8px 0 rgba(255, 215, 0, 0.15));
 }
 
-.action-item.dice-animating .dice-of-fortune-icon {
-  animation: dicePulse 0.8s ease-in-out infinite alternate;
+.action-item.idol-animating .golden-idol-icon {
+  animation: idolPulse 0.8s ease-in-out infinite alternate;
   filter:
     drop-shadow(0 0 8px rgba(255, 215, 0, 0.8))
     drop-shadow(0 0 16px rgba(255, 255, 224, 0.6));
 }
 
-@keyframes dicePulse {
+@keyframes idolPulse {
   from { transform: translateY(-4px) scale(1.03); }
   to { transform: translateY(4px) scale(1.08); }
 }

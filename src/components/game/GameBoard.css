@@ -528,9 +528,9 @@
   100% { transform: scale(0.96); opacity: 0.6; }
 }
 
-/* Styling for the sole surviving tile after Dice of Fortune effect */
-.tile-dice-survivor {
-  animation: diceSurvivorPulse 1s ease-in-out infinite alternate;
+/* Styling for the sole surviving tile after Golden Idol effect */
+.tile-idol-survivor {
+  animation: idolSurvivorPulse 1s ease-in-out infinite alternate;
   border-color: #ffd700; /* Gold border */
   box-shadow:
     0 0 10px rgba(255, 215, 0, 0.7),
@@ -539,18 +539,18 @@
   z-index: 2; /* Bring to front */
 }
 
-.tile-dice-survivor::after {
+.tile-idol-survivor::after {
   border-color: rgba(255, 215, 0, 0.9);
   box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
   opacity: 1;
 }
 
-.tile-dice-survivor .value {
+.tile-idol-survivor .value {
   color: #fff;
   text-shadow: 0 0 8px rgba(255, 215, 0, 0.9), 0 0 15px rgba(255, 165, 0, 0.6);
 }
 
-@keyframes diceSurvivorPulse {
+@keyframes idolSurvivorPulse {
   from {
     transform: scale(1.02);
     box-shadow:

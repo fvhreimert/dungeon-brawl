@@ -115,6 +115,8 @@ const updateStatsForScoreChange = (
   return nextStats
 }
 
+const ALLIANCE_COLORS: AllianceColor[] = ['red', 'yellow', 'green', 'blue']
+
 export function useJeopardyGame({
   categories,
   pointValues,
@@ -176,7 +178,7 @@ export function useJeopardyGame({
     ? tiles.find((tile) => tile.id === selectedTileId) ?? null
     : null
 
-  const saveSnapshot = () => {
+  const saveSnapshot = useCallback(() => {
     setHistory((prev) => {
       const newHistory = [
         ...prev,
@@ -191,7 +193,7 @@ export function useJeopardyGame({
       ]
       return newHistory.slice(-5)
     })
-  }
+  }, [tiles, players, activePlayerIndex, puppetLocks, frozenActions, alliances])
 
   const updatePlayerStats = useCallback(
     (targetIndex: number, updater: (stats: PlayerStats) => PlayerStats) => {
@@ -377,7 +379,7 @@ export function useJeopardyGame({
       (tile) => tile.status === 'open' && tile.category === puppetLock.category,
     )
     if (!hasAvailableTiles) {
-      clearPuppetLock(activePlayerIndex)
+      setTimeout(() => clearPuppetLock(activePlayerIndex), 0)
     }
   }, [activePlayerIndex, tiles, clearPuppetLock, puppetLocks])
 
@@ -547,7 +549,7 @@ export function useJeopardyGame({
         }),
       )
     },
-    [],
+    [saveSnapshot],
   )
 
   const unfreezeTilesForPlayer = useCallback((playerIndex: number) => {
@@ -555,7 +557,8 @@ export function useJeopardyGame({
       prev.map((tile) => {
         if (!tile.modifiers?.frozen) return tile
         if (tile.modifiers.frozen.frozenByPlayerIndex !== playerIndex) return tile
-        const { frozen: _removed, ...restModifiers } = tile.modifiers
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { frozen: _, ...restModifiers } = tile.modifiers
         return {
           ...tile,
           modifiers: restModifiers,
@@ -575,7 +578,7 @@ export function useJeopardyGame({
         },
       }))
     },
-    [],
+    [saveSnapshot],
   )
 
   const unfreezeActionsForPlayer = useCallback((playerIndex: number) => {
@@ -589,8 +592,6 @@ export function useJeopardyGame({
       return next
     })
   }, [])
-
-  const ALLIANCE_COLORS: AllianceColor[] = ['red', 'yellow', 'green', 'blue']
 
   const getNextAllianceColor = useCallback((): AllianceColor => {
     const usedColors = new Set(alliances.map((a) => a.color))
@@ -794,10 +795,12 @@ export function useJeopardyGame({
       return
     }
     // Unfreeze tiles and actions that this player froze (their turn has come back around)
-    unfreezeTilesForPlayer(activePlayerIndex)
-    unfreezeActionsForPlayer(activePlayerIndex)
-    // Tick down alliance timers
-    tickDownAlliances()
+    setTimeout(() => {
+        unfreezeTilesForPlayer(activePlayerIndex)
+        unfreezeActionsForPlayer(activePlayerIndex)
+        // Tick down alliance timers
+        tickDownAlliances()
+    }, 0)
     runGlobalTurnEffects()
     runTurnStartEffects(activePlayerIndex)
   }, [activePlayerIndex, runTurnStartEffects, runGlobalTurnEffects, unfreezeTilesForPlayer, unfreezeActionsForPlayer, tickDownAlliances])
@@ -807,14 +810,14 @@ export function useJeopardyGame({
       saveSnapshot()
       setActivePlayerIndex(playerIndex)
     }
-  }, [players.length])
+  }, [players.length, saveSnapshot])
 
   const adjustPlayerScore = useCallback((playerIndex: number, delta: number) => {
     if (playerIndex >= 0 && playerIndex < players.length) {
       saveSnapshot()
       applyScoreChange(playerIndex, delta, 'other')
     }
-  }, [players.length, applyScoreChange])
+  }, [players.length, applyScoreChange, saveSnapshot])
 
   return {
     tiles,

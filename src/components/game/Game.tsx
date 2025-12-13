@@ -13,7 +13,7 @@ import { PuppetMasterPlayerSelectModal } from '@/components/game/PuppetMasterPla
 import { CoalitionPlayerSelectModal } from '@/components/game/CoalitionPlayerSelectModal'
 import { ScoreAdjustModal } from '@/components/game/ScoreAdjustModal'
 import { useFrogSounds } from '@/features/actions/frogOfFate/useFrogSounds'
-import { useDiceOfFortune } from '@/features/actions/diceOfFortune/useDiceOfFortune'
+import { useGoldenIdol } from '@/features/actions/goldenIdol/useGoldenIdol'
 import { useMadSeerSounds } from '@/features/actions/madSeer/useMadSeerSounds'
 import { useBloodSacrificeSounds } from '@/features/actions/bloodSacrifice/useBloodSacrificeSounds'
 import { Scoreboard } from '@/components/game/Scoreboard'
@@ -29,7 +29,7 @@ import minimizeIcon from '@/assets/images/ui/minimize.png'
 import expandIcon from '@/assets/images/ui/expand.png'
 import webIcon from '@/assets/images/actions/web.png'
 import frogIcon from '@/assets/images/actions/frog_of_fate.png'
-import diceIcon from '@/assets/images/actions/dice_of_fortune.png'
+import idolIcon from '@/assets/images/actions/golden_idol.png'
 import { CardRevealModal } from '@/features/actions/cardJester/CardRevealModal'
 import { InventoryModal } from '@/components/game/InventoryModal'
 import { StolenCardModal } from '@/features/cards/StolenCardModal'
@@ -100,7 +100,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
   const { playStart: playFrogStart, playHop, playLand } = useFrogSounds()
   const { playStart: playMadSeerStart } = useMadSeerSounds()
   const { playStart: playBloodSacrificeStart, playLand: playBloodSacrificeLand } = useBloodSacrificeSounds()
-  const { triggerDice, isRolling: diceRolling, selectedSurvivorId, clearDiceEffect } = useDiceOfFortune()
+  const { triggerIdol, isActive: idolActive, selectedSurvivorId, clearIdolEffect } = useGoldenIdol()
   const {
     tiles,
     players,
@@ -183,7 +183,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
   const handleCardJesterClick = () => {
     if (handleActionFreezeClick('card_jester')) return
     if (frozenActions.card_jester) return
-    if (madSeerActive || frogSelecting || selectedTile || diceRolling || bloodSacrificeActive) return
+    if (madSeerActive || frogSelecting || selectedTile || idolActive || bloodSacrificeActive) return
     const drawContext = buildCardDrawContext(players, activePlayerIndex)
     const entry = pickCardForPlayer(drawContext)
     if (!entry) return
@@ -329,7 +329,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
   const handleMadSeerStart = () => {
     if (handleActionFreezeClick('mad_seer')) return
     if (frozenActions.mad_seer) return
-    if (selectedTile || frogSelecting || diceRolling) return
+    if (selectedTile || frogSelecting || idolActive) return
     playMadSeerStart()
     setMadSeerActive(true)
     setMadSeerPreviewTile(null)
@@ -372,12 +372,12 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
       }
     }
 
-    // If Dice of Fortune just ran, logic is handled in GameBoard regarding 'disabled'.
+    // If Golden Idol just ran, logic is handled in GameBoard regarding 'disabled'.
     if (selectedSurvivorId) {
       if (tileId === selectedSurvivorId) {
         handleTileClick(tileId)
         // Clear persistent crumbled state
-        clearDiceEffect(tiles, updateTileModifiers)
+        clearIdolEffect(tiles, updateTileModifiers)
       }
       return
     }
@@ -389,7 +389,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     if (!madSeerPreviewTile) return
     handleTileClick(madSeerPreviewTile.id)
     if (selectedSurvivorId && madSeerPreviewTile.id === selectedSurvivorId) {
-        clearDiceEffect(tiles, updateTileModifiers)
+        clearIdolEffect(tiles, updateTileModifiers)
     }
     setMadSeerPreviewTile(null)
     setMadSeerActive(false)
@@ -403,7 +403,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
   const handleBloodSacrificeStart = () => {
     if (handleActionFreezeClick('blood_sacrifice')) return
     if (frozenActions.blood_sacrifice) return
-    if (selectedTile || frogSelecting || diceRolling || madSeerActive) return
+    if (selectedTile || frogSelecting || idolActive || madSeerActive) return
     playBloodSacrificeStart()
     setBloodSacrificeActive(true)
   }
@@ -439,7 +439,11 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     const sequence: string[] = []
     const shuffled = [...openTiles].sort(() => Math.random() - 0.5)
     shuffled.forEach((tile) => sequence.push(tile.id))
-    for (let i = 0; i < 10; i++) {
+    
+    // Scale extra hops based on board size to speed up end-game
+    const extraHops = Math.min(10, Math.max(2, Math.floor(openTiles.length / 2)))
+    
+    for (let i = 0; i < extraHops; i++) {
       sequence.push(openTiles[Math.floor(Math.random() * openTiles.length)].id)
     }
 
@@ -465,16 +469,16 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
   const handleFrogClick = () => {
     if (handleActionFreezeClick('frog_of_fate')) return
     if (frozenActions.frog_of_fate) return
-    if (madSeerActive || frogSelecting || selectedTile || diceRolling) return
+    if (madSeerActive || frogSelecting || selectedTile || idolActive) return
     playFrogStart()
     runFrogSelection()
   }
 
-  const handleDiceClick = () => {
-    if (handleActionFreezeClick('dice_of_fortune')) return
-    if (frozenActions.dice_of_fortune) return
-    if (madSeerActive || frogSelecting || selectedTile || diceRolling || selectedSurvivorId) return
-    triggerDice(tiles, updateTileModifiers)
+  const handleIdolClick = () => {
+    if (handleActionFreezeClick('golden_idol')) return
+    if (frozenActions.golden_idol) return
+    if (madSeerActive || frogSelecting || selectedTile || idolActive || selectedSurvivorId) return
+    triggerIdol(tiles, updateTileModifiers)
   }
 
   useEffect(() => {
@@ -640,10 +644,10 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
           onTileSelect={handleTileSelect}
           highlightOpenTiles={madSeerActive}
           highlightedTileId={madSeerPreviewTile?.id ?? null}
-          boardLocked={!!selectedTile || !!madSeerPreviewTile || frogSelecting || diceRolling}
+          boardLocked={!!selectedTile || !!madSeerPreviewTile || frogSelecting || idolActive}
           frogHighlightId={frogHighlightId}
           frogLandingId={frogLandingId}
-          diceSurvivorId={selectedSurvivorId}
+          idolSurvivorId={selectedSurvivorId}
           puppetLockCategory={activePuppetLockCategory}
           freezeSelectMode={freezeSelectMode}
         />
@@ -750,15 +754,15 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
         </div>
         <div 
           className={`action-item ${
-            diceRolling ? 'dice-animating' : ''
+            idolActive ? 'idol-animating' : ''
           } ${
-            frozenActions.dice_of_fortune ? 'action-frozen' : ''
+            frozenActions.golden_idol ? 'action-frozen' : ''
           } ${
-            freezeSelectMode && !frozenActions.dice_of_fortune ? 'action-freeze-target' : ''
+            freezeSelectMode && !frozenActions.golden_idol ? 'action-freeze-target' : ''
           }`} 
-          onClick={handleDiceClick}
+          onClick={handleIdolClick}
         >
-          {frozenActions.dice_of_fortune && (
+          {frozenActions.golden_idol && (
             <div className="action-frozen-overlay back">
               <div className="ice-particle" />
               <div className="ice-particle" />
@@ -768,9 +772,9 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
               <div className="ice-particle" />
             </div>
           )}
-          <img src={diceIcon} alt="Dice of Fortune" className="dice-of-fortune-icon" />
-          <span className="action-label action-label-gold">Dice of Fortune</span>
-          {frozenActions.dice_of_fortune && (
+          <img src={idolIcon} alt="Golden Idol" className="golden-idol-icon" />
+          <span className="action-label action-label-gold">Golden Idol</span>
+          {frozenActions.golden_idol && (
             <div className="action-frozen-overlay front">
               <div className="ice-particle" />
               <div className="ice-particle" />

@@ -36,4 +36,6 @@ export const gameConfig = {
   }
 } as const;
 
+export const TREASURE_SET_CARD_IDS = ['shovel', 'compass', 'treasure_map'] as const
+
 export type GameConfig = typeof gameConfig;

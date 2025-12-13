@@ -10,8 +10,8 @@ type GameBoardProps = {
   boardLocked?: boolean
   frogHighlightId?: string | null
   frogLandingId?: string | null
-  diceLockedTileIds?: string[] | null
-  diceSurvivorId?: string | null
+  idolLockedTileIds?: string[] | null
+  idolSurvivorId?: string | null
   puppetLockCategory?: string | null
   freezeSelectMode?: boolean
 }
@@ -25,8 +25,8 @@ export function GameBoard({
   boardLocked = false,
   frogHighlightId = null,
   frogLandingId = null,
-  diceLockedTileIds = null,
-  diceSurvivorId = null,
+  idolLockedTileIds = null,
+  idolSurvivorId = null,
   puppetLockCategory = null,
   freezeSelectMode = false,
 }: GameBoardProps) {
@@ -53,8 +53,8 @@ export function GameBoard({
       <div className="question-grid">
         {tiles.map((tile) => {
           // Use persisted state OR animation state
-          const isCrumbled = tile.modifiers?.isCrumbled || diceLockedTileIds?.includes(tile.id)
-          const isSurvivor = diceSurvivorId && tile.id === diceSurvivorId
+          const isCrumbled = tile.modifiers?.isCrumbled || idolLockedTileIds?.includes(tile.id)
+          const isSurvivor = idolSurvivorId && tile.id === idolSurvivorId
           const frozenInfo = tile.modifiers?.frozen
           const isFrozen = !!frozenInfo
 
@@ -67,7 +67,7 @@ export function GameBoard({
             boardLocked || 
             tile.status === 'done' || 
             !!isCrumbled || 
-            (!!diceSurvivorId && !isSurvivor && !highlightOpenTiles) ||
+            (!!idolSurvivorId && !isSurvivor && !highlightOpenTiles) ||
             !!isPuppetBlocked ||
             isFrozen
 
@@ -87,9 +87,9 @@ export function GameBoard({
                 // Crumbled tiles should generally visually override everything.
                 isCrumbled ? 'tile-crumbled' : ''
               } ${
-                // Dice survivor should be next, can be overridden by Mad Seer
+                // Idol survivor should be next, can be overridden by Mad Seer
                 // But if it is crumbled (should not happen logic wise for survivor, but safe guard), crumbled wins.
-                isSurvivor && !isCrumbled ? 'tile-dice-survivor' : ''
+                isSurvivor && !isCrumbled ? 'tile-idol-survivor' : ''
               } ${
                 // Frog highlights
                 frogHighlightId === tile.id ? 'tile-frog-highlight' : ''

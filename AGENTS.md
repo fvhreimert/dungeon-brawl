@@ -6,7 +6,7 @@
 - `src/components/menu/`: Main menu components (`MainMenuScreen`) for game setup flow before entering the game.
 - `src/components/game/`: Feature components (`Game`, `GameBoard`, `Scoreboard`, `QuestionDialog`, `InventoryModal`, `PlayerSelectModal`, `ScoreAdjustModal`) that render the Jeopardy flow. Each component has its own CSS file.
 - `src/features/`: Complex feature logic and components, organized by domain.
-  - `features/actions/`: Contains logic for Dungeon Actions (Mad Seer, Frog of Fate, Dice of Fortune, Card Jester, Blood Sacrifice).
+  - `features/actions/`: Contains logic for Dungeon Actions (Mad Seer, Frog of Fate, Golden Idol, Card Jester, Blood Sacrifice).
 - `src/components/ui/`: UI primitives, including 8bit components in `ui/8bit/` (buttons, badges, cards).
 - `src/hooks/`: Custom logic like `useJeopardyGame` for turn state, scoring, history (undo), and statistics. Also `useGlobalClickSound` for UI click feedback.
 - `src/types/`: Shared TypeScript types (e.g., `game.ts`, `quiz.ts`).
@@ -96,11 +96,11 @@ The game features special "Dungeon Actions" available to players, each providing
   3. Lands on a final tile and applies a **2x Multiplier**.
   4. The multiplier persists until the tile is selected.
 
-### Dice of Fortune
-- **Logic:** `src/features/actions/diceOfFortune/`
+### Golden Idol
+- **Logic:** `src/features/actions/goldenIdol/`
 - **Mechanic:** Forces a random selection by eliminating choices.
 - **Flow:**
-  1. Player activates the Dice of Fortune.
+  1. Player activates the Golden Idol.
   2. A "crumbling" effect ripples through the board, visually disabling tiles.
   3. One single **Survivor** tile remains (highlighted in gold).
   4. All other tiles are effectively locked/crumbled.
@@ -168,7 +168,7 @@ The game features special "Dungeon Actions" available to players, each providing
   - Tile freeze info stored in `tile.modifiers.frozen` (`FrozenTileInfo` type in `src/types/game.ts`).
   - Action freeze info stored in `frozenActions` state in `useJeopardyGame` (`FrozenActions` type).
   - Both track `frozenByPlayerIndex` and `frozenByCardInstanceId` for proper unfreezing.
-- **Freezable Actions:** `card_jester`, `mad_seer`, `blood_sacrifice`, `frog_of_fate`, `dice_of_fortune`, `web`.
+- **Freezable Actions:** `card_jester`, `mad_seer`, `blood_sacrifice`, `frog_of_fate`, `golden_idol`, `web`.
 - **Visual Effects:**
   - Frozen tiles: Icy blue background, glowing border, floating ice particles (in `GameBoard.css`).
   - Frozen actions: Icy blue color shift via CSS filters, ice particle overlays in front and behind (in `Actions.css`).

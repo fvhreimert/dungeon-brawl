@@ -1,9 +1,10 @@
 import { useEffect } from 'react'
 import type { CardInstance } from '@/types/game'
 import { Button as RetroButton } from '@/components/ui/8bit/button'
+import { TREASURE_SET_CARD_IDS } from '@/config/gameConfig'
 import './TreasureSetModal.css'
 
-const TREASURE_SET_IDS = ['shovel', 'compass', 'treasure_map'] as const
+const TREASURE_SET_IDS = TREASURE_SET_CARD_IDS
 
 interface TreasureSetModalProps {
   inventory: CardInstance[]
@@ -122,5 +123,3 @@ export function TreasureSetModal({ inventory, onStartDig, onClose }: TreasureSet
     </div>
   )
 }
-
-export const TREASURE_SET_CARD_IDS = TREASURE_SET_IDS
