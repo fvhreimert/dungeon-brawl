@@ -91,10 +91,14 @@ export function GameBoard({
                 // But if it is crumbled (should not happen logic wise for survivor, but safe guard), crumbled wins.
                 isSurvivor && !isCrumbled ? 'tile-idol-survivor' : ''
               } ${
-                // Frog highlights
-                frogHighlightId === tile.id ? 'tile-frog-highlight' : ''
+                // Frog highlights - use next tier color if tile already has a multiplier
+                frogHighlightId === tile.id
+                  ? `tile-frog-highlight${(tile.multiplier ?? 1) > 1 ? `-next-x${(tile.multiplier ?? 1) * 2}` : ''}`
+                  : ''
               } ${
-                frogLandingId === tile.id ? 'tile-frog-landing' : ''
+                frogLandingId === tile.id
+                  ? `tile-frog-landing${(tile.multiplier ?? 1) > 1 ? `-next-x${(tile.multiplier ?? 1) * 2}` : ''}`
+                  : ''
               } ${
                 puppetLockCategory &&
                 tile.status === 'open' &&

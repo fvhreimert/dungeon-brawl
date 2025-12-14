@@ -52,17 +52,11 @@ export function RouletteModal({ playerScore, onConfirm, onCancel }: RouletteModa
     }
   }, [])
 
-  // Ensure stake doesn't exceed current score or goes below 0
-  useEffect(() => {
-    // If player score drops, adjust stake down.
-    if (stake > actualMaxStake) {
-      setStake(actualMaxStake)
-    }
-    // If player score is 0, stake should be 0.
-    if (actualMaxStake === 0 && stake !== 0) {
-      setStake(0);
-    }
-  }, [stake, actualMaxStake]);
+  // Ensure stake doesn't exceed current score. 
+  // We do this during render to avoid cascading updates via useEffect.
+  if (stake > actualMaxStake) {
+    setStake(actualMaxStake)
+  }
 
   const playTick = () => {
     const audio = new Audio(clickSound)
