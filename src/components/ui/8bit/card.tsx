@@ -1,126 +1,146 @@
+import * as React from "react";
 import { type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
-
-import {
-  Card as ShadcnCard,
-  CardAction as ShadcnCardAction,
-  CardContent as ShadcnCardContent,
-  CardDescription as ShadcnCardDescription,
-  CardFooter as ShadcnCardFooter,
-  CardHeader as ShadcnCardHeader,
-  CardTitle as ShadcnCardTitle,
-} from "@/components/ui/card";
-
-import "./styles/retro.css";
 import { cardVariants } from "./cardVariants";
+import "./styles/pixel-card.css";
+
+/* 
+  Re-exporting standard shadcn card components 
+  is NOT recommended here as the structure is completely different.
+  We are building a bespoke pixel-art card system.
+*/
 
 export interface BitCardProps
-  extends React.ComponentProps<"div">,
+  extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof cardVariants> {
-  asChild?: boolean;
+  frameSrc?: string;
+  overlay?: React.ReactNode;
 }
 
-function Card({ ...props }: BitCardProps) {
-  const { className, font } = props;
-
-  return (
-    <div
-      className={cn(
-        "relative border-y-6 border-foreground dark:border-ring !p-0",
-        className
-      )}
-    >
-      <ShadcnCard
-        {...props}
+const Card = React.forwardRef<HTMLDivElement, BitCardProps>(
+  ({ className, theme, frameSrc, overlay, children, ...props }, ref) => {
+    return (
+      <div
+        ref={ref}
         className={cn(
-          "rounded-none border-0 !w-full",
-          font !== "normal" && "retro",
+          "pixel-card relative box-border bg-transparent transition-transform duration-200 hover:-translate-y-1 flex justify-center items-center w-[var(--card-width,320px)] h-[var(--card-height,480px)]",
+          cardVariants({ theme }),
           className
         )}
-      />
+        style={{
+          imageRendering: "pixelated",
+          // CSS variables are handled by the theme class from cardVariants
+        }}
+        {...props}
+      >
+        {/* Layer 1: Backing & Content */}
+        <div className="card-backing-layer pixel-card-backing pixel-card-backing-layer relative z-10 w-[calc(100%-60px)] h-[calc(100%-60px)] flex p-0 box-border">
+          <div className="card-inner pixel-card-inner-shadow pixel-card-inner-bg relative z-20 flex-1 flex flex-col box-border">
+            {children}
+          </div>
+        </div>
 
-      <div
-        className="absolute inset-0 border-x-6 -mx-1.5 border-foreground dark:border-ring pointer-events-none"
-        aria-hidden="true"
-      />
+        {/* Layer 2: Frame Overlay (Top) */}
+        {frameSrc && (
+          <div
+            className="frame-overlay absolute inset-0 z-0 pointer-events-none box-border"
+            style={{
+              backgroundImage: `url('${frameSrc}')`,
+              backgroundSize: "100% 100%",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "center",
+              imageRendering: "pixelated",
+            }}
+          />
+        )}
+
+        {/* Overlay Layer */}
+        {overlay}
+      </div>
+    );
+  }
+);
+Card.displayName = "Card";
+
+const CardImage = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & { src: string; alt?: string }
+>(({ className, src, alt, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "card-visual-well pixel-card-well-bg w-full h-[55%] flex justify-center items-center relative overflow-hidden border-b-2",
+      className
+    )}
+    {...props}
+  >
+    <img
+      src={src}
+      alt={alt}
+      className="w-full h-auto flex-shrink-0"
+      style={{ imageRendering: "pixelated" }}
+    />
+  </div>
+));
+CardImage.displayName = "CardImage";
+
+const CardTitle = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, children, ...props }, ref) => (
+  <div
+    className="title-banner pixel-card-title-banner pixel-card-outline flex-none relative z-[5] p-1 text-center my-[2px]"
+  >
+    <div
+      ref={ref}
+      className={cn(
+        "card-title pixel-card-title pixel-card-text-main font-['VT323'] text-[28px] leading-none uppercase tracking-wider",
+        className
+      )}
+      {...props}
+    >
+      {children}
     </div>
-  );
-}
+  </div>
+));
+CardTitle.displayName = "CardTitle";
 
-function CardHeader({ ...props }: BitCardProps) {
-  const { className, font } = props;
+const CardDescription = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, children, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "card-description-box pixel-card-description-box pixel-card-bg-parchment pixel-card-text-dark flex-1 px-[30px] pt-[5px] pb-[35px] text-[22px] text-center leading-[1.1] flex items-center justify-center font-['VT323']",
+      className
+    )}
+    {...props}
+  >
+    {children}
+  </div>
+));
+CardDescription.displayName = "CardDescription";
 
-  return (
-    <ShadcnCardHeader
-      className={cn(font !== "normal" && "retro", className)}
-      {...props}
-    />
-  );
-}
+const CardHeader = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("flex flex-col space-y-1.5 p-6", className)}
+    {...props}
+  />
+));
+CardHeader.displayName = "CardHeader";
 
-function CardTitle({ ...props }: BitCardProps) {
-  const { className, font } = props;
+const CardContent = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
+));
+CardContent.displayName = "CardContent";
 
-  return (
-    <ShadcnCardTitle
-      className={cn(font !== "normal" && "retro", className)}
-      {...props}
-    />
-  );
-}
-
-function CardDescription({ ...props }: BitCardProps) {
-  const { className, font } = props;
-
-  return (
-    <ShadcnCardDescription
-      className={cn(font !== "normal" && "retro", className)}
-      {...props}
-    />
-  );
-}
-
-function CardAction({ ...props }: BitCardProps) {
-  const { className, font } = props;
-
-  return (
-    <ShadcnCardAction
-      className={cn(font !== "normal" && "retro", className)}
-      {...props}
-    />
-  );
-}
-
-function CardContent({ ...props }: BitCardProps) {
-  const { className, font } = props;
-
-  return (
-    <ShadcnCardContent
-      className={cn(font !== "normal" && "retro", className)}
-      {...props}
-    />
-  );
-}
-
-function CardFooter({ ...props }: BitCardProps) {
-  const { className, font } = props;
-
-  return (
-    <ShadcnCardFooter
-      data-slot="card-footer"
-      className={cn(font !== "normal" && "retro", className)}
-      {...props}
-    />
-  );
-}
-
-export {
-  Card,
-  CardHeader,
-  CardFooter,
-  CardTitle,
-  CardAction,
-  CardDescription,
-  CardContent,
-};
+export { Card, CardImage, CardTitle, CardDescription, CardHeader, CardContent };

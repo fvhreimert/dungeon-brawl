@@ -5,20 +5,20 @@ import clickSound from '@/assets/sounds/UI/click.mp3'
 import './RouletteModal.css'
 
 type RouletteModalProps = {
-  maxStake: number
+  playerScore: number
   onConfirm: (won: boolean, amount: number) => void
   onCancel: () => void
 }
 
 type SpinPhase = 'idle' | 'spinning' | 'result'
 
-export function RouletteModal({ maxStake, onConfirm, onCancel }: RouletteModalProps) {
-  const [stake, setStake] = useState(Math.min(100, maxStake))
+export function RouletteModal({ playerScore, onConfirm, onCancel }: RouletteModalProps) {
+  // Effective max stake is the player's current score, capped at 500. Cannot be negative.
+  const actualMaxStake = Math.min(500, Math.max(0, playerScore))
+  const [stake, setStake] = useState(Math.min(100, actualMaxStake > 0 ? actualMaxStake : 0))
   const [phase, setPhase] = useState<SpinPhase>('idle')
   const [result, setResult] = useState<'win' | 'lose' | null>(null)
   const spinTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const effectiveMax = Math.min(500, Math.max(1, maxStake))
 
   // Memoize cancel handler to avoid re-running effect
   const handleCancel = useCallback(() => {
@@ -52,6 +52,18 @@ export function RouletteModal({ maxStake, onConfirm, onCancel }: RouletteModalPr
     }
   }, [])
 
+  // Ensure stake doesn't exceed current score or goes below 0
+  useEffect(() => {
+    // If player score drops, adjust stake down.
+    if (stake > actualMaxStake) {
+      setStake(actualMaxStake)
+    }
+    // If player score is 0, stake should be 0.
+    if (actualMaxStake === 0 && stake !== 0) {
+      setStake(0);
+    }
+  }, [stake, actualMaxStake]);
+
   const playTick = () => {
     const audio = new Audio(clickSound)
     audio.volume = 0.15
@@ -59,12 +71,15 @@ export function RouletteModal({ maxStake, onConfirm, onCancel }: RouletteModalPr
   }
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setStake(Number(e.target.value))
+    const newStake = Number(e.target.value)
+    if (newStake <= actualMaxStake) {
+      setStake(newStake)
+    }
     playTick()
   }
 
   const handleSpin = () => {
-    if (phase !== 'idle') return
+    if (phase !== 'idle' || stake <= 0) return // Disable spin if stake is 0
 
     setPhase('spinning')
     
@@ -83,7 +98,8 @@ export function RouletteModal({ maxStake, onConfirm, onCancel }: RouletteModalPr
     onConfirm(result === 'win', stake)
   }
 
-  const progress = effectiveMax > 1 ? (stake - 1) / (effectiveMax - 1) : 0
+  const progress = actualMaxStake > 0 ? (stake / actualMaxStake) : 0;
+  const canSpinButton = phase === 'idle' && stake > 0;
 
   return (
     <div 
@@ -117,16 +133,17 @@ export function RouletteModal({ maxStake, onConfirm, onCancel }: RouletteModalPr
                 <label className="roulette-label">STAKE: {stake} pts</label>
                 <input 
                   type="range" 
-                  min="1" 
-                  max={effectiveMax}
+                  min="0" // Allow min to be 0 for consistency if player has 0 points
+                  max={actualMaxStake}
                   value={stake} 
                   onChange={handleSliderChange}
                   className="roulette-slider"
                   style={{ '--stake-progress': progress } as React.CSSProperties}
+                  disabled={actualMaxStake <= 0} // Disable slider if no points
                 />
                 <div className="roulette-range-labels">
-                  <span>1</span>
-                  <span>{effectiveMax}</span>
+                  <span>0</span>
+                  <span>{actualMaxStake}</span>
                 </div>
               </div>
 
@@ -165,6 +182,7 @@ export function RouletteModal({ maxStake, onConfirm, onCancel }: RouletteModalPr
                   variant="default"
                   className="dialog-button-8bit roulette-btn-spin"
                   onClick={handleSpin}
+                  disabled={!canSpinButton}
                 >
                   SPIN!
                 </RetroButton>

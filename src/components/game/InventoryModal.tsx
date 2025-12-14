@@ -3,6 +3,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Player, CardInstance } from '@/types/game'
 import { getCardEffectDefinition } from '@/features/cards/cardEffectRegistry'
 import { Badge } from '@/components/ui/8bit/badge'
+import {
+  Card,
+  CardImage,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/8bit/card";
 import './InventoryModal.css'
 import crossIcon from '@/assets/images/ui/cross.png'
 
@@ -212,32 +218,25 @@ export function InventoryModal({
                         }
                       }}
                     >
-                      <div className={`pixel-card ${card.theme}`}>
-                        <div className="card-backing-layer">
-                          <div className="card-inner">
-                            <div className="card-visual-well">
-                              <img src={card.imagePath} alt={card.title} />
+                      <Card
+                        theme={card.theme}
+                        frameSrc={card.framePath}
+                        overlay={
+                          count > 1 ? (
+                            <div className="card-stack-counter">
+                              <Badge font="retro" variant="secondary">
+                                x{count}
+                              </Badge>
                             </div>
-                            <div className="title-banner">
-                              <div className="card-title">{card.title}</div>
-                            </div>
-                            <div className="card-description-box">
-                              {getInventoryDescription(card)}
-                            </div>
-                          </div>
-                        </div>
-                        <div
-                          className="frame-overlay"
-                          style={{ backgroundImage: `url('${card.framePath}')` }}
-                        />
-                        {count > 1 && (
-                          <div className="card-stack-counter">
-                            <Badge font="retro" variant="secondary">
-                              x{count}
-                            </Badge>
-                          </div>
-                        )}
-                      </div>
+                          ) : undefined
+                        }
+                      >
+                        <CardImage src={card.imagePath} alt={card.title} />
+                        <CardTitle>{card.title}</CardTitle>
+                        <CardDescription>
+                          {getInventoryDescription(card)}
+                        </CardDescription>
+                      </Card>
                     </div>
                   )
                 })}

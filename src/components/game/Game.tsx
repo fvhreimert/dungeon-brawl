@@ -797,6 +797,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
 
       {bloodSacrificeActive && (
         <BloodSacrificeModal
+          playerScore={players[activePlayerIndex]?.score ?? 0}
           onConfirm={handleBloodSacrificeConfirm}
           onCancel={handleBloodSacrificeCancel}
         />
@@ -918,7 +919,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
 
       {rouletteActive && cardUsePending && (
         <RouletteModal
-          maxStake={players[activePlayerIndex]?.score ?? 0}
+          playerScore={players[activePlayerIndex]?.score ?? 0}
           onConfirm={handleRouletteConfirm}
           onCancel={handleRouletteCancel}
         />

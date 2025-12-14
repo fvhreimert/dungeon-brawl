@@ -2,6 +2,11 @@ import { useEffect } from 'react'
 import type { CardInstance } from '@/types/game'
 import { Button as RetroButton } from '@/components/ui/8bit/button'
 import { TREASURE_SET_CARD_IDS } from '@/config/gameConfig'
+import {
+  Card,
+  CardImage,
+  CardTitle,
+} from "@/components/ui/8bit/card";
 import './TreasureSetModal.css'
 
 const TREASURE_SET_IDS = TREASURE_SET_CARD_IDS
@@ -63,22 +68,10 @@ export function TreasureSetModal({ inventory, onStartDig, onClose }: TreasureSet
                 className={`treasure-card-slot ${isOwned ? 'owned' : 'missing'}`}
               >
                 {isOwned ? (
-                  <div className={`pixel-card ${card.theme}`}>
-                    <div className="card-backing-layer">
-                      <div className="card-inner">
-                        <div className="card-visual-well">
-                          <img src={card.imagePath} alt={card.title} />
-                        </div>
-                        <div className="title-banner">
-                          <div className="card-title">{card.title}</div>
-                        </div>
-                      </div>
-                    </div>
-                    <div
-                      className="frame-overlay"
-                      style={{ backgroundImage: `url('${card.framePath}')` }}
-                    />
-                  </div>
+                  <Card theme={card.theme} frameSrc={card.framePath}>
+                    <CardImage src={card.imagePath} alt={card.title} />
+                    <CardTitle>{card.title}</CardTitle>
+                  </Card>
                 ) : (
                   <div className="missing-card-placeholder">
                     <div className="missing-icon">?</div>
@@ -92,14 +85,6 @@ export function TreasureSetModal({ inventory, onStartDig, onClose }: TreasureSet
               </div>
             )
           })}
-        </div>
-
-        <div className="treasure-reward-section">
-          <div className="reward-label">Potential Reward</div>
-          <div className="reward-value">
-            <span className="reward-amount">???</span>
-            <span className="reward-pts">gold</span>
-          </div>
         </div>
 
         <div className="treasure-set-actions">

@@ -1,0 +1,170 @@
+/* Themes */
+.theme-common {
+    --col-parchment: #4e463d;      
+    --col-text-dark: #dccbb6;      
+    --col-gold-main: #b8b0a2;      
+    --col-gold-dark: #6b6359;      
+    --col-banner-dark: #2e2620;    
+    --col-backing: #3d332a;        
+}
+
+.theme-dungeon {
+    --col-parchment: #2d3238;      
+    --col-text-dark: #aebbc3;      
+    --col-gold-main: #7b8791;      
+    --col-gold-dark: #464e54;      
+    --col-banner-dark: #121416;    
+    --col-backing: #212529;
+}
+
+.theme-nature {
+    --col-parchment: #2f3d30;      
+    --col-text-dark: #b8cbb9;      
+    --col-gold-main: #637d40;      
+    --col-gold-dark: #364522;      
+    --col-banner-dark: #1a261b;    
+    --col-backing: #263327;        
+}
+
+.theme-gold {
+    --col-parchment: #614e1a;      
+    --col-text-dark: #fff5db;      
+    --col-gold-main: #ffc400;      
+    --col-gold-dark: #aa8200;      
+    --col-banner-dark: #403311;    
+    --col-backing: #4a3b14;        
+}
+
+.theme-red {
+    --col-parchment: #4a1a1a;      
+    --col-text-dark: #d6a6a6;      
+    --col-gold-main: #9a5d5d;      
+    --col-gold-dark: #5e3838;      
+    --col-banner-dark: #2e0d0d;    
+    --col-backing: #3d1212;
+}
+
+.theme-gray {
+    --col-parchment: #333333;      
+    --col-text-dark: #cccccc;      
+    --col-gold-main: #808080;      
+    --col-gold-dark: #4d4d4d;      
+    --col-banner-dark: #262626;    
+    --col-backing: #383838;
+}
+
+.theme-fel {
+    --col-parchment: #111f11;      
+    --col-text-dark: #a5d6a7;      
+    --col-gold-main: #76ff03;      
+    --col-gold-dark: #3e8a02;      
+    --col-banner-dark: #0a140a;    
+    --col-backing: #1b301b;        
+}
+
+/* Shapes */
+.pixel-card-backing {
+    clip-path: polygon(
+        0 20px, 5px 20px, 5px 15px, 10px 15px, 10px 10px, 15px 10px, 15px 5px, 20px 5px, 20px 0,
+        calc(100% - 20px) 0, calc(100% - 20px) 5px, calc(100% - 15px) 5px, calc(100% - 15px) 10px, calc(100% - 10px) 10px, calc(100% - 10px) 15px, calc(100% - 5px) 15px, calc(100% - 5px) 20px, 100% 20px,
+        100% calc(100% - 20px), calc(100% - 5px) calc(100% - 20px), calc(100% - 5px) calc(100% - 15px), calc(100% - 10px) calc(100% - 15px), calc(100% - 10px) calc(100% - 10px), calc(100% - 15px) calc(100% - 10px), calc(100% - 15px) calc(100% - 5px), calc(100% - 20px) calc(100% - 5px), calc(100% - 20px) 100%,
+        20px 100%, 20px calc(100% - 5px), 15px calc(100% - 5px), 15px calc(100% - 10px), 10px calc(100% - 10px), 10px calc(100% - 15px), 5px calc(100% - 15px), 5px calc(100% - 20px), 0 calc(100% - 20px)
+    );
+}
+
+.pixel-card-title {
+    text-shadow: 
+        -1px -1px 0 #000,  
+         1px -1px 0 #000,
+        -1px  1px 0 #000,
+         1px  1px 0 #000;
+}
+
+.pixel-card-description-box {
+    box-shadow: inset 0 0 0 2px rgba(0,0,0,0.1), inset 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.pixel-card-backing-layer {
+    background-color: var(--col-backing);
+}
+
+.pixel-card-title-banner {
+    background-color: var(--col-banner-dark);
+    border-top: 4px solid var(--col-gold-main);
+    border-left: 4px solid var(--col-gold-main);
+    border-right: 4px solid var(--col-gold-dark);
+    border-bottom: 4px solid var(--col-gold-dark);
+}
+
+.pixel-card-text-main {
+    color: var(--col-gold-main);
+}
+
+.pixel-card-bg-parchment {
+    background-color: var(--col-parchment);
+}
+
+.pixel-card-text-dark {
+    color: var(--col-text-dark);
+}
+
+.theme-blue {
+    --col-parchment: #1f3b6f;
+    --col-text-dark: #d0e7ff;
+    --col-gold-main: #5f9bff;
+    --col-gold-dark: #1b2f62;
+    --col-banner-dark: #0c224b;
+    --col-backing: #102843;
+}
+
+.theme-dark {
+    --col-parchment: #0c0c0c;
+    --col-text-dark: #f0f0f0;
+    --col-gold-main: #f2c84b;
+    --col-gold-dark: #5b3f1d;
+    --col-banner-dark: #100f10;
+    --col-backing: #161416;
+}
+
+.pixel-card-inner-shadow::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+    background: rgba(0,0,0,0.5);
+    
+    clip-path: polygon(
+        /* Outer Path (Clockwise) */
+        0 20px, 5px 20px, 5px 15px, 10px 15px, 10px 10px, 15px 10px, 15px 5px, 20px 5px, 20px 0,
+        calc(100% - 20px) 0, calc(100% - 20px) 5px, calc(100% - 15px) 5px, calc(100% - 15px) 10px, calc(100% - 10px) 10px, calc(100% - 10px) 15px, calc(100% - 5px) 15px, calc(100% - 5px) 20px, 100% 20px,
+        100% calc(100% - 20px), calc(100% - 5px) calc(100% - 20px), calc(100% - 5px) calc(100% - 15px), calc(100% - 10px) calc(100% - 15px), calc(100% - 10px) calc(100% - 10px), calc(100% - 15px) calc(100% - 10px), calc(100% - 15px) calc(100% - 5px), calc(100% - 20px) calc(100% - 5px), calc(100% - 20px) 100%,
+        20px 100%, 20px calc(100% - 5px), 15px calc(100% - 5px), 15px calc(100% - 10px), 10px calc(100% - 10px), 10px calc(100% - 15px), 5px calc(100% - 15px), 5px calc(100% - 20px), 0 calc(100% - 20px),
+        0 20px,
+
+        /* Inner Path (Counter-Clockwise - 5px Inset) */
+        5px 25px,
+        5px calc(100% - 25px),
+        10px calc(100% - 25px), 10px calc(100% - 20px), 15px calc(100% - 20px), 15px calc(100% - 15px), 20px calc(100% - 15px), 20px calc(100% - 10px), 25px calc(100% - 10px), 25px calc(100% - 5px),
+        calc(100% - 25px) calc(100% - 5px),
+        calc(100% - 25px) calc(100% - 10px), calc(100% - 20px) calc(100% - 10px), calc(100% - 20px) calc(100% - 15px), calc(100% - 15px) calc(100% - 15px), calc(100% - 15px) calc(100% - 20px), calc(100% - 10px) calc(100% - 20px), calc(100% - 10px) calc(100% - 25px), calc(100% - 5px) calc(100% - 25px),
+        calc(100% - 5px) 25px,
+        calc(100% - 10px) 25px, calc(100% - 10px) 20px, calc(100% - 15px) 20px, calc(100% - 15px) 15px, calc(100% - 20px) 15px, calc(100% - 20px) 10px, calc(100% - 25px) 10px, calc(100% - 25px) 5px,
+        25px 5px,
+        25px 10px, 20px 10px, 20px 15px, 15px 15px, 15px 20px, 10px 20px, 10px 25px, 5px 25px
+    );
+}
+
+.pixel-card-inner-bg {
+    background-color: #111;
+}
+
+.pixel-card-well-bg {
+    background-color: #000;
+    border-color: #000;
+}
+
+.pixel-card-outline {
+    outline: 2px solid #000;
+}
+

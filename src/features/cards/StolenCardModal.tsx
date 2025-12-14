@@ -1,5 +1,11 @@
 import { useEffect } from 'react'
 import type { CardInstance } from '@/types/game'
+import {
+  Card,
+  CardImage,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/8bit/card";
 import './StolenCardModal.css'
 
 interface StolenCardModalProps {
@@ -32,25 +38,11 @@ export function StolenCardModal({ card, fromPlayerName, onClose }: StolenCardMod
         <div className="stolen-card-subtitle">from {fromPlayerName}</div>
 
         <div className="stolen-card-art">
-          <div className={`pixel-card ${card.theme}`}>
-            <div className="card-backing-layer">
-              <div className="card-inner">
-                <div className="card-visual-well">
-                  <img src={card.imagePath} alt={card.title} />
-                </div>
-                <div className="title-banner">
-                  <div className="card-title">{card.title}</div>
-                </div>
-                <div className="card-description-box">
-                  {card.description}
-                </div>
-              </div>
-            </div>
-            <div
-              className="frame-overlay"
-              style={{ backgroundImage: `url('${card.framePath}')` }}
-            />
-          </div>
+          <Card theme={card.theme} frameSrc={card.framePath}>
+            <CardImage src={card.imagePath} alt={card.title} />
+            <CardTitle>{card.title}</CardTitle>
+            <CardDescription>{card.description}</CardDescription>
+          </Card>
         </div>
 
         <div className="stolen-card-hint">Click anywhere to close</div>

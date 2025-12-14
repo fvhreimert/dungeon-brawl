@@ -64,11 +64,15 @@
   gap: 20px;
   justify-content: center;
   padding: 16px 0;
+  /* Ensure container has enough height for the scaled cards if they take up flow space, 
+     but we are fixing the slot size so this is fine. */
 }
 
 .treasure-card-slot {
   position: relative;
   transition: transform 0.2s ease;
+  width: 160px;
+  height: 240px; /* 480px * 0.5 */
 }
 
 .treasure-card-slot.owned:hover {
@@ -76,9 +80,19 @@
 }
 
 .treasure-card-slot .pixel-card {
-  width: 160px;
-  --card-width: 160px;
-  --card-height: 220px;
+  transform: scale(0.5);
+  transform-origin: top left;
+  /* Since the card takes up 320x480 flow space, we force the wrapper to be smaller.
+     The scale makes it fit visually. 
+     We don't need to adjust flow here because the parent .treasure-card-slot has fixed dimensions.
+     However, the .pixel-card might overflow visually if we don't handle it, 
+     but scale handles the visual size. The layout size remains 320x480.
+     This causes the slot to expand if it wasn't fixed. 
+     Since we fixed the slot size, we just need to ensure the card doesn't push neighbors.
+     Absolute positioning is the safest way to decouple layout size. */
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .treasure-card-slot .card-description-box {
@@ -95,7 +109,7 @@
 
 .missing-card-placeholder {
   width: 160px;
-  height: 220px;
+  height: 240px; /* Updated to match new aspect ratio */
   background: linear-gradient(180deg, #1a1a1a 0%, #0d0d0d 100%);
   border: 3px dashed #4a4a4a;
   display: flex;

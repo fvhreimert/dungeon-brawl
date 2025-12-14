@@ -18,7 +18,7 @@ This repository keeps cards decoupled from the rest of the game so new mechanics
 
 ## Inventory UI & tooltip UX
 
-- `InventoryModal` renders cards using the pixel frames and overlays; clicking a card triggers `onUseCard` when the card has an `activated` handler, so there are no separate “Use” buttons.
+- `InventoryModal` (and other card-displaying modals) renders cards using the centralized `Card` component (`src/components/ui/8bit/card.tsx`), which provides the pixel frames and overlays. Clicking a card triggers `onUseCard` when the card has an `activated` handler, so there are no separate “Use” buttons.
 - The modal also drives the dynamic inventory description: special cards (Niffler, Soul Burst) query their `CardInstance.state` and format strings like `+25 pts/turn\n*123* pts total` or `*25* pts stored\nActivate to steal stored pts from a foe.` General cards fall back to `inventoryDescription ?? description`.
 - Hover tooltips render through a portal anchored to the hovered card’s bounding rect, float above the modal, show the base `description`, and appear only after ~450ms without scrolling. Any scroll/resize/wheel event immediately hides the tooltip so it never clips or duplicates.
 - The scoreboard reads `calculatePassiveDeltaForPlayer(player, players)` so the pixel arrow and number always show the same sum of passives that will fire on the next `turnAdvanced` event; `PlayerStats` continues to hold the detailed totals for gains and losses.

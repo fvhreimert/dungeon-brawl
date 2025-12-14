@@ -60,7 +60,6 @@
 }
 
 .traveling-merchant-card-wrapper .pixel-card {
-  width: 320px;
   --card-width: 320px;
   --card-height: 480px;
 }

@@ -136,7 +136,7 @@
         .frame-overlay {
             position: absolute;
             inset: 0;
-            z-index: 9999; /* Highest Z-Index to ensure it overlays content */
+            z-index: 0;
             pointer-events: none;
             box-sizing: border-box;
             
@@ -156,13 +156,21 @@
             z-index: 1;
             
             /* Dimensions calculated to sit inside the frame border */
-            width: calc(100% - (var(--border-width) * 2));
-            height: calc(100% - (var(--border-width) * 2));
+            width: calc(100% - (var(--border-width) * 4));
+            height: calc(100% - (var(--border-width) * 4));
             
             display: flex;
-            padding: 1px; /* Small gap between backing and inner content */
+            padding: 0; /* Border removed, content fills shape */
             box-sizing: border-box;
-            background-color: var(--col-backing); /* Theme-driven color */
+            background-color: #000; /* Acts as the Border Color */
+            
+            /* Outer Pixelated Corner Shape */
+            clip-path: polygon(
+                0 20px, 5px 20px, 5px 15px, 10px 15px, 10px 10px, 15px 10px, 15px 5px, 20px 5px, 20px 0,
+                calc(100% - 20px) 0, calc(100% - 20px) 5px, calc(100% - 15px) 5px, calc(100% - 15px) 10px, calc(100% - 10px) 10px, calc(100% - 10px) 15px, calc(100% - 5px) 15px, calc(100% - 5px) 20px, 100% 20px,
+                100% calc(100% - 20px), calc(100% - 5px) calc(100% - 20px), calc(100% - 5px) calc(100% - 15px), calc(100% - 10px) calc(100% - 15px), calc(100% - 10px) calc(100% - 10px), calc(100% - 15px) calc(100% - 10px), calc(100% - 15px) calc(100% - 5px), calc(100% - 20px) calc(100% - 5px), calc(100% - 20px) 100%,
+                20px 100%, 20px calc(100% - 5px), 15px calc(100% - 5px), 15px calc(100% - 10px), 10px calc(100% - 10px), 10px calc(100% - 15px), 5px calc(100% - 15px), 5px calc(100% - 20px), 0 calc(100% - 20px)
+            );
         }
 
         /* --- Inner Content Container --- */
@@ -172,25 +180,51 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            border: 2px solid #000;
+            /* Border removed, handled by parent padding + background */
             background-color: #111;
             box-sizing: border-box;
+            /* Clip path removed so content fills the backing layer shape */
         }
 
         /* Inner Shadow Vignette */
         .card-inner::after {
             content: "";
             position: absolute;
-            inset: -1px;
-            z-index: 20;
+            inset: 0;
+            z-index: 10; /* Top of content */
             pointer-events: none;
-            box-shadow: 
-                inset 0 0 0 8px rgba(0,0,0,0.8),
-                inset 0 0 0 13px rgba(0,0,0,0.6),
-                inset 0 0 0 18px rgba(0,0,0,0.4),
-                inset 0 0 0 23px rgba(0,0,0,0.2),
-                inset 0 0 0 28px rgba(0,0,0,0.1);
+            background: rgba(0,0,0,0.5); /* Shadow Color */
+            
+            /* Pixel Perfect Ring Shadow (5px thick) - Optimized */
+            clip-path: polygon(
+                /* Outer Path (Clockwise) */
+                0 20px, 5px 20px, 5px 15px, 10px 15px, 10px 10px, 15px 10px, 15px 5px, 20px 5px, 20px 0,
+                calc(100% - 20px) 0, calc(100% - 20px) 5px, calc(100% - 15px) 5px, calc(100% - 15px) 10px, calc(100% - 10px) 10px, calc(100% - 10px) 15px, calc(100% - 5px) 15px, calc(100% - 5px) 20px, 100% 20px,
+                100% calc(100% - 20px), calc(100% - 5px) calc(100% - 20px), calc(100% - 5px) calc(100% - 15px), calc(100% - 10px) calc(100% - 15px), calc(100% - 10px) calc(100% - 10px), calc(100% - 15px) calc(100% - 10px), calc(100% - 15px) calc(100% - 5px), calc(100% - 20px) calc(100% - 5px), calc(100% - 20px) 100%,
+                20px 100%, 20px calc(100% - 5px), 15px calc(100% - 5px), 15px calc(100% - 10px), 10px calc(100% - 10px), 10px calc(100% - 15px), 5px calc(100% - 15px), 5px calc(100% - 20px), 0 calc(100% - 20px),
+                0 20px,
+
+                /* Inner Path (Counter-Clockwise - 5px Inset) */
+                5px 20px,
+                /* Left Edge Down */
+                5px calc(100% - 15px), 
+                /* Bottom-Left Corner */
+                10px calc(100% - 15px), 10px calc(100% - 10px), 15px calc(100% - 10px), 15px calc(100% - 5px), 20px calc(100% - 5px),
+                /* Bottom Edge Right */
+                calc(100% - 20px) calc(100% - 5px),
+                /* Bottom-Right Corner */
+                calc(100% - 20px) calc(100% - 10px), calc(100% - 15px) calc(100% - 10px), calc(100% - 15px) calc(100% - 15px), calc(100% - 10px) calc(100% - 15px), calc(100% - 10px) calc(100% - 20px), calc(100% - 5px) calc(100% - 20px),
+                /* Right Edge Up */
+                calc(100% - 5px) 15px, 
+                /* Top-Right Corner */
+                calc(100% - 10px) 15px, calc(100% - 10px) 10px, calc(100% - 15px) 10px, calc(100% - 15px) 5px, calc(100% - 20px) 5px,
+                /* Top Edge Left */
+                20px 5px,
+                /* Top-Left Corner */
+                20px 10px, 15px 10px, 15px 15px, 10px 15px, 10px 20px, 5px 20px
+            );
         }
+
 
         /* --- Sub-Component: Visual/Image Well --- */
         .card-visual-well {
@@ -241,12 +275,7 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             
-            /* Hard Pixel Shadow */
-            text-shadow: 
-                -1px -1px 0 #000,  
-                 1px -1px 0 #000,
-                -1px  1px 0 #000,
-                 1px  1px 0 #000;
+
         }
 
         /* --- Sub-Component: Description Box --- */
@@ -266,8 +295,7 @@
             align-items: center;
             justify-content: center;
             
-            /* Inset Shadows */
-            box-shadow: inset 0 0 0 2px rgba(0,0,0,0.1), inset 0 4px 8px rgba(0,0,0,0.15);
+
         }
 
 

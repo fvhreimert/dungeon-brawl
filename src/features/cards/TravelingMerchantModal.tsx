@@ -1,6 +1,12 @@
 import { useEffect } from 'react'
 import type { CardDefinition } from '@/data/cards'
 import { Button as RetroButton } from '@/components/ui/8bit/button'
+import {
+  Card,
+  CardImage,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/8bit/card";
 import '@/features/actions/cardJester/CardRevealModal.css'
 import './TravelingMerchantModal.css'
 
@@ -43,23 +49,11 @@ export function TravelingMerchantModal({
         <div className="traveling-merchant-grid">
           {offers.map((card, index) => (
             <div key={`${card.id}-${index}`} className="card-wrapper traveling-merchant-card-wrapper">
-              <div className={`pixel-card ${card.theme}`}>
-                <div className="card-backing-layer">
-                  <div className="card-inner">
-                    <div className="card-visual-well">
-                      <img src={card.imagePath} alt={card.title} />
-                    </div>
-                    <div className="title-banner">
-                      <div className="card-title">{card.title}</div>
-                    </div>
-                    <div className="card-description-box">{card.description}</div>
-                  </div>
-                </div>
-                <div
-                  className="frame-overlay"
-                  style={{ backgroundImage: `url('${card.framePath}')` }}
-                />
-              </div>
+              <Card theme={card.theme} frameSrc={card.framePath}>
+                <CardImage src={card.imagePath} alt={card.title} />
+                <CardTitle>{card.title}</CardTitle>
+                <CardDescription>{card.description}</CardDescription>
+              </Card>
               <RetroButton
                 variant="secondary"
                 size="default"

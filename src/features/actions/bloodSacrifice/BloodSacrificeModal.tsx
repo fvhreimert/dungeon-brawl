@@ -5,15 +5,18 @@ import clickSound from '@/assets/sounds/UI/click.mp3'
 import './BloodSacrificeModal.css'
 
 type BloodSacrificeModalProps = {
+  playerScore: number
   onConfirm: (amount: number) => void
   onCancel: () => void
 }
 
-export function BloodSacrificeModal({ onConfirm, onCancel }: BloodSacrificeModalProps) {
-  const [amount, setAmount] = useState(1) // Default to 1
+export function BloodSacrificeModal({ playerScore, onConfirm, onCancel }: BloodSacrificeModalProps) {
+  const capMaxSacrifice = 100; // Slider always goes to 100 visually
+  // Initial amount to sacrifice. If playerScore is 0, start at 0. Otherwise, start at 1 or playerScore if less than 1.
+  const [amount, setAmount] = useState(Math.max(0, Math.min(1, playerScore))); 
 
-  // Calculate progress from 0 to 1 based on slider (min 1, max 100)
-  const progress = (amount - 1) / 99
+  // Calculate progress from 0 to 1 based on slider's visual range (0 to 100)
+  const progress = capMaxSacrifice > 0 ? (amount / capMaxSacrifice) : 0;
 
   const playTick = () => {
     const audio = new Audio(clickSound)
@@ -22,9 +25,16 @@ export function BloodSacrificeModal({ onConfirm, onCancel }: BloodSacrificeModal
   }
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAmount(Number(e.target.value))
-    playTick()
+    let val = Number(e.target.value)
+    // User cannot select more than their current score
+    val = Math.min(val, playerScore)
+    if (val !== amount) {
+      setAmount(val)
+      playTick()
+    }
   }
+
+  const canSacrifice = amount > 0 && amount <= playerScore;
 
   return (
     <div className="blood-sacrifice-backdrop" onClick={onCancel}>
@@ -41,11 +51,12 @@ export function BloodSacrificeModal({ onConfirm, onCancel }: BloodSacrificeModal
                 <label className="sacrifice-label">SACRIFICE: {amount}</label>
                 <input 
                     type="range" 
-                    min="1" 
-                    max="100" 
+                    min="0" 
+                    max="100" // Slider always goes to 100
                     value={amount} 
                     onChange={handleSliderChange}
                     className="bloody-slider"
+                    disabled={playerScore <= 0} // Slider is disabled if player has 0 points
                 />
             </div>
             <div className="sacrifice-actions">
@@ -54,6 +65,7 @@ export function BloodSacrificeModal({ onConfirm, onCancel }: BloodSacrificeModal
                     variant="secondary"
                     className="dialog-button-8bit sacrifice-btn-confirm"
                     onClick={() => onConfirm(amount)}
+                    disabled={!canSacrifice}
                 >
                     SACRIFICE
                 </RetroButton>
