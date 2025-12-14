@@ -135,7 +135,27 @@ export function GameBoard({
             >
               <span className="value">{tile.value}</span>
               {tile.status === 'open' && (tile.multiplier ?? 1) > 1 && !isCrumbled && !isFrozen && (
-                <span className="multiplier-badge">x{tile.multiplier}</span>
+                <>
+                  <span className="multiplier-badge">x{tile.multiplier}</span>
+                  <div className={`frog-particle-overlay frog-particles-x${tile.multiplier}`}>
+                    <div className="frog-particle" />
+                    <div className="frog-particle" />
+                    <div className="frog-particle" />
+                    <div className="frog-particle" />
+                    <div className="frog-particle" />
+                    <div className="frog-particle" />
+                  </div>
+                </>
+              )}
+              {isSurvivor && !isCrumbled && (
+                <div className="idol-particle-overlay">
+                  <div className="idol-particle" />
+                  <div className="idol-particle" />
+                  <div className="idol-particle" />
+                  <div className="idol-particle" />
+                  <div className="idol-particle" />
+                  <div className="idol-particle" />
+                </div>
               )}
               {isFrozen && !isCrumbled && (
                 <div className="tile-frozen-overlay">
