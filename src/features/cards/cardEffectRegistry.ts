@@ -330,7 +330,7 @@ const CARD_EFFECTS: Record<string, CardEffectDefinition> = {
       activated: () => ({ openTreasureSet: true }),
     },
   },
-  sad_glacial_elemental: {
+  glacial_elemental: {
     handlers: {
       activated: ({ metadata }) => {
         const tileId = typeof metadata?.tileId === 'string' ? metadata.tileId : null
@@ -349,6 +349,15 @@ const CARD_EFFECTS: Record<string, CardEffectDefinition> = {
             cardInstanceId: card.instanceId,
           },
         }
+      },
+    },
+  },
+  loot_goblin: {
+    handlers: {
+      activated: ({ ownerPlayerIndex, targetIndex, applyScoreChange }) => {
+        applyScoreChange(targetIndex, -200, 'activeCard')
+        applyScoreChange(ownerPlayerIndex, 200, 'activeCard')
+        return { playSound: 'loot_goblin' }
       },
     },
   },

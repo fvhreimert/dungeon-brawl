@@ -8,6 +8,7 @@ type NeutralPlayerSelectModalProps = {
   alliances?: readonly Alliance[]
   onSelect: (playerIndex: number) => void
   onCancel: () => void
+  requireCards?: boolean
 }
 
 export function NeutralPlayerSelectModal({
@@ -16,6 +17,7 @@ export function NeutralPlayerSelectModal({
   alliances = [],
   onSelect,
   onCancel,
+  requireCards = true,
 }: NeutralPlayerSelectModalProps) {
   const isAllied = (playerIndex: number): boolean => {
     return alliances.some(
@@ -34,7 +36,7 @@ export function NeutralPlayerSelectModal({
             if (index === activePlayerIndex) return null
             const hasCards = player.inventory.length > 0
             const allied = isAllied(index)
-            const isDisabled = !hasCards || allied
+            const isDisabled = (requireCards && !hasCards) || allied
             return (
               <div key={index} className={`neutral-player-select-item ${isDisabled ? 'disabled' : ''}`}>
                 {player.portrait && (
@@ -48,7 +50,7 @@ export function NeutralPlayerSelectModal({
                   disabled={isDisabled}
                 >
                   {player.name}
-                  {allied ? ' • allied' : !hasCards ? ' • empty' : ''}
+                  {allied ? ' • allied' : (requireCards && !hasCards) ? ' • empty' : ''}
                 </RetroButton>
               </div>
             )

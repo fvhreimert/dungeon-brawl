@@ -314,7 +314,11 @@
   to { transform: translateY(4px) scale(1.08); }
 }
 
-/* Frozen action effect - Sad Glacial Elemental */
+/* Frozen action effect - Glacial Elemental */
+.action-frozen {
+  pointer-events: none;
+}
+
 .action-item.action-frozen,
 .web-wrapper.action-frozen {
   cursor: not-allowed !important;

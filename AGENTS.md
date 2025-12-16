@@ -154,11 +154,11 @@ The game features special "Dungeon Actions" available to players, each providing
   - All player select modals (`PlayerSelectModal`, `NeutralPlayerSelectModal`, `FelPlayerSelectModal`, `PuppetMasterPlayerSelectModal`) filter out allied players.
   - Allied players show "• allied" label and are disabled.
 
-### Sad Glacial Elemental (Freeze Mechanic)
-- **Card:** `sad_glacial_elemental` in `src/data/cards.ts`
+### Glacial Elemental (Freeze Mechanic)
+- **Card:** `glacial_elemental` in `src/data/cards.ts`
 - **Mechanic:** Freezes a tile OR an action until the caster's next turn. Frozen targets cannot be used by anyone (including the caster).
 - **Flow:**
-  1. Player activates Sad Glacial Elemental from inventory (uses `targetSelectMode: 'freeze'`).
+  1. Player activates Glacial Elemental from inventory (uses `targetSelectMode: 'freeze'`).
   2. All open tiles and actions get an icy blue highlight indicating they can be frozen.
   3. Player clicks a tile or action to freeze it.
   4. The target becomes frozen with a strong icy blue visual effect and floating ice particles.

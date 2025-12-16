@@ -54,6 +54,8 @@ import spider6 from '@/assets/images/actions/spiders/spider_6.png'
 import spider7 from '@/assets/images/actions/spiders/spider_7.png'
 import spider8 from '@/assets/images/actions/spiders/spider_8.png'
 
+import lootGoblinSound from '@/assets/sounds/cards/loot_goblin.wav'
+
 const SPIDERS = [null, spider1, spider2, spider3, spider4, spider5, spider6, spider7, spider8]
 
 type StolenCardReveal = {
@@ -205,10 +207,15 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
       targetIndex: number
       cardInstanceId: string
     }
+    playSound?: string
   }
 
   const processCardEffectResult = (effectResult: unknown) => {
     const result = effectResult as CardEffectResult | undefined
+
+    if (result?.playSound === 'loot_goblin') {
+      new Audio(lootGoblinSound).play().catch(() => {})
+    }
 
     const stolenCard = result?.stolenCard
     const stolenFromIndex = result?.stolenFromIndex
@@ -866,13 +873,14 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
       )}
 
       {cardTargetSelecting && cardUsePending && (
-        cardTargetMode === 'neutral' ? (
+        (cardTargetMode === 'neutral' || cardTargetMode === 'neutral_all') ? (
           <NeutralPlayerSelectModal
             players={players}
             activePlayerIndex={activePlayerIndex}
             alliances={alliances}
             onSelect={handleCardTargetSelect}
             onCancel={handleCardTargetCancel}
+            requireCards={cardTargetMode === 'neutral'}
           />
         ) : cardTargetMode === 'fel' ? (
           <FelPlayerSelectModal

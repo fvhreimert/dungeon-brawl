@@ -48,10 +48,14 @@ import compassImg from '@/assets/images/cards/images/compass.png'
 import compassFrame from '@/assets/images/cards/frames/compass.png'
 import treasureMapImg from '@/assets/images/cards/images/treasure_map.png'
 import treasureMapFrame from '@/assets/images/cards/frames/treasure_map.png'
-import sadGlacialElementalImg from '@/assets/images/cards/images/sad_glacial_elemental.png'
-import sadGlacialElementalFrame from '@/assets/images/cards/frames/sad_glacial_elemental.png'
+import glacialElementalImg from '@/assets/images/cards/images/glacial_elemental.png'
+import glacialElementalFrame from '@/assets/images/cards/frames/glacial_elemental.png'
 import coalitionImg from '@/assets/images/cards/images/coalition.png'
 import coalitionFrame from '@/assets/images/cards/frames/coalition.png'
+import lootGoblinImg from '@/assets/images/cards/images/loot_goblin.png'
+import lootGoblinFrame from '@/assets/images/cards/frames/loot_goblin.png'
+import isopodImg from '@/assets/images/cards/images/isopod.png'
+import isopodFrame from '@/assets/images/cards/frames/isopod.png'
 
 export const CARDS: CardDefinition[] = [
   {
@@ -185,13 +189,13 @@ export const CARDS: CardDefinition[] = [
     framePath: treasureMapFrame,
   },
   {
-    id: 'sad_glacial_elemental',
-    title: 'Sad Glacial Elemental',
+    id: 'glacial_elemental',
+    title: 'Glacial Elemental',
     description: 'Freeze a tile until your next turn. Others cannot select it.',
     inventoryDescription: 'Activate to freeze a tile for one round.',
     theme: 'theme-blue',
-    imagePath: sadGlacialElementalImg,
-    framePath: sadGlacialElementalFrame,
+    imagePath: glacialElementalImg,
+    framePath: glacialElementalFrame,
     consumesOnActivate: true,
   },
   {
@@ -203,5 +207,23 @@ export const CARDS: CardDefinition[] = [
     imagePath: coalitionImg,
     framePath: coalitionFrame,
     consumesOnActivate: true,
+  },
+  {
+    id: 'loot_goblin',
+    title: 'Loot Goblin',
+    description: 'The loot goblin, is an active card, it should steal 200 points from a player of your choice.',
+    inventoryDescription: 'Steal 200 points from a player of your choice.',
+    theme: 'theme-dungeon',
+    imagePath: lootGoblinImg,
+    framePath: lootGoblinFrame,
+    consumesOnActivate: true,
+  },
+  {
+    id: 'isopod',
+    title: 'Isopod',
+    description: '...',
+    theme: 'theme-common',
+    imagePath: isopodImg,
+    framePath: isopodFrame,
   },
 ]
