@@ -8,14 +8,15 @@ type BloodSacrificeModalProps = {
   playerScore: number
   onConfirm: (amount: number) => void
   onCancel: () => void
+  isUpgraded?: boolean
 }
 
-export function BloodSacrificeModal({ playerScore, onConfirm, onCancel }: BloodSacrificeModalProps) {
-  const capMaxSacrifice = 100; // Slider always goes to 100 visually
+export function BloodSacrificeModal({ playerScore, onConfirm, onCancel, isUpgraded = false }: BloodSacrificeModalProps) {
+  const capMaxSacrifice = isUpgraded ? 200 : 100;
   // Initial amount to sacrifice. If playerScore is 0, start at 0. Otherwise, start at 1 or playerScore if less than 1.
   const [amount, setAmount] = useState(Math.max(0, Math.min(1, playerScore))); 
 
-  // Calculate progress from 0 to 1 based on slider's visual range (0 to 100)
+  // Calculate progress from 0 to 1 based on slider's visual range
   const progress = capMaxSacrifice > 0 ? (amount / capMaxSacrifice) : 0;
 
   const playTick = () => {
@@ -39,7 +40,7 @@ export function BloodSacrificeModal({ playerScore, onConfirm, onCancel }: BloodS
   return (
     <div className="blood-sacrifice-backdrop" onClick={onCancel}>
       <div className="blood-sacrifice-dialog" onClick={(e) => e.stopPropagation()}>
-        <div className="blood-sacrifice-title">Blood Sacrifice</div>
+        <div className="blood-sacrifice-title">Blood Sacrifice{isUpgraded ? ' (Upgraded)' : ''}</div>
         <div className="blood-sacrifice-content">
             <img 
               src={pentagram} 
@@ -52,7 +53,7 @@ export function BloodSacrificeModal({ playerScore, onConfirm, onCancel }: BloodS
                 <input 
                     type="range" 
                     min="0" 
-                    max="100" // Slider always goes to 100
+                    max={capMaxSacrifice}
                     value={amount} 
                     onChange={handleSliderChange}
                     className="bloody-slider"

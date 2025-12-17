@@ -78,52 +78,59 @@ Quizzes are JSON files in `src/data/quizzes/` following this structure:
 ## Dungeon Actions (Game Mechanics)
 The game features special "Dungeon Actions" available to players, each providing unique strategic advantages or chaos. These are located in the sidebars and interact directly with the game board.
 
+**Upgrade System (Current Implementation):**
+Upgraded versions of actions are currently implemented and **active for Player 1 (index 0) only** as a placeholder for testing. Future updates will introduce a mechanic for all players to unlock these upgrades.
+
 ### Mad Seer
 - **Logic:** `src/features/actions/madSeer/`
 - **Mechanic:** Allows a player to preview the content of a specific tile before committing to it.
-- **Flow:**
-  1. Player activates the Mad Seer.
-  2. Selects any open tile on the board.
-  3. A modal (`MadSeerModal`) appears, showing a chaotic swirl of words from the question.
-  4. Player can choose to **Embrace the Vision** (select the tile immediately) or **Reject the Omen** (cancel and return to board).
+- **Standard:**
+  - Player selects any open tile.
+  - A modal (`MadSeerModal`) appears with a chaotic swirl of words from the question.
+  - Player can **Embrace the Vision** (select tile) or **Reject the Omen** (cancel).
+- **Upgraded (Player 1):**
+  - **Effect:** Reveals double the amount of words in the vision, making it easier to decipher the question.
+  - **Visuals:** Uses `mad_seer_upgraded.png`, white label text, and a white pulsating glow.
 
 ### Frog of Fate
 - **Logic:** `src/features/actions/frogOfFate/`
-- **Mechanic:** Adds a multiplier to a random tile.
-- **Flow:**
-  1. Player activates the Frog of Fate.
-  2. The frog automatically "hops" across random open tiles (visual and audio cues).
-  3. Lands on a final tile and applies a **2x Multiplier**.
-  4. The multiplier persists until the tile is selected.
+- **Mechanic:** Adds a multiplier to random tiles.
+- **Standard:**
+  - Frog hops across random open tiles and lands on one.
+  - Applies a **2x Multiplier** to the landed tile.
+- **Upgraded (Player 1):**
+  - **Effect:** Two frogs are deployed simultaneously, selecting **2 unique tiles**. If both land on the same tile (rare but possible logic), multipliers stack.
+  - **Visuals:** Uses `frog_of_fate_upgraded.png`, orange label text, and an orange pulsating glow.
 
 ### Golden Idol
 - **Logic:** `src/features/actions/goldenIdol/`
 - **Mechanic:** Forces a random selection by eliminating choices.
-- **Flow:**
-  1. Player activates the Golden Idol.
-  2. A "crumbling" effect ripples through the board, visually disabling tiles.
-  3. One single **Survivor** tile remains (highlighted in gold).
-  4. All other tiles are effectively locked/crumbled.
-  5. The player is forced to select the survivor tile to proceed, which clears the crumbled state.
+- **Standard:**
+  - A "crumbling" effect disables most tiles.
+  - **1 Survivor** tile remains. Player is forced to select it.
+- **Upgraded (Player 1):**
+  - **Effect:** Selects **2 distinct survivor tiles** instead of 1. Player can choose either of the survivors.
+  - **Visuals:** Uses `golden_idol_upgraded.png`, diamond-blue label text, and a diamond-blue pulsating glow.
 
 ### Card Jester
 - **Logic:** `src/features/actions/cardJester/`
-- **Mechanic:** Grants the player a random item card.
-- **Flow:**
-  1. Player activates the Card Jester.
-  2. A random card is drawn from the deck.
-  3. A modal (`CardRevealModal`) reveals the card to the player.
-  4. The card is added to the player's inventory.
+- **Mechanic:** Grants the player random item cards.
+- **Standard:**
+  - Draws **1 card** from the deck.
+  - Displays it in a modal (`CardRevealModal`) and adds to inventory.
+- **Upgraded (Player 1):**
+  - **Effect:** Draws **2 cards** simultaneously.
+  - **Visuals:** Uses `card_jester_upgraded.png`, green label text, and a green hover glow.
 
 ### Blood Sacrifice
 - **Logic:** `src/features/actions/bloodSacrifice/`
-  - **Mechanic:** Allows a player to sacrifice points to damage or affect another player.
-  - **Flow:**
-    1. Player activates Blood Sacrifice.
-    2. A modal (`BloodSacrificeModal`) appears with a pentagram slider.
-    3. Player selects an amount of points (1-100) to sacrifice.
-    4. Player selects a target player from the `PlayerSelectModal`.
-    5. The sacrifice is performed (logic handled in game hook).
+- **Mechanic:** Allows a player to sacrifice points to damage or affect another player.
+- **Standard:**
+  - Player selects an amount to sacrifice (max **100**).
+  - Selects a target player to damage.
+- **Upgraded (Player 1):**
+  - **Effect:** Maximum sacrifice limit increased to **200** points.
+  - **Visuals:** Uses `blood_sacrifice_upgraded.png` and an intense red pulsating glow.
 
 ## Card System & Passive Tracking
 - Card definitions live in `src/data/cards.ts` while runtime behavior flows through the registry (`src/features/cards/cardEffectRegistry.ts`). Each card wires handlers for lifecycle hooks (`turnStart`, `turnAdvanced`, `damageTaken`, `activated`) and, when appropriate, an optional `getPassiveDelta` that describes how the card moves the passive meter every time a turn advances.

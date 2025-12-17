@@ -15,7 +15,7 @@ function createAudio(src: string) {
 
 export function useGoldenIdol() {
   const [isActive, setIsActive] = useState(false)
-  const [selectedSurvivorId, setSelectedSurvivorId] = useState<string | null>(null)
+  const [selectedSurvivorIds, setSelectedSurvivorIds] = useState<string[] | null>(null)
 
   const playStartIdol = useCallback(() => {
     const audio = createAudio(START_IDOL_SOUND)
@@ -38,19 +38,30 @@ export function useGoldenIdol() {
 
   const triggerIdol = useCallback(async (
     tiles: Tile[],
-    updateTileModifiers: (id: string, mods: { isCrumbled: boolean }) => void
+    updateTileModifiers: (id: string, mods: { isCrumbled: boolean }) => void,
+    count: number = 1
   ) => {
     const openTiles = tiles.filter(t => t.status === 'open')
-    if (openTiles.length < 2) return
+    if (openTiles.length < count + 1) return
 
     setIsActive(true)
-    setSelectedSurvivorId(null)
+    setSelectedSurvivorIds(null)
 
     playStartIdol()
 
-    const survivorIndex = Math.floor(Math.random() * openTiles.length)
-    const survivor = openTiles[survivorIndex]
-    const victims = openTiles.filter(t => t.id !== survivor.id)
+    // Select distinct survivors
+    const survivors: Tile[] = []
+    const availableForSurvivor = [...openTiles]
+    
+    for (let i = 0; i < count; i++) {
+        if (availableForSurvivor.length === 0) break
+        const index = Math.floor(Math.random() * availableForSurvivor.length)
+        survivors.push(availableForSurvivor[index])
+        availableForSurvivor.splice(index, 1)
+    }
+
+    const survivorIds = survivors.map(s => s.id)
+    const victims = openTiles.filter(t => !survivorIds.includes(t.id))
     const shuffledVictims = [...victims].sort(() => Math.random() - 0.5)
 
     // Crumble loop
@@ -73,7 +84,7 @@ export function useGoldenIdol() {
 
     // Set the survivor ID first, which will trigger the yellow indicator
     setIsActive(false) // Exit active state
-    setSelectedSurvivorId(survivor.id) // This triggers the yellow indicator
+    setSelectedSurvivorIds(survivorIds) // This triggers the indicator
     
     playLand() // Play land sound *after* the state for the indicator is set.
 
@@ -85,7 +96,7 @@ export function useGoldenIdol() {
 
   const clearIdolEffect = useCallback((tiles: Tile[], updateTileModifiers: (id: string, mods: { isCrumbled?: boolean }) => void) => {
     setIsActive(false)
-    setSelectedSurvivorId(null)
+    setSelectedSurvivorIds(null)
     // Clear all crumbled flags
     tiles.forEach(t => {
       if (t.modifiers?.isCrumbled) {
@@ -96,7 +107,7 @@ export function useGoldenIdol() {
 
   return {
     isActive,
-    selectedSurvivorId,
+    selectedSurvivorIds,
     triggerIdol,
     clearIdolEffect,
   }

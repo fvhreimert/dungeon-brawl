@@ -18,6 +18,26 @@
     to { opacity: 1; }
 }
 
+.cards-container {
+    display: flex;
+    gap: 32px; /* Space between cards */
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap; /* In case we have many cards later */
+    max-width: 90vw;
+}
+
+/* Add animation to cards appearing? */
+.reveal-card-item {
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+    animation-delay: 0.1s;
+}
+
+@keyframes popIn {
+    from { opacity: 0; transform: scale(0.8) translateY(20px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
 .close-hint {
     position: absolute;
     bottom: -40px;

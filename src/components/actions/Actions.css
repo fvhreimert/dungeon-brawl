@@ -87,6 +87,19 @@
     drop-shadow(0 -8px 0 rgba(160, 32, 240, 0.15));
 }
 
+.action-item:hover .mad-seer-icon.upgraded {
+  filter:
+    drop-shadow(4px 0 0 rgba(255, 255, 255, 0.3))
+    drop-shadow(-4px 0 0 rgba(255, 255, 255, 0.3))
+    drop-shadow(0 4px 0 rgba(255, 255, 255, 0.3))
+    drop-shadow(0 -4px 0 rgba(255, 255, 255, 0.3))
+    
+    drop-shadow(8px 0 0 rgba(255, 255, 255, 0.15))
+    drop-shadow(-8px 0 0 rgba(255, 255, 255, 0.15))
+    drop-shadow(0 8px 0 rgba(255, 255, 255, 0.15))
+    drop-shadow(0 -8px 0 rgba(255, 255, 255, 0.15));
+}
+
 .frog-of-fate-icon {
   width: 100%;
   height: auto;
@@ -115,11 +128,31 @@
     drop-shadow(0 -8px 0 rgba(0, 150, 0, 0.15));
 }
 
+.action-item:hover .frog-of-fate-icon.upgraded {
+  /* Intense orange glow for upgraded version */
+  filter: 
+    drop-shadow(4px 0 0 rgba(255, 165, 0, 0.4)) 
+    drop-shadow(-4px 0 0 rgba(255, 165, 0, 0.4))
+    drop-shadow(0 4px 0 rgba(255, 165, 0, 0.4))
+    drop-shadow(0 -4px 0 rgba(255, 165, 0, 0.4))
+    
+    drop-shadow(8px 0 0 rgba(255, 165, 0, 0.2))
+    drop-shadow(-8px 0 0 rgba(255, 165, 0, 0.2))
+    drop-shadow(0 8px 0 rgba(255, 165, 0, 0.2))
+    drop-shadow(0 -8px 0 rgba(255, 165, 0, 0.2));
+}
+
 .action-item.frog-animating .frog-of-fate-icon {
   animation: frogPulse 0.8s ease-in-out infinite alternate;
   filter:
     drop-shadow(0 0 8px rgba(0, 180, 0, 0.8))
     drop-shadow(0 0 16px rgba(120, 255, 160, 0.6));
+}
+
+.action-item.frog-animating .frog-of-fate-icon.upgraded {
+  filter:
+    drop-shadow(0 0 8px rgba(255, 165, 0, 0.8)) /* Orange glow */
+    drop-shadow(0 0 16px rgba(255, 200, 120, 0.6)); /* Lighter Orange */
 }
 
 @keyframes frogPulse {
@@ -154,6 +187,20 @@
     drop-shadow(0 -8px 0 rgba(139, 0, 0, 0.15));
 }
 
+.action-item:hover .blood-sacrifice-icon.upgraded {
+  /* Intense red glow for upgraded version */
+  filter: 
+    drop-shadow(4px 0 0 rgba(200, 0, 0, 0.4)) 
+    drop-shadow(-4px 0 0 rgba(200, 0, 0, 0.4))
+    drop-shadow(0 4px 0 rgba(200, 0, 0, 0.4))
+    drop-shadow(0 -4px 0 rgba(200, 0, 0, 0.4))
+    
+    drop-shadow(8px 0 0 rgba(200, 0, 0, 0.2))
+    drop-shadow(-8px 0 0 rgba(200, 0, 0, 0.2))
+    drop-shadow(0 8px 0 rgba(200, 0, 0, 0.2))
+    drop-shadow(0 -8px 0 rgba(200, 0, 0, 0.2));
+}
+
 .card-jester-icon {
   width: 100%;
   height: auto;
@@ -180,6 +227,20 @@
     drop-shadow(-8px 0 0 rgba(255, 165, 0, 0.15))
     drop-shadow(0 8px 0 rgba(255, 165, 0, 0.15))
     drop-shadow(0 -8px 0 rgba(255, 165, 0, 0.15));
+}
+
+.action-item:hover .card-jester-icon.upgraded {
+  /* Green glow for upgraded version */
+  filter: 
+    drop-shadow(4px 0 0 rgba(0, 255, 0, 0.3)) 
+    drop-shadow(-4px 0 0 rgba(0, 255, 0, 0.3))
+    drop-shadow(0 4px 0 rgba(0, 255, 0, 0.3))
+    drop-shadow(0 -4px 0 rgba(0, 255, 0, 0.3))
+    
+    drop-shadow(8px 0 0 rgba(0, 255, 0, 0.15))
+    drop-shadow(-8px 0 0 rgba(0, 255, 0, 0.15))
+    drop-shadow(0 8px 0 rgba(0, 255, 0, 0.15))
+    drop-shadow(0 -8px 0 rgba(0, 255, 0, 0.15));
 }
 
 .action-item {
@@ -228,11 +289,25 @@
   text-shadow: 0 0 8px rgba(160, 32, 240, 0.8);
 }
 
+.action-label-white {
+  color: rgba(255, 255, 255, 1);
+}
+
+.action-item:hover .action-label-white {
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+}
+
 .action-item.madseer-armed .mad-seer-icon {
   filter:
     drop-shadow(0 0 10px rgba(160, 32, 240, 0.8))
     drop-shadow(0 0 18px rgba(214, 157, 255, 0.35));
   animation: madseerIconPulse 1.3s ease-in-out infinite alternate;
+}
+
+.action-item.madseer-armed .mad-seer-icon.upgraded {
+  filter:
+    drop-shadow(0 0 10px rgba(255, 255, 255, 0.8))
+    drop-shadow(0 0 18px rgba(200, 200, 255, 0.6));
 }
 
 .action-item.madseer-armed .action-label-purple {
@@ -302,11 +377,39 @@
     drop-shadow(0 -8px 0 rgba(255, 215, 0, 0.15));
 }
 
+.action-item:hover .golden-idol-icon.upgraded {
+  /* Diamond blue glow for upgraded version */
+  filter: 
+    drop-shadow(4px 0 0 rgba(100, 200, 255, 0.4)) 
+    drop-shadow(-4px 0 0 rgba(100, 200, 255, 0.4))
+    drop-shadow(0 4px 0 rgba(100, 200, 255, 0.4))
+    drop-shadow(0 -4px 0 rgba(100, 200, 255, 0.4))
+    
+    drop-shadow(8px 0 0 rgba(100, 200, 255, 0.2))
+    drop-shadow(-8px 0 0 rgba(100, 200, 255, 0.2))
+    drop-shadow(0 8px 0 rgba(100, 200, 255, 0.2))
+    drop-shadow(0 -8px 0 rgba(100, 200, 255, 0.2));
+}
+
+.action-label-blue {
+  color: rgba(100, 200, 255, 1);
+}
+
+.action-item:hover .action-label-blue {
+  text-shadow: 0 0 8px rgba(100, 200, 255, 0.8);
+}
+
 .action-item.idol-animating .golden-idol-icon {
   animation: idolPulse 0.8s ease-in-out infinite alternate;
   filter:
     drop-shadow(0 0 8px rgba(255, 215, 0, 0.8))
     drop-shadow(0 0 16px rgba(255, 255, 224, 0.6));
+}
+
+.action-item.idol-animating .golden-idol-icon.upgraded {
+  filter:
+    drop-shadow(0 0 8px rgba(100, 200, 255, 0.8)) /* Diamond Blue glow */
+    drop-shadow(0 0 16px rgba(150, 230, 255, 0.6)); /* Lighter Diamond Blue */
 }
 
 @keyframes idolPulse {
@@ -323,6 +426,9 @@
 .web-wrapper.action-frozen {
   cursor: not-allowed !important;
   pointer-events: auto;
+}
+
+.action-item.action-frozen {
   position: relative;
 }
 

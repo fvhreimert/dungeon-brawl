@@ -23,13 +23,18 @@ import type { QAItem, Tile, PlayerConfig, CardInstance, ActionId } from '@/types
 import { type CardDefinition } from '@/data/cards'
 
 import cardJesterIcon from '@/assets/images/actions/card_jester.png'
+import cardJesterUpgradedIcon from '@/assets/images/actions/card_jester_upgraded.png'
 import madSeerIcon from '@/assets/images/actions/mad_seer.png'
+import madSeerUpgradedIcon from '@/assets/images/actions/mad_seer_upraded.png'
 import bloodSacrificeIcon from '@/assets/images/actions/blood_sacrifice.png'
+import bloodSacrificeUpgradedIcon from '@/assets/images/actions/blood_sacrifice_upgraded.png'
 import minimizeIcon from '@/assets/images/ui/minimize.png'
 import expandIcon from '@/assets/images/ui/expand.png'
 import webIcon from '@/assets/images/actions/web.png'
 import frogIcon from '@/assets/images/actions/frog_of_fate.png'
+import frogUpgradedIcon from '@/assets/images/actions/frog_of_fate_upgraded.png'
 import idolIcon from '@/assets/images/actions/golden_idol.png'
+import idolUpgradedIcon from '@/assets/images/actions/golden_idol_upgraded.png'
 import { CardRevealModal } from '@/features/actions/cardJester/CardRevealModal'
 import { InventoryModal } from '@/components/game/InventoryModal'
 import { StolenCardModal } from '@/features/cards/StolenCardModal'
@@ -76,14 +81,14 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
   const [madSeerActive, setMadSeerActive] = useState(false)
   const [madSeerPreviewTile, setMadSeerPreviewTile] = useState<Tile | null>(null)
   const [frogSelecting, setFrogSelecting] = useState(false)
-  const [frogHighlightId, setFrogHighlightId] = useState<string | null>(null)
-  const [frogLandingId, setFrogLandingId] = useState<string | null>(null)
+  const [frogHighlightIds, setFrogHighlightIds] = useState<string[]>([])
+  const [frogLandingIds, setFrogLandingIds] = useState<string[]>([])
   
   const [bloodSacrificeActive, setBloodSacrificeActive] = useState(false)
   const [bloodSacrificeAmount, setBloodSacrificeAmount] = useState<number | null>(null)
   const [bloodSacrificeTargetSelecting, setBloodSacrificeTargetSelecting] = useState(false)
 
-  const [currentCard, setCurrentCard] = useState<CardDefinition | null>(null)
+  const [revealedCards, setRevealedCards] = useState<CardDefinition[]>([])
   const [inventoryPlayerIndex, setInventoryPlayerIndex] = useState<number | null>(null)
   const [cardUsePending, setCardUsePending] = useState<CardInstance | null>(null)
   const [cardTargetSelecting, setCardTargetSelecting] = useState(false)
@@ -102,7 +107,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
   const { playStart: playFrogStart, playHop, playLand } = useFrogSounds()
   const { playStart: playMadSeerStart } = useMadSeerSounds()
   const { playStart: playBloodSacrificeStart, playLand: playBloodSacrificeLand } = useBloodSacrificeSounds()
-  const { triggerIdol, isActive: idolActive, selectedSurvivorId, clearIdolEffect } = useGoldenIdol()
+  const { triggerIdol, isActive: idolActive, selectedSurvivorIds, clearIdolEffect } = useGoldenIdol()
   const {
     tiles,
     players,
@@ -186,12 +191,25 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     if (handleActionFreezeClick('card_jester')) return
     if (frozenActions.card_jester) return
     if (madSeerActive || frogSelecting || selectedTile || idolActive || bloodSacrificeActive) return
-    const drawContext = buildCardDrawContext(players, activePlayerIndex)
-    const entry = pickCardForPlayer(drawContext)
-    if (!entry) return
-    const randomCard = entry.definition
-    setCurrentCard(randomCard)
-    addCardToInventory(randomCard)
+
+    // Player 1 gets upgraded effect (2 cards)
+    const isUpgraded = activePlayerIndex === 0
+    const cardsToDraw = isUpgraded ? 2 : 1
+    const newCards: CardDefinition[] = []
+
+    for (let i = 0; i < cardsToDraw; i++) {
+      const drawContext = buildCardDrawContext(players, activePlayerIndex)
+      const entry = pickCardForPlayer(drawContext)
+      if (entry) {
+        const card = entry.definition
+        addCardToInventory(card)
+        newCards.push(card)
+      }
+    }
+
+    if (newCards.length > 0) {
+      setRevealedCards(prev => [...prev, ...newCards])
+    }
   }
 
   const handleInventoryClick = (playerIndex: number) => {
@@ -218,19 +236,23 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     }
 
     const stolenCard = result?.stolenCard
-    const stolenFromIndex = result?.stolenFromIndex
-    if (stolenCard && typeof stolenFromIndex === 'number') {
-      const fromName = players[stolenFromIndex]?.name ?? `Player ${stolenFromIndex + 1}`
-      setStolenCardReveal({ card: stolenCard, fromPlayerName: fromName })
+    if (stolenCard && result.stolenFromIndex !== undefined) {
+      setStolenCardReveal({
+        card: stolenCard,
+        fromPlayerName: players[result.stolenFromIndex].name
+      })
     }
 
-    if (Array.isArray(result?.merchantOffers) && result?.merchantOffers.length > 0) {
+    if (result?.merchantOffers) {
       setMerchantOffers(result.merchantOffers)
     }
 
     if (result?.createAlliance) {
-      const { initiatorIndex, targetIndex, cardInstanceId } = result.createAlliance
-      createAlliance(initiatorIndex, targetIndex, cardInstanceId)
+      createAlliance(
+        result.createAlliance.initiatorIndex, 
+        result.createAlliance.targetIndex,
+        result.createAlliance.cardInstanceId
+      )
     }
   }
 
@@ -380,8 +402,8 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     }
 
     // If Golden Idol just ran, logic is handled in GameBoard regarding 'disabled'.
-    if (selectedSurvivorId) {
-      if (tileId === selectedSurvivorId) {
+    if (selectedSurvivorIds) {
+      if (selectedSurvivorIds.includes(tileId)) {
         handleTileClick(tileId)
         // Clear persistent crumbled state
         clearIdolEffect(tiles, updateTileModifiers)
@@ -395,7 +417,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
   const handleMadSeerAccept = () => {
     if (!madSeerPreviewTile) return
     handleTileClick(madSeerPreviewTile.id)
-    if (selectedSurvivorId && madSeerPreviewTile.id === selectedSurvivorId) {
+    if (selectedSurvivorIds && selectedSurvivorIds.includes(madSeerPreviewTile.id)) {
         clearIdolEffect(tiles, updateTileModifiers)
     }
     setMadSeerPreviewTile(null)
@@ -437,38 +459,68 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
 
   const getOpenTiles = () => tiles.filter((tile) => tile.status === 'open')
 
-  const runFrogSelection = async () => {
+  const runFrogSelection = async (count: number = 1) => {
     const openTiles = getOpenTiles()
     if (openTiles.length === 0) return
 
     setFrogSelecting(true)
-    setFrogLandingId(null)
-    const sequence: string[] = []
-    const shuffled = [...openTiles].sort(() => Math.random() - 0.5)
-    shuffled.forEach((tile) => sequence.push(tile.id))
+    setFrogLandingIds([])
     
     // Scale extra hops based on board size to speed up end-game
     const extraHops = Math.min(10, Math.max(2, Math.floor(openTiles.length / 2)))
     
-    for (let i = 0; i < extraHops; i++) {
-      sequence.push(openTiles[Math.floor(Math.random() * openTiles.length)].id)
+    // Generate 'count' independent sequences
+    const sequences: string[][] = []
+    
+    for (let f = 0; f < count; f++) {
+      const sequence: string[] = []
+      const shuffled = [...openTiles].sort(() => Math.random() - 0.5)
+      shuffled.forEach((tile) => sequence.push(tile.id))
+      
+      for (let i = 0; i < extraHops; i++) {
+        sequence.push(openTiles[Math.floor(Math.random() * openTiles.length)].id)
+      }
+      sequences.push(sequence)
     }
 
-    for (let i = 0; i < sequence.length; i++) {
-      setFrogHighlightId(sequence[i])
+    // Determine the max length so we can loop through steps
+    const maxSteps = Math.max(...sequences.map(s => s.length))
+
+    for (let i = 0; i < maxSteps; i++) {
+      // Collect current step's highlighted tiles for all frogs
+      const currentHighlights: string[] = []
+      
+      sequences.forEach(seq => {
+         // If sequence ended, hold on the last tile (the landing spot)
+         if (i < seq.length) {
+            currentHighlights.push(seq[i])
+         } else {
+            currentHighlights.push(seq[seq.length - 1])
+         }
+      })
+      
+      setFrogHighlightIds(currentHighlights)
       playHop()
-      const progress = i / sequence.length
+      
+      const progress = i / maxSteps
       const delay = 120 + progress * 140
       await new Promise((resolve) => setTimeout(resolve, delay))
     }
 
-    const finalTileId = sequence[sequence.length - 1]
-    setFrogHighlightId(null)
-    setFrogLandingId(finalTileId)
-    applyTileMultiplier(finalTileId, 2)
+    // Finalize
+    const finalTileIds = sequences.map(seq => seq[seq.length - 1])
+    setFrogHighlightIds([])
+    setFrogLandingIds(finalTileIds)
+    
+    // Apply multiplier to each landed tile
+    // If multiple frogs land on same tile, applyTileMultiplier is called multiple times
+    finalTileIds.forEach(id => {
+      applyTileMultiplier(id, 2)
+    })
+    
     playLand()
     setTimeout(() => {
-      setFrogLandingId(null)
+      setFrogLandingIds([])
       setFrogSelecting(false)
     }, 900)
   }
@@ -477,15 +529,19 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     if (handleActionFreezeClick('frog_of_fate')) return
     if (frozenActions.frog_of_fate) return
     if (madSeerActive || frogSelecting || selectedTile || idolActive) return
+    
+    const isUpgraded = activePlayerIndex === 0
     playFrogStart()
-    runFrogSelection()
+    runFrogSelection(isUpgraded ? 2 : 1)
   }
 
   const handleIdolClick = () => {
     if (handleActionFreezeClick('golden_idol')) return
     if (frozenActions.golden_idol) return
-    if (madSeerActive || frogSelecting || selectedTile || idolActive || selectedSurvivorId) return
-    triggerIdol(tiles, updateTileModifiers)
+    if (madSeerActive || frogSelecting || selectedTile || idolActive || selectedSurvivorIds) return
+    
+    const isUpgraded = activePlayerIndex === 0
+    triggerIdol(tiles, updateTileModifiers, isUpgraded ? 2 : 1)
   }
 
   useEffect(() => {
@@ -533,8 +589,14 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
               <div className="ice-particle" />
             </div>
           )}
-          <img src={cardJesterIcon} alt="Card Jester" className="card-jester-icon" />
-          <span className="action-label action-label-orange">Card Jester</span>
+          <img 
+            src={activePlayerIndex === 0 ? cardJesterUpgradedIcon : cardJesterIcon} 
+            alt="Card Jester" 
+            className={`card-jester-icon ${activePlayerIndex === 0 ? 'upgraded' : ''}`}
+          />
+          <span className={`action-label ${activePlayerIndex === 0 ? 'action-label-green' : 'action-label-orange'}`}>
+            Card Jester
+          </span>
           {frozenActions.card_jester && (
             <div className="action-frozen-overlay front">
               <div className="ice-particle" />
@@ -566,8 +628,14 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
               <div className="ice-particle" />
             </div>
           )}
-          <img src={madSeerIcon} alt="Mad Seer" className="mad-seer-icon" />
-          <span className="action-label action-label-purple">Mad Seer</span>
+          <img 
+            src={activePlayerIndex === 0 ? madSeerUpgradedIcon : madSeerIcon} 
+            alt="Mad Seer" 
+            className={`mad-seer-icon ${activePlayerIndex === 0 ? 'upgraded' : ''}`} 
+          />
+          <span className={`action-label ${activePlayerIndex === 0 ? 'action-label-white' : 'action-label-purple'}`}>
+            Mad Seer
+          </span>
           {frozenActions.mad_seer && (
             <div className="action-frozen-overlay front">
               <div className="ice-particle" />
@@ -597,7 +665,11 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
               <div className="ice-particle" />
             </div>
           )}
-          <img src={bloodSacrificeIcon} alt="Blood Sacrifice" className="blood-sacrifice-icon" />
+          <img 
+            src={activePlayerIndex === 0 ? bloodSacrificeUpgradedIcon : bloodSacrificeIcon} 
+            alt="Blood Sacrifice" 
+            className={`blood-sacrifice-icon ${activePlayerIndex === 0 ? 'upgraded' : ''}`} 
+          />
           <span className="action-label action-label-red">Blood Sacrifice</span>
           {frozenActions.blood_sacrifice && (
             <div className="action-frozen-overlay front">
@@ -652,9 +724,9 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
           highlightOpenTiles={madSeerActive}
           highlightedTileId={madSeerPreviewTile?.id ?? null}
           boardLocked={!!selectedTile || !!madSeerPreviewTile || frogSelecting || idolActive}
-          frogHighlightId={frogHighlightId}
-          frogLandingId={frogLandingId}
-          idolSurvivorId={selectedSurvivorId}
+          frogHighlightIds={frogHighlightIds}
+          frogLandingIds={frogLandingIds}
+          idolSurvivorIds={selectedSurvivorIds}
           puppetLockCategory={activePuppetLockCategory}
           freezeSelectMode={freezeSelectMode}
         />
@@ -746,8 +818,14 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
               <div className="ice-particle" />
             </div>
           )}
-          <img src={frogIcon} alt="Frog of Fate" className="frog-of-fate-icon" />
-          <span className="action-label action-label-green">Frog of Fate</span>
+          <img 
+            src={activePlayerIndex === 0 ? frogUpgradedIcon : frogIcon} 
+            alt="Frog of Fate" 
+            className={`frog-of-fate-icon ${activePlayerIndex === 0 ? 'upgraded' : ''}`}
+          />
+          <span className={`action-label ${activePlayerIndex === 0 ? 'action-label-orange' : 'action-label-green'}`}>
+            Frog of Fate
+          </span>
           {frozenActions.frog_of_fate && (
             <div className="action-frozen-overlay front">
               <div className="ice-particle" />
@@ -779,8 +857,14 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
               <div className="ice-particle" />
             </div>
           )}
-          <img src={idolIcon} alt="Golden Idol" className="golden-idol-icon" />
-          <span className="action-label action-label-gold">Golden Idol</span>
+          <img 
+            src={activePlayerIndex === 0 ? idolUpgradedIcon : idolIcon} 
+            alt="Golden Idol" 
+            className={`golden-idol-icon ${activePlayerIndex === 0 ? 'upgraded' : ''}`}
+          />
+          <span className={`action-label ${activePlayerIndex === 0 ? 'action-label-blue' : 'action-label-gold'}`}>
+            Golden Idol
+          </span>
           {frozenActions.golden_idol && (
             <div className="action-frozen-overlay front">
               <div className="ice-particle" />
@@ -799,6 +883,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
           tile={madSeerPreviewTile}
           onAccept={handleMadSeerAccept}
           onReject={handleMadSeerReject}
+          isUpgraded={activePlayerIndex === 0}
         />
       )}
 
@@ -807,6 +892,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
           playerScore={players[activePlayerIndex]?.score ?? 0}
           onConfirm={handleBloodSacrificeConfirm}
           onCancel={handleBloodSacrificeCancel}
+          isUpgraded={activePlayerIndex === 0}
         />
       )}
 
@@ -820,10 +906,10 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
         />
       )}
 
-      {currentCard && (
+      {revealedCards.length > 0 && (
         <CardRevealModal
-          card={currentCard}
-          onClose={() => setCurrentCard(null)}
+          cards={revealedCards}
+          onClose={() => setRevealedCards([])}
         />
       )}
 

@@ -9,11 +9,11 @@ import {
 import './CardRevealModal.css'
 
 interface CardRevealModalProps {
-  card: CardDefinition
+  cards: CardDefinition[]
   onClose: () => void
 }
 
-export function CardRevealModal({ card, onClose }: CardRevealModalProps) {
+export function CardRevealModal({ cards, onClose }: CardRevealModalProps) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -33,15 +33,21 @@ export function CardRevealModal({ card, onClose }: CardRevealModalProps) {
 
   return (
     <div className="card-reveal-backdrop" onClick={onClose}>
-      <Card
-        theme={card.theme}
-        frameSrc={card.framePath}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <CardImage src={card.imagePath} alt={card.title} />
-        <CardTitle>{card.title}</CardTitle>
-        <CardDescription>{card.description}</CardDescription>
-      </Card>
+      <div className="cards-container">
+        {cards.map((card, index) => (
+          <Card
+            key={`${card.id}-${index}`}
+            theme={card.theme}
+            frameSrc={card.framePath}
+            onClick={(e) => e.stopPropagation()}
+            className="reveal-card-item"
+          >
+            <CardImage src={card.imagePath} alt={card.title} />
+            <CardTitle>{card.title}</CardTitle>
+            <CardDescription>{card.description}</CardDescription>
+          </Card>
+        ))}
+      </div>
     </div>
   )
 }

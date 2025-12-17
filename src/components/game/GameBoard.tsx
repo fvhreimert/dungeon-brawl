@@ -8,10 +8,10 @@ type GameBoardProps = {
   highlightOpenTiles?: boolean
   highlightedTileId?: string | null
   boardLocked?: boolean
-  frogHighlightId?: string | null
-  frogLandingId?: string | null
+  frogHighlightIds?: string[] | null
+  frogLandingIds?: string[] | null
   idolLockedTileIds?: string[] | null
-  idolSurvivorId?: string | null
+  idolSurvivorIds?: string[] | null
   puppetLockCategory?: string | null
   freezeSelectMode?: boolean
 }
@@ -23,10 +23,10 @@ export function GameBoard({
   highlightOpenTiles = false,
   highlightedTileId = null,
   boardLocked = false,
-  frogHighlightId = null,
-  frogLandingId = null,
+  frogHighlightIds = null,
+  frogLandingIds = null,
   idolLockedTileIds = null,
-  idolSurvivorId = null,
+  idolSurvivorIds = null,
   puppetLockCategory = null,
   freezeSelectMode = false,
 }: GameBoardProps) {
@@ -54,7 +54,7 @@ export function GameBoard({
         {tiles.map((tile) => {
           // Use persisted state OR animation state
           const isCrumbled = tile.modifiers?.isCrumbled || idolLockedTileIds?.includes(tile.id)
-          const isSurvivor = idolSurvivorId && tile.id === idolSurvivorId
+          const isSurvivor = idolSurvivorIds?.includes(tile.id)
           const frozenInfo = tile.modifiers?.frozen
           const isFrozen = !!frozenInfo
 
@@ -67,11 +67,14 @@ export function GameBoard({
             boardLocked || 
             tile.status === 'done' || 
             !!isCrumbled || 
-            (!!idolSurvivorId && !isSurvivor && !highlightOpenTiles) ||
+            (!!idolSurvivorIds && !isSurvivor && !highlightOpenTiles) ||
             !!isPuppetBlocked ||
             isFrozen
 
           const showFreezeTarget = freezeSelectMode && tile.status === 'open' && !isCrumbled && !isFrozen
+
+          const isFrogHighlight = frogHighlightIds?.includes(tile.id)
+          const isFrogLanding = frogLandingIds?.includes(tile.id)
 
           return (
             <button
@@ -92,11 +95,11 @@ export function GameBoard({
                 isSurvivor && !isCrumbled ? 'tile-idol-survivor' : ''
               } ${
                 // Frog highlights - use next tier color if tile already has a multiplier
-                frogHighlightId === tile.id
+                isFrogHighlight
                   ? `tile-frog-highlight${(tile.multiplier ?? 1) > 1 ? `-next-x${(tile.multiplier ?? 1) * 2}` : ''}`
                   : ''
               } ${
-                frogLandingId === tile.id
+                isFrogLanding
                   ? `tile-frog-landing${(tile.multiplier ?? 1) > 1 ? `-next-x${(tile.multiplier ?? 1) * 2}` : ''}`
                   : ''
               } ${

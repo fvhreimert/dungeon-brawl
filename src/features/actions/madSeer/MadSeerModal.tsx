@@ -7,6 +7,7 @@ type MadSeerModalProps = {
   tile: Tile
   onAccept: () => void
   onReject: () => void
+  isUpgraded?: boolean
 }
 
 type FloatingWord = {
@@ -35,7 +36,7 @@ function createSeededRandom(seed: string) {
   }
 }
 
-export function MadSeerModal({ tile, onAccept, onReject }: MadSeerModalProps) {
+export function MadSeerModal({ tile, onAccept, onReject, isUpgraded = false }: MadSeerModalProps) {
   const floatingWords = useMemo<FloatingWord[]>(() => {
     const random = createSeededRandom(`${tile.id}-${tile.question}`)
     const cleanedWords = tile.question
@@ -44,10 +45,14 @@ export function MadSeerModal({ tile, onAccept, onReject }: MadSeerModalProps) {
       .filter(Boolean)
 
     const uniqueWords = Array.from(new Set(cleanedWords))
-    const count = Math.min(
+    let count = Math.min(
       uniqueWords.length || cleanedWords.length,
       Math.max(4, Math.floor(random() * 5) + 4),
     )
+    
+    if (isUpgraded) {
+      count = Math.min(uniqueWords.length || cleanedWords.length, count * 2)
+    }
 
     const source = uniqueWords.length > 0 ? uniqueWords : cleanedWords
     const shuffled = [...source].sort(() => random() - 0.5)
@@ -67,7 +72,7 @@ export function MadSeerModal({ tile, onAccept, onReject }: MadSeerModalProps) {
         direction: random() > 0.5 ? 'reverse' : 'normal',
       }
     })
-  }, [tile.id, tile.question])
+  }, [tile.id, tile.question, isUpgraded])
 
   return (
     <div className="madseer-backdrop" onClick={onReject}>
