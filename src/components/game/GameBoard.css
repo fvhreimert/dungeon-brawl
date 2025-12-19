@@ -29,6 +29,10 @@
   box-shadow:
     0 4px 0 #000000,
     0 0 0 2px #0a0a0a;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+  min-width: 0;
 }
 
 .category-chip-puppet {

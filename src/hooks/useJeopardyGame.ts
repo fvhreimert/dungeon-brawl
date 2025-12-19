@@ -17,8 +17,9 @@ import type {
   Alliance,
   Alliances,
   AllianceColor,
+  UpgradeableAction,
 } from '@/types/game'
-import type { CardDefinition } from '@/data/cards'
+import { CARDS, type CardDefinition } from '@/data/cards'
 import { gameConfig } from '@/config/gameConfig'
 import {
   runCardEffect,
@@ -46,15 +47,6 @@ const createDefaultPlayerStats = (): PlayerStats => ({
   puppetLock: null,
 })
 
-const buildPlayerWithStats = (config: PlayerConfig): Player => {
-  const basePlayer = {
-    ...config,
-    inventory: [...config.inventory],
-  }
-  const stats = createDefaultPlayerStats()
-  return { ...basePlayer, stats }
-}
-
 const createCardInstance = (definition: CardDefinition): CardInstance => {
   const uid = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
     ? crypto.randomUUID()
@@ -64,6 +56,27 @@ const createCardInstance = (definition: CardDefinition): CardInstance => {
     instanceId: `${definition.id}-${uid}`,
     state: {},
   }
+}
+
+const buildPlayerWithStats = (config: PlayerConfig): Player => {
+  const basePlayer = {
+    ...config,
+    inventory: [...config.inventory],
+  }
+  
+  // If player is named "TEST", give them 100 of every card
+  if (config.name === 'TEST') {
+    const testCards: CardInstance[] = []
+    for (const cardDef of CARDS) {
+      for (let i = 0; i < 100; i++) {
+        testCards.push(createCardInstance(cardDef))
+      }
+    }
+    basePlayer.inventory = [...testCards, ...basePlayer.inventory]
+  }
+  
+  const stats = createDefaultPlayerStats()
+  return { ...basePlayer, stats }
 }
 
 const addToTurnTotals = (totals: { total: number; thisTurn: number }, amount: number) => ({
@@ -449,7 +462,17 @@ export function useJeopardyGame({
 
     saveSnapshot()
     const effectiveValue = selectedTile.value * (selectedTile.multiplier ?? 1)
-    const scoreChange = correct ? effectiveValue : -effectiveValue
+    
+    // Apply spider sense bonus for correct answers (5% per level)
+    let scoreChange: number
+    if (correct) {
+      const spiderSenseLevel = players[activePlayerIndex].spiderSenseLevel ?? 0
+      const bonusMultiplier = 1 + (spiderSenseLevel * 0.05)
+      scoreChange = Math.round(effectiveValue * bonusMultiplier)
+    } else {
+      scoreChange = -effectiveValue
+    }
+    
     recordStat(correct ? 'correct' : 'wrong', scoreChange)
 
     setTiles((prev) =>
@@ -819,6 +842,41 @@ export function useJeopardyGame({
     }
   }, [players.length, applyScoreChange, saveSnapshot])
 
+  const increaseSpiderSense = useCallback((playerIndex: number) => {
+    if (playerIndex >= 0 && playerIndex < players.length) {
+      saveSnapshot()
+      setPlayers((prev) =>
+        prev.map((player, index) => {
+          if (index !== playerIndex) return player
+          const currentLevel = player.spiderSenseLevel ?? 0
+          if (currentLevel >= 10) return player
+          return {
+            ...player,
+            spiderSenseLevel: currentLevel + 1,
+          }
+        })
+      )
+    }
+  }, [players.length, saveSnapshot])
+
+  const upgradeAction = useCallback((playerIndex: number, actionId: UpgradeableAction) => {
+    if (playerIndex >= 0 && playerIndex < players.length) {
+      saveSnapshot()
+      setPlayers((prev) =>
+        prev.map((player, index) => {
+          if (index !== playerIndex) return player
+          return {
+            ...player,
+            upgradedActions: {
+              ...player.upgradedActions,
+              [actionId]: true,
+            },
+          }
+        })
+      )
+    }
+  }, [players.length, saveSnapshot])
+
   return {
     tiles,
     players,
@@ -837,6 +895,7 @@ export function useJeopardyGame({
     updateTileModifiers,
     performBloodSacrifice,
     addCardToInventory,
+    removeCardFromInventory,
     activateCard,
     activePuppetLockCategory,
     combineTreasureSet,
@@ -845,6 +904,8 @@ export function useJeopardyGame({
     frozenActions,
     setActivePlayer,
     adjustPlayerScore,
+    increaseSpiderSense,
+    upgradeAction,
     alliances,
     createAlliance,
     arePlayersAllied,

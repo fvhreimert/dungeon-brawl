@@ -46,11 +46,17 @@ export type PlayerStats = {
   puppetLock?: PuppetLock | null
 }
 
+export type UpgradeableAction = 'mad_seer' | 'card_jester' | 'blood_sacrifice' | 'frog_of_fate' | 'golden_idol'
+
+export type PlayerUpgrades = Partial<Record<UpgradeableAction, boolean>>
+
 export type PlayerConfig = {
   name: string
   score: number
   inventory: CardInstance[]
   portrait?: string
+  spiderSenseLevel?: number
+  upgradedActions?: PlayerUpgrades
 }
 
 export type Player = PlayerConfig & {

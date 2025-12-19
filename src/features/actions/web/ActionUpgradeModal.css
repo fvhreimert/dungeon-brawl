@@ -1,0 +1,203 @@
+.action-upgrade-backdrop {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 30%, rgba(20, 10, 30, 0.7), rgba(5, 0, 10, 0.97));
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  z-index: 85;
+  backdrop-filter: blur(6px);
+}
+
+.action-upgrade-dialog {
+  width: min(1200px, 98vw);
+  max-height: 95vh;
+  overflow-y: auto;
+  background: linear-gradient(180deg, #1a1020 0%, #0d0812 100%);
+  border: 4px solid #4a3060;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.9),
+    0 0 0 4px #0a0510,
+    inset 0 0 0 2px #2d1d40,
+    0 0 40px rgba(100, 50, 150, 0.3);
+  color: #e0d0f0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.5rem 3rem;
+  gap: 2rem;
+  image-rendering: pixelated;
+}
+
+.action-upgrade-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 2px solid #4a3060;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+.action-upgrade-close:hover {
+  background: rgba(100, 50, 150, 0.4);
+  border-color: #8050a0;
+}
+
+.action-upgrade-close img {
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  filter: brightness(0.8);
+}
+
+.action-upgrade-title {
+  font-family: 'ArcadeClassic', sans-serif;
+  font-size: 42px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: #b080d0;
+  text-shadow:
+    0 0 20px rgba(150, 100, 200, 0.6),
+    2px 2px 0 #1a0a25;
+  text-align: center;
+}
+
+.action-upgrade-subtitle {
+  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-size: 12px;
+  color: #a080c0;
+  text-align: center;
+}
+
+.upgrade-grid {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+  padding: 16px;
+}
+
+.upgrade-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 28px 24px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 2px solid #3d2850;
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.4);
+  transition: all 0.2s ease;
+  width: 220px;
+  flex-shrink: 0;
+}
+
+.upgrade-card:hover:not(.already-upgraded) {
+  border-color: #6040a0;
+  box-shadow:
+    inset 0 0 15px rgba(0, 0, 0, 0.4),
+    0 0 15px rgba(100, 50, 150, 0.3);
+}
+
+.upgrade-card.already-upgraded {
+  opacity: 0.5;
+  background: rgba(0, 30, 0, 0.2);
+  border-color: #2a4a2a;
+}
+
+.upgrade-image-wrapper {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upgrade-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.upgrade-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  flex: 1;
+}
+
+.upgrade-name {
+  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-size: 10px;
+  color: #d0b0f0;
+  text-transform: uppercase;
+}
+
+.upgrade-description {
+  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-size: 8px;
+  color: #a080c0;
+  line-height: 1.6;
+}
+
+.upgrade-btn {
+  background: linear-gradient(180deg, #4a3070 0%, #2d1d45 100%) !important;
+  color: #e0d0f0 !important;
+  border: 2px solid #6040a0 !important;
+  box-shadow: 0 4px 0 #1a0a25 !important;
+  text-shadow: 1px 1px 0 #0a0510;
+  font-size: 8px !important;
+  padding: 6px 12px !important;
+  min-width: 90px;
+}
+
+.upgrade-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #5a4080 0%, #3d2d55 100%) !important;
+  box-shadow:
+    0 4px 0 #1a0a25,
+    0 0 15px rgba(100, 50, 150, 0.4) !important;
+}
+
+.upgrade-btn:active:not(:disabled) {
+  box-shadow: 0 0 0 #1a0a25 !important;
+  transform: translateY(4px);
+}
+
+.upgrade-btn:disabled {
+  background: linear-gradient(180deg, #2a4a2a 0%, #1a3a1a 100%) !important;
+  color: #6aba6a !important;
+  border-color: #3a6a3a !important;
+  cursor: default;
+}
+
+.upgrade-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.close-btn {
+  background: linear-gradient(180deg, #2b2b2b 0%, #1a1a1a 100%) !important;
+  color: #cccccc !important;
+  box-shadow: 0 4px 0 #000000 !important;
+  min-width: 100px;
+}
+
+.close-btn:active {
+  box-shadow: 0 0 0 #000000 !important;
+  transform: translateY(4px);
+}

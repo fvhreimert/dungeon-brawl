@@ -19,7 +19,7 @@ import { useBloodSacrificeSounds } from '@/features/actions/bloodSacrifice/useBl
 import { Scoreboard } from '@/components/game/Scoreboard'
 import { useJeopardyGame } from '@/hooks/useJeopardyGame'
 import { gameConfig } from '@/config/gameConfig'
-import type { QAItem, Tile, PlayerConfig, CardInstance, ActionId } from '@/types/game'
+import type { QAItem, Tile, PlayerConfig, CardInstance, ActionId, UpgradeableAction } from '@/types/game'
 import { type CardDefinition } from '@/data/cards'
 
 import cardJesterIcon from '@/assets/images/actions/card_jester.png'
@@ -43,6 +43,8 @@ import { PuppetMasterCategoryModal } from '@/features/cards/PuppetMasterCategory
 import { RouletteModal } from '@/features/cards/RouletteModal'
 import { TreasureSetModal } from '@/features/cards/TreasureSetModal'
 import { TreasureIslandModal } from '@/features/cards/TreasureIslandModal'
+import { SpiderFeedingModal } from '@/features/actions/web/SpiderFeedingModal'
+import { ActionUpgradeModal } from '@/features/actions/web/ActionUpgradeModal'
 import {
   buildCardDrawContext,
   pickCardForPlayer,
@@ -103,6 +105,8 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
   const [treasureCardIds, setTreasureCardIds] = useState<string[]>([])
   const [freezeSelectMode, setFreezeSelectMode] = useState(false)
   const [scoreAdjustPlayerIndex, setScoreAdjustPlayerIndex] = useState<number | null>(null)
+  const [spiderFeedingActive, setSpiderFeedingActive] = useState(false)
+  const [actionUpgradeActive, setActionUpgradeActive] = useState(false)
 
   const { playStart: playFrogStart, playHop, playLand } = useFrogSounds()
   const { playStart: playMadSeerStart } = useMadSeerSounds()
@@ -123,6 +127,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     updateTileModifiers,
     performBloodSacrifice,
     addCardToInventory,
+    removeCardFromInventory,
     activateCard,
     activePuppetLockCategory,
     combineTreasureSet,
@@ -131,6 +136,8 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     frozenActions,
     setActivePlayer,
     adjustPlayerScore,
+    increaseSpiderSense,
+    upgradeAction,
     alliances,
     createAlliance,
   } = useJeopardyGame({
@@ -152,6 +159,10 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     }))
   }, [tiles, categories])
 
+  const isActionUpgraded = (actionId: UpgradeableAction) => {
+    return players[activePlayerIndex]?.upgradedActions?.[actionId] ?? false
+  }
+
   const handleWebClick = () => {
     if (freezeSelectMode && cardUsePending) {
       if (frozenActions.web) return
@@ -162,7 +173,24 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
       return
     }
     if (frozenActions.web) return
-    setSpiderIndex((prev) => (prev < 8 ? prev + 1 : 1))
+    setSpiderFeedingActive(true)
+  }
+
+  const handleSpiderFeedIsopod = (isopodInstanceId: string) => {
+    removeCardFromInventory(activePlayerIndex, isopodInstanceId)
+    setSpiderIndex((prev) => (prev < 8 ? prev + 1 : prev))
+    increaseSpiderSense(activePlayerIndex)
+  }
+
+  const handleSpiderFeedSheep = (sheepInstanceId: string) => {
+    removeCardFromInventory(activePlayerIndex, sheepInstanceId)
+    setSpiderFeedingActive(false)
+    setActionUpgradeActive(true)
+  }
+
+  const handleUpgradeAction = (actionId: UpgradeableAction) => {
+    upgradeAction(activePlayerIndex, actionId)
+    setActionUpgradeActive(false)
   }
 
   const handleActionFreezeClick = (actionId: ActionId) => {
@@ -192,8 +220,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     if (frozenActions.card_jester) return
     if (madSeerActive || frogSelecting || selectedTile || idolActive || bloodSacrificeActive) return
 
-    // Player 1 gets upgraded effect (2 cards)
-    const isUpgraded = activePlayerIndex === 0
+    const isUpgraded = isActionUpgraded('card_jester')
     const cardsToDraw = isUpgraded ? 2 : 1
     const newCards: CardDefinition[] = []
 
@@ -530,7 +557,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     if (frozenActions.frog_of_fate) return
     if (madSeerActive || frogSelecting || selectedTile || idolActive) return
     
-    const isUpgraded = activePlayerIndex === 0
+    const isUpgraded = isActionUpgraded('frog_of_fate')
     playFrogStart()
     runFrogSelection(isUpgraded ? 2 : 1)
   }
@@ -540,7 +567,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     if (frozenActions.golden_idol) return
     if (madSeerActive || frogSelecting || selectedTile || idolActive || selectedSurvivorIds) return
     
-    const isUpgraded = activePlayerIndex === 0
+    const isUpgraded = isActionUpgraded('golden_idol')
     triggerIdol(tiles, updateTileModifiers, isUpgraded ? 2 : 1)
   }
 
@@ -590,11 +617,11 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
             </div>
           )}
           <img 
-            src={activePlayerIndex === 0 ? cardJesterUpgradedIcon : cardJesterIcon} 
+            src={isActionUpgraded('card_jester') ? cardJesterUpgradedIcon : cardJesterIcon} 
             alt="Card Jester" 
-            className={`card-jester-icon ${activePlayerIndex === 0 ? 'upgraded' : ''}`}
+            className={`card-jester-icon ${isActionUpgraded('card_jester') ? 'upgraded' : ''}`}
           />
-          <span className={`action-label ${activePlayerIndex === 0 ? 'action-label-green' : 'action-label-orange'}`}>
+          <span className={`action-label ${isActionUpgraded('card_jester') ? 'action-label-green' : 'action-label-orange'}`}>
             Card Jester
           </span>
           {frozenActions.card_jester && (
@@ -629,11 +656,11 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
             </div>
           )}
           <img 
-            src={activePlayerIndex === 0 ? madSeerUpgradedIcon : madSeerIcon} 
+            src={isActionUpgraded('mad_seer') ? madSeerUpgradedIcon : madSeerIcon} 
             alt="Mad Seer" 
-            className={`mad-seer-icon ${activePlayerIndex === 0 ? 'upgraded' : ''}`} 
+            className={`mad-seer-icon ${isActionUpgraded('mad_seer') ? 'upgraded' : ''}`} 
           />
-          <span className={`action-label ${activePlayerIndex === 0 ? 'action-label-white' : 'action-label-purple'}`}>
+          <span className={`action-label ${isActionUpgraded('mad_seer') ? 'action-label-white' : 'action-label-purple'}`}>
             Mad Seer
           </span>
           {frozenActions.mad_seer && (
@@ -666,9 +693,9 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
             </div>
           )}
           <img 
-            src={activePlayerIndex === 0 ? bloodSacrificeUpgradedIcon : bloodSacrificeIcon} 
+            src={isActionUpgraded('blood_sacrifice') ? bloodSacrificeUpgradedIcon : bloodSacrificeIcon} 
             alt="Blood Sacrifice" 
-            className={`blood-sacrifice-icon ${activePlayerIndex === 0 ? 'upgraded' : ''}`} 
+            className={`blood-sacrifice-icon ${isActionUpgraded('blood_sacrifice') ? 'upgraded' : ''}`} 
           />
           <span className="action-label action-label-red">Blood Sacrifice</span>
           {frozenActions.blood_sacrifice && (
@@ -819,11 +846,11 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
             </div>
           )}
           <img 
-            src={activePlayerIndex === 0 ? frogUpgradedIcon : frogIcon} 
+            src={isActionUpgraded('frog_of_fate') ? frogUpgradedIcon : frogIcon} 
             alt="Frog of Fate" 
-            className={`frog-of-fate-icon ${activePlayerIndex === 0 ? 'upgraded' : ''}`}
+            className={`frog-of-fate-icon ${isActionUpgraded('frog_of_fate') ? 'upgraded' : ''}`}
           />
-          <span className={`action-label ${activePlayerIndex === 0 ? 'action-label-orange' : 'action-label-green'}`}>
+          <span className={`action-label ${isActionUpgraded('frog_of_fate') ? 'action-label-orange' : 'action-label-green'}`}>
             Frog of Fate
           </span>
           {frozenActions.frog_of_fate && (
@@ -858,11 +885,11 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
             </div>
           )}
           <img 
-            src={activePlayerIndex === 0 ? idolUpgradedIcon : idolIcon} 
+            src={isActionUpgraded('golden_idol') ? idolUpgradedIcon : idolIcon} 
             alt="Golden Idol" 
-            className={`golden-idol-icon ${activePlayerIndex === 0 ? 'upgraded' : ''}`}
+            className={`golden-idol-icon ${isActionUpgraded('golden_idol') ? 'upgraded' : ''}`}
           />
-          <span className={`action-label ${activePlayerIndex === 0 ? 'action-label-blue' : 'action-label-gold'}`}>
+          <span className={`action-label ${isActionUpgraded('golden_idol') ? 'action-label-blue' : 'action-label-gold'}`}>
             Golden Idol
           </span>
           {frozenActions.golden_idol && (
@@ -883,7 +910,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
           tile={madSeerPreviewTile}
           onAccept={handleMadSeerAccept}
           onReject={handleMadSeerReject}
-          isUpgraded={activePlayerIndex === 0}
+          isUpgraded={isActionUpgraded('mad_seer')}
         />
       )}
 
@@ -892,7 +919,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
           playerScore={players[activePlayerIndex]?.score ?? 0}
           onConfirm={handleBloodSacrificeConfirm}
           onCancel={handleBloodSacrificeCancel}
-          isUpgraded={activePlayerIndex === 0}
+          isUpgraded={isActionUpgraded('blood_sacrifice')}
         />
       )}
 
@@ -1035,6 +1062,25 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
             setScoreAdjustPlayerIndex(null)
           }}
           onCancel={() => setScoreAdjustPlayerIndex(null)}
+        />
+      )}
+
+      {spiderFeedingActive && (
+        <SpiderFeedingModal
+          spiderImage={SPIDERS[spiderIndex] || ''}
+          spiderIndex={spiderIndex}
+          inventory={players[activePlayerIndex].inventory}
+          onFeedIsopod={handleSpiderFeedIsopod}
+          onFeedSheep={handleSpiderFeedSheep}
+          onClose={() => setSpiderFeedingActive(false)}
+        />
+      )}
+
+      {actionUpgradeActive && (
+        <ActionUpgradeModal
+          playerUpgrades={players[activePlayerIndex]?.upgradedActions ?? {}}
+          onUpgrade={handleUpgradeAction}
+          onClose={() => setActionUpgradeActive(false)}
         />
       )}
 

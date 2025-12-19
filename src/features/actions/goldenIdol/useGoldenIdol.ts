@@ -1,10 +1,9 @@
 import { useState, useCallback } from 'react'
 import type { Tile } from '@/types/game'
-import idolStart from '@/assets/sounds/actions/dice_of_fortune/dice_start.mp3'
+
 import idolTick from '@/assets/sounds/actions/dice_of_fortune/dice_tick.wav'
 import idolLand from '@/assets/sounds/actions/dice_of_fortune/dice_land.mp3'
 
-const START_IDOL_SOUND = idolStart
 const TICK_IDOL_SOUND = idolTick
 const LAND_IDOL_SOUND = idolLand
 
@@ -16,12 +15,6 @@ function createAudio(src: string) {
 export function useGoldenIdol() {
   const [isActive, setIsActive] = useState(false)
   const [selectedSurvivorIds, setSelectedSurvivorIds] = useState<string[] | null>(null)
-
-  const playStartIdol = useCallback(() => {
-    const audio = createAudio(START_IDOL_SOUND)
-    audio.volume = 0.4
-    audio.play().catch(() => {})
-  }, [])
 
   const playTick = useCallback(() => {
     const audio = createAudio(TICK_IDOL_SOUND)
@@ -47,7 +40,7 @@ export function useGoldenIdol() {
     setIsActive(true)
     setSelectedSurvivorIds(null)
 
-    playStartIdol()
+    // playStartIdol() // Removed sound
 
     // Select distinct survivors
     const survivors: Tile[] = []
@@ -86,13 +79,13 @@ export function useGoldenIdol() {
     setIsActive(false) // Exit active state
     setSelectedSurvivorIds(survivorIds) // This triggers the indicator
     
-    playLand() // Play land sound *after* the state for the indicator is set.
+    playLand()
 
     // A very short pause to let the UI render the yellow indicator before ending.
     await new Promise(resolve => setTimeout(resolve, 200)) 
 
 
-  }, [playStartIdol, playTick, playLand])
+  }, [playTick, playLand])
 
   const clearIdolEffect = useCallback((tiles: Tile[], updateTileModifiers: (id: string, mods: { isCrumbled?: boolean }) => void) => {
     setIsActive(false)

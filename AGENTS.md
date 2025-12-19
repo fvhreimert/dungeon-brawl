@@ -78,8 +78,21 @@ Quizzes are JSON files in `src/data/quizzes/` following this structure:
 ## Dungeon Actions (Game Mechanics)
 The game features special "Dungeon Actions" available to players, each providing unique strategic advantages or chaos. These are located in the sidebars and interact directly with the game board.
 
-**Upgrade System (Current Implementation):**
-Upgraded versions of actions are currently implemented and **active for Player 1 (index 0) only** as a placeholder for testing. Future updates will introduce a mechanic for all players to unlock these upgrades.
+**Upgrade System:**
+Upgraded versions of actions are unlocked via the **Spider Web** mechanic. Players must feed the spider to grow it, and eventually feed it a Sheep to unlock a permanent upgrade for one of their actions.
+
+### Spider Web (New)
+- **Logic:** `src/features/actions/web/`
+- **Mechanic:** A persistent growth system that rewards feeding the spider.
+- **Feeding Isopods:**
+  - Players can feed **Isopod** cards to the spider.
+  - Each isopod increases the **Spider Sense** level.
+  - **Spider Sense:** Grants a **+5% score bonus** per level on all correct answers.
+  - The spider grows visually as it is fed (max size at index 8).
+- **Feeding Sheep:**
+  - Once the spider reaches max size, players can feed it a **Sheep** card.
+  - This triggers the `ActionUpgradeModal`, allowing the player to choose one action to **permanently upgrade**.
+  - **Visuals:** An interactive web interface where the spider grows and options to feed appear based on inventory.
 
 ### Mad Seer
 - **Logic:** `src/features/actions/madSeer/`
@@ -88,7 +101,7 @@ Upgraded versions of actions are currently implemented and **active for Player 1
   - Player selects any open tile.
   - A modal (`MadSeerModal`) appears with a chaotic swirl of words from the question.
   - Player can **Embrace the Vision** (select tile) or **Reject the Omen** (cancel).
-- **Upgraded (Player 1):**
+- **Upgraded:**
   - **Effect:** Reveals double the amount of words in the vision, making it easier to decipher the question.
   - **Visuals:** Uses `mad_seer_upgraded.png`, white label text, and a white pulsating glow.
 
@@ -98,9 +111,9 @@ Upgraded versions of actions are currently implemented and **active for Player 1
 - **Standard:**
   - Frog hops across random open tiles and lands on one.
   - Applies a **2x Multiplier** to the landed tile.
-- **Upgraded (Player 1):**
+- **Upgraded:**
   - **Effect:** Two frogs are deployed simultaneously, selecting **2 unique tiles**. If both land on the same tile (rare but possible logic), multipliers stack.
-  - **Visuals:** Uses `frog_of_fate_upgraded.png`, orange label text, and an orange pulsating glow.
+  - **Visuals:** Uses `frog_of_fate_upgraded.png`, orange label text, and a orange pulsating glow.
 
 ### Golden Idol
 - **Logic:** `src/features/actions/goldenIdol/`
@@ -108,7 +121,7 @@ Upgraded versions of actions are currently implemented and **active for Player 1
 - **Standard:**
   - A "crumbling" effect disables most tiles.
   - **1 Survivor** tile remains. Player is forced to select it.
-- **Upgraded (Player 1):**
+- **Upgraded:**
   - **Effect:** Selects **2 distinct survivor tiles** instead of 1. Player can choose either of the survivors.
   - **Visuals:** Uses `golden_idol_upgraded.png`, diamond-blue label text, and a diamond-blue pulsating glow.
 
@@ -118,7 +131,7 @@ Upgraded versions of actions are currently implemented and **active for Player 1
 - **Standard:**
   - Draws **1 card** from the deck.
   - Displays it in a modal (`CardRevealModal`) and adds to inventory.
-- **Upgraded (Player 1):**
+- **Upgraded:**
   - **Effect:** Draws **2 cards** simultaneously.
   - **Visuals:** Uses `card_jester_upgraded.png`, green label text, and a green hover glow.
 
@@ -128,7 +141,7 @@ Upgraded versions of actions are currently implemented and **active for Player 1
 - **Standard:**
   - Player selects an amount to sacrifice (max **100**).
   - Selects a target player to damage.
-- **Upgraded (Player 1):**
+- **Upgraded:**
   - **Effect:** Maximum sacrifice limit increased to **200** points.
   - **Visuals:** Uses `blood_sacrifice_upgraded.png` and an intense red pulsating glow.
 

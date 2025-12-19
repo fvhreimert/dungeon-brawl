@@ -32,7 +32,7 @@ export function TravelingMerchantModal({
     window.addEventListener('keydown', handleKeyDown)
 
     return () => {
-      document.body.style.overflow = 'unset'
+      document.body.style.overflow = ''
       window.removeEventListener('keydown', handleKeyDown)
     }
   }, [onClose])

@@ -38,7 +38,7 @@ export function RouletteModal({ playerScore, onConfirm, onCancel }: RouletteModa
     window.addEventListener('keydown', handleKeyDown)
 
     return () => {
-      document.body.style.overflow = 'unset'
+      document.body.style.overflow = ''
       window.removeEventListener('keydown', handleKeyDown)
     }
   }, [onCancel, phase])

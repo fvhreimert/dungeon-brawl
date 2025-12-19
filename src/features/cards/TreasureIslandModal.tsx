@@ -103,7 +103,7 @@ export function TreasureIslandModal({ onComplete, onCancel }: TreasureIslandModa
     window.addEventListener('keydown', handleKeyDown)
 
     return () => {
-      document.body.style.overflow = 'unset'
+      document.body.style.overflow = ''
       window.removeEventListener('keydown', handleKeyDown)
     }
   }, [onCancel, phase, dugTreasures.length])

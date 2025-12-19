@@ -26,7 +26,7 @@ export function CardRevealModal({ cards, onClose }: CardRevealModalProps) {
     window.addEventListener('keydown', handleKeyDown)
     
     return () => {
-      document.body.style.overflow = 'unset'
+      document.body.style.overflow = ''
       window.removeEventListener('keydown', handleKeyDown)
     }
   }, [onClose])

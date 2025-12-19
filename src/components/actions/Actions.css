@@ -47,12 +47,6 @@
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   transition: all 0.2s ease-out; /* Keep for smoothness of inline styles. */
-  /* Pixel contour */
-  filter: 
-    drop-shadow(1px 0 0 white)
-    drop-shadow(-1px 0 0 white)
-    drop-shadow(0 1px 0 white)
-    drop-shadow(0 -1px 0 white);
 }
 
 .spider-icon.no-contour {

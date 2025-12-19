@@ -6,6 +6,7 @@ import allianceRed from '@/assets/images/ui/alliance_red.png'
 import allianceYellow from '@/assets/images/ui/alliance_yellow.png'
 import allianceGreen from '@/assets/images/ui/alliance_green.png'
 import allianceBlue from '@/assets/images/ui/alliance_blue.png'
+import spiderSenseIcon from '@/assets/images/ui/spider_sense.png'
 import { calculatePassiveDeltaForPlayer } from '@/features/cards/cardEffectRegistry'
 import { AnimatedScore } from './AnimatedScore'
 import './Scoreboard.css'
@@ -119,6 +120,24 @@ export function Scoreboard({
                 >
                   <img src={inventoryIcon} alt="Inventory" />
                 </button>
+              </div>
+              <div className="spider-sense-meter" title="Spider Sense: Gain bonus points on correct answers. Feed isopods to the spider to increase.">
+                <img
+                  src={spiderSenseIcon}
+                  alt="Spider Sense"
+                  className="spider-sense-icon"
+                />
+                <div className="spider-sense-bar">
+                  {Array.from({ length: 10 }, (_, i) => (
+                    <div
+                      key={i}
+                      className={`spider-sense-tick ${i < (player.spiderSenseLevel ?? 0) ? 'filled' : ''}`}
+                    />
+                  ))}
+                </div>
+                <span className="spider-sense-level">
+                  +{(player.spiderSenseLevel ?? 0) * 5}%
+                </span>
               </div>
             </div>
           </div>
