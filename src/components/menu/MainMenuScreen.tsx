@@ -83,7 +83,7 @@ export function MainMenuScreen({ onStartGame }: MainMenuScreenProps) {
   }
 
   const handleCategoryCountChange = (delta: number) => {
-    const newCount = Math.max(1, Math.min(8, categoryCount + delta))
+    const newCount = Math.max(1, Math.min(10, categoryCount + delta))
     setCategoryCount(newCount)
     setCategoryInputs((prev) => {
       const updated = [...prev]
@@ -268,19 +268,22 @@ export function MainMenuScreen({ onStartGame }: MainMenuScreenProps) {
         {menuState === 'generate-quiz' && (
           <>
             <h1 className="main-menu-title-standalone">Generate Quiz</h1>
-            <div className="generate-quiz-content">
+            <div 
+              className="generate-quiz-content"
+              style={{ '--category-count': categoryCount } as React.CSSProperties}
+            >
               <div className="quiz-name-row">
                 <input
                   type="text"
                   className="quiz-name-input"
                   value={quizName}
                   onChange={(e) => setQuizName(e.target.value)}
-                  placeholder="Quiz Name"
+                  placeholder="ENTER QUIZ NAME"
                 />
               </div>
 
               <div className="category-count-row">
-                <span className="category-count-label">Categories:</span>
+                <span className="category-count-label">COLUMNS:</span>
                 <div className="category-count-controls">
                   <RetroButton
                     font="retro"
@@ -297,35 +300,40 @@ export function MainMenuScreen({ onStartGame }: MainMenuScreenProps) {
                     variant="secondary"
                     className="count-btn"
                     onClick={() => handleCategoryCountChange(1)}
-                    disabled={categoryCount >= 8}
+                    disabled={categoryCount >= 10}
                   >
                     +
                   </RetroButton>
                 </div>
               </div>
 
-              <div className="category-list">
-                {categoryInputs.slice(0, categoryCount).map((cat, index) => (
-                  <div key={index} className="category-row">
-                    <div className="category-number">{index + 1}</div>
-                    <div className="category-inputs">
-                      <input
-                        type="text"
-                        className="category-name-input"
-                        value={cat.name}
-                        onChange={(e) => handleCategoryInputChange(index, 'name', e.target.value)}
-                        placeholder="Category Name"
-                      />
-                      <input
-                        type="text"
-                        className="category-desc-input"
-                        value={cat.description}
-                        onChange={(e) => handleCategoryInputChange(index, 'description', e.target.value)}
-                        placeholder="Description (optional)"
-                      />
-                    </div>
-                  </div>
-                ))}
+              <div className="generate-quiz-board">
+                {/* Row 1: Category Names */}
+                <div className="category-input-row">
+                  {categoryInputs.slice(0, categoryCount).map((cat, index) => (
+                    <textarea
+                      key={`cat-name-${index}`}
+                      className="category-input-tile"
+                      value={cat.name}
+                      onChange={(e) => handleCategoryInputChange(index, 'name', e.target.value)}
+                      placeholder={`CAT ${index + 1}`}
+                      rows={2}
+                    />
+                  ))}
+                </div>
+
+                {/* Row 2: Descriptions */}
+                <div className="description-input-row">
+                  {categoryInputs.slice(0, categoryCount).map((cat, index) => (
+                    <textarea
+                      key={`cat-desc-${index}`}
+                      className="description-input-tile"
+                      value={cat.description}
+                      onChange={(e) => handleCategoryInputChange(index, 'description', e.target.value)}
+                      placeholder="Topic description..."
+                    />
+                  ))}
+                </div>
               </div>
 
               {generationError && (
@@ -335,19 +343,19 @@ export function MainMenuScreen({ onStartGame }: MainMenuScreenProps) {
               <div className="generate-quiz-actions">
                 <RetroButton
                   font="retro"
+                  variant="secondary"
+                  className="back-button"
+                  onClick={handleBackFromGenerate}
+                >
+                  BACK
+                </RetroButton>
+                <RetroButton
+                  font="retro"
                   className="generate-btn"
                   onClick={handleStartGeneration}
                   disabled={categoryInputs.slice(0, categoryCount).every(c => !c.name.trim())}
                 >
-                  Generate
-                </RetroButton>
-                <RetroButton
-                  font="retro"
-                  variant="destructive"
-                  className="back-button"
-                  onClick={handleBackFromGenerate}
-                >
-                  Back
+                  GENERATE
                 </RetroButton>
               </div>
             </div>
@@ -425,18 +433,18 @@ export function MainMenuScreen({ onStartGame }: MainMenuScreenProps) {
               <div className="player-setup-actions">
                 <RetroButton
                   font="retro"
-                  className="start-game-btn"
-                  onClick={handleStartGame}
-                >
-                  Start Game
-                </RetroButton>
-                <RetroButton
-                  font="retro"
-                  variant="destructive"
+                  variant="secondary"
                   className="back-button"
                   onClick={isGeneratedQuiz ? handleBackToMain : handleBackToQuizSelect}
                 >
                   Back
+                </RetroButton>
+                <RetroButton
+                  font="retro"
+                  className="start-game-btn"
+                  onClick={handleStartGame}
+                >
+                  Start Game
                 </RetroButton>
               </div>
             </div>

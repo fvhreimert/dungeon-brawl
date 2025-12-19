@@ -25,7 +25,7 @@ The game starts with a main menu flow before entering the actual game board.
 ### Menu Flow
 1. **Main Menu** (`src/components/menu/MainMenuScreen.tsx`)
    - Displays "DUNGEON BRAWL" title with the November font
-   - Options: "Quiz from File" (active), "Generate Quiz" (disabled/future)
+   - Options: "Quiz from File" (active), "Generate Quiz" (active, grid-based layout for categories/descriptions)
    - Dark overlay on the dungeon background texture
 
 2. **Quiz Selection**
