@@ -1,12 +1,16 @@
 import { useState } from 'react'
 import { Button as RetroButton } from '@/components/ui/8bit/button'
+import { Spinner } from '@/components/ui/8bit/spinner'
 import { getAvailableQuizzes, loadQuiz, quizToQAItems, getQuizCategories, inferPointValues } from '@/utils/quizLoader'
 import { ALL_PORTRAITS } from '@/utils/portraits'
+import { generateQuizCategories, type CategoryInput } from '@/services/geminiService'
 import type { Quiz, QuizFile } from '@/types/quiz'
 import type { PlayerConfig, QAItem } from '@/types/game'
 import './MainMenuScreen.css'
 
-type MenuState = 'main' | 'quiz-select' | 'player-setup'
+type MenuState = 'main' | 'quiz-select' | 'generate-quiz' | 'generating' | 'player-setup'
+
+const GEMINI_API_KEY = 'AIzaSyAEzBRKviKLj4TmZJA05qZxZ1I0UB4LL6E'
 
 export type GameSettings = {
   quiz: Quiz
@@ -38,6 +42,16 @@ export function MainMenuScreen({ onStartGame }: MainMenuScreenProps) {
     }))
   )
   const [portraitPickerIndex, setPortraitPickerIndex] = useState<number | null>(null)
+  const [isGeneratedQuiz, setIsGeneratedQuiz] = useState(false)
+  
+  // Generate quiz state
+  const [categoryCount, setCategoryCount] = useState(5)
+  const [categoryInputs, setCategoryInputs] = useState<CategoryInput[]>(() =>
+    Array.from({ length: 5 }, () => ({ name: '', description: '' }))
+  )
+  const [quizName, setQuizName] = useState('')
+  const [generationProgress, setGenerationProgress] = useState({ completed: 0, total: 0 })
+  const [generationError, setGenerationError] = useState<string | null>(null)
 
   const quizFiles = getAvailableQuizzes()
 
@@ -49,6 +63,7 @@ export function MainMenuScreen({ onStartGame }: MainMenuScreenProps) {
     const quiz = loadQuiz(quizFile.fileName)
     if (quiz) {
       setSelectedQuiz(quiz)
+      setIsGeneratedQuiz(false)
       setMenuState('player-setup')
     }
   }
@@ -60,6 +75,69 @@ export function MainMenuScreen({ onStartGame }: MainMenuScreenProps) {
 
   const handleBackToQuizSelect = () => {
     setMenuState('quiz-select')
+  }
+
+  const handleGenerateQuiz = () => {
+    setMenuState('generate-quiz')
+    setGenerationError(null)
+  }
+
+  const handleCategoryCountChange = (delta: number) => {
+    const newCount = Math.max(1, Math.min(8, categoryCount + delta))
+    setCategoryCount(newCount)
+    setCategoryInputs((prev) => {
+      const updated = [...prev]
+      while (updated.length < newCount) {
+        updated.push({ name: '', description: '' })
+      }
+      return updated
+    })
+  }
+
+  const handleCategoryInputChange = (index: number, field: 'name' | 'description', value: string) => {
+    setCategoryInputs((prev) => {
+      const updated = [...prev]
+      updated[index] = { ...updated[index], [field]: value }
+      return updated
+    })
+  }
+
+  const handleStartGeneration = async () => {
+    const validCategories = categoryInputs.slice(0, categoryCount).filter(c => c.name.trim())
+    if (validCategories.length === 0) {
+      setGenerationError('Please enter at least one category name')
+      return
+    }
+
+    setMenuState('generating')
+    setGenerationProgress({ completed: 0, total: validCategories.length })
+    setGenerationError(null)
+
+    try {
+      const generatedCategories = await generateQuizCategories(
+        GEMINI_API_KEY,
+        validCategories,
+        (completed, total) => setGenerationProgress({ completed, total })
+      )
+
+      const generatedQuiz: Quiz = {
+        displayName: quizName || 'Generated Quiz',
+        categories: generatedCategories,
+      }
+
+      setSelectedQuiz(generatedQuiz)
+      setIsGeneratedQuiz(true)
+      setMenuState('player-setup')
+    } catch (error) {
+      console.error('Quiz generation failed:', error)
+      setGenerationError(error instanceof Error ? error.message : 'Generation failed')
+      setMenuState('generate-quiz')
+    }
+  }
+
+  const handleBackFromGenerate = () => {
+    setMenuState('main')
+    setGenerationError(null)
   }
 
   const handlePlayerCountChange = (delta: number) => {
@@ -149,7 +227,7 @@ export function MainMenuScreen({ onStartGame }: MainMenuScreenProps) {
                   font="retro"
                   className="menu-button"
                   variant="secondary"
-                  disabled
+                  onClick={handleGenerateQuiz}
                 >
                   Generate Quiz
                 </RetroButton>
@@ -185,6 +263,107 @@ export function MainMenuScreen({ onStartGame }: MainMenuScreenProps) {
               </RetroButton>
             </div>
           </>
+        )}
+
+        {menuState === 'generate-quiz' && (
+          <>
+            <h1 className="main-menu-title-standalone">Generate Quiz</h1>
+            <div className="generate-quiz-content">
+              <div className="quiz-name-row">
+                <input
+                  type="text"
+                  className="quiz-name-input"
+                  value={quizName}
+                  onChange={(e) => setQuizName(e.target.value)}
+                  placeholder="Quiz Name"
+                />
+              </div>
+
+              <div className="category-count-row">
+                <span className="category-count-label">Categories:</span>
+                <div className="category-count-controls">
+                  <RetroButton
+                    font="retro"
+                    variant="secondary"
+                    className="count-btn"
+                    onClick={() => handleCategoryCountChange(-1)}
+                    disabled={categoryCount <= 1}
+                  >
+                    -
+                  </RetroButton>
+                  <span className="category-count-value">{categoryCount}</span>
+                  <RetroButton
+                    font="retro"
+                    variant="secondary"
+                    className="count-btn"
+                    onClick={() => handleCategoryCountChange(1)}
+                    disabled={categoryCount >= 8}
+                  >
+                    +
+                  </RetroButton>
+                </div>
+              </div>
+
+              <div className="category-list">
+                {categoryInputs.slice(0, categoryCount).map((cat, index) => (
+                  <div key={index} className="category-row">
+                    <div className="category-number">{index + 1}</div>
+                    <div className="category-inputs">
+                      <input
+                        type="text"
+                        className="category-name-input"
+                        value={cat.name}
+                        onChange={(e) => handleCategoryInputChange(index, 'name', e.target.value)}
+                        placeholder="Category Name"
+                      />
+                      <input
+                        type="text"
+                        className="category-desc-input"
+                        value={cat.description}
+                        onChange={(e) => handleCategoryInputChange(index, 'description', e.target.value)}
+                        placeholder="Description (optional)"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {generationError && (
+                <div className="generation-error">{generationError}</div>
+              )}
+
+              <div className="generate-quiz-actions">
+                <RetroButton
+                  font="retro"
+                  className="generate-btn"
+                  onClick={handleStartGeneration}
+                  disabled={categoryInputs.slice(0, categoryCount).every(c => !c.name.trim())}
+                >
+                  Generate
+                </RetroButton>
+                <RetroButton
+                  font="retro"
+                  variant="destructive"
+                  className="back-button"
+                  onClick={handleBackFromGenerate}
+                >
+                  Back
+                </RetroButton>
+              </div>
+            </div>
+          </>
+        )}
+
+        {menuState === 'generating' && (
+          <div className="generating-content">
+            <h1 className="main-menu-title-standalone">Generating...</h1>
+            <div className="generation-status">
+              <Spinner variant="diamond" className="generation-spinner" />
+              <div className="generation-progress">
+                Category {generationProgress.completed} of {generationProgress.total}
+              </div>
+            </div>
+          </div>
         )}
 
         {menuState === 'player-setup' && (
@@ -255,7 +434,7 @@ export function MainMenuScreen({ onStartGame }: MainMenuScreenProps) {
                   font="retro"
                   variant="destructive"
                   className="back-button"
-                  onClick={handleBackToQuizSelect}
+                  onClick={isGeneratedQuiz ? handleBackToMain : handleBackToQuizSelect}
                 >
                   Back
                 </RetroButton>

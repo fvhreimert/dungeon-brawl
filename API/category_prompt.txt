@@ -1,0 +1,34 @@
+Du er en ekspert i at udforme quizspørgsmål. Generér præcis 5 quizspørgsmål inden for kategorien: [Category].
+Følg eventuelle særlige instruktioner: [Instructions].
+
+Krav:
+
+1. Alle spørgsmål og svar skal være på dansk.
+2. Svarene skal være faktuelt korrekte, verificerbare og formuleret som korte, præcise udsagn.
+2. Spørgsmålene skal være relevante og interessante for et publikum i alderen 25–30 år.
+3. Spørgsmålene skal kunne besvares mundtligt uden hjælpemidler.
+4. Spørgsmålene skal stige gradvist i sværhedsgrad (1 = let, 5 = svært).
+5. Spørgsmålene må ikke være ledende eller afsløre svarene på sig selv.
+6. Spørgsmålene må ikke afsløre svarene på de andre spørgsmål.
+7. Undgå at gentage nøgleord fra et svar i senere spørgsmål.
+8. Spørgsmålene skal være korte, naturligt formulerede og uden unødige detaljer.
+9. Undgå “trick questions” – spørg hellere klart og fængende.
+10. Undgå at lave for lange spørgsmål om muligt. 
+
+Tjek før du svarer:
+
+1. Intet spørgsmål må indeholde sit eget svar.
+2. Ingen spørgsmål må bruge et ord eller navn, der direkte optræder i et andet spørgsmål eller svar.
+
+Svar udelukkende i dette JSON-format (Der må IKKE være noget ekstra tekst udenfor JSON):
+
+{
+  "name": "[Category]",
+  "questions": [
+    { "q": "Spørgsmål 1", "a": "Svar 1" },
+    { "q": "Spørgsmål 2", "a": "Svar 2" },
+    { "q": "Spørgsmål 3", "a": "Svar 3" },
+    { "q": "Spørgsmål 4", "a": "Svar 4" },
+    { "q": "Spørgsmål 5", "a": "Svar 5" }
+  ]
+}
