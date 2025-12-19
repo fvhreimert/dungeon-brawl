@@ -629,7 +629,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     runFrogSelection(isUpgraded ? 2 : 1)
   }
 
-  const handleIdolClick = () => {
+  const handleIdolClick = async () => {
     if (handleActionFreezeClick('golden_idol')) return
     if (frozenActions.golden_idol) return
     if (isActionExhausted('golden_idol')) return
@@ -637,11 +637,12 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     
     // Award the accumulated bonus
     adjustPlayerScore(activePlayerIndex, goldenIdolBonus)
-    incrementActionCount(activePlayerIndex, 'golden_idol')
-    resetGoldenIdolBonus()
 
     const isUpgraded = isActionUpgraded('golden_idol')
-    triggerIdol(tiles, updateTileModifiers, isUpgraded ? 2 : 1)
+    await triggerIdol(tiles, updateTileModifiers, isUpgraded ? 2 : 1)
+    
+    incrementActionCount(activePlayerIndex, 'golden_idol')
+    resetGoldenIdolBonus()
   }
 
   useEffect(() => {
@@ -1002,8 +1003,9 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
             alt="Golden Idol" 
             className={`golden-idol-icon ${isActionUpgraded('golden_idol') ? 'upgraded' : ''}`}
             style={{
-              filter: `drop-shadow(0 0 ${Math.min(40, (goldenIdolBonus ?? 0) / 6)}px rgba(255, 215, 0, ${Math.min(1, 0.4 + (goldenIdolBonus ?? 0) / 200)}))`
-            }}
+              '--idol-glow-radius': `${Math.min(40, (goldenIdolBonus ?? 0) / 6)}px`,
+              '--idol-glow-opacity': Math.min(1, 0.4 + (goldenIdolBonus ?? 0) / 200)
+            } as React.CSSProperties}
           />
           <span className={`action-label ${isActionUpgraded('golden_idol') ? 'action-label-blue' : 'action-label-gold'}`}>
             Golden Idol

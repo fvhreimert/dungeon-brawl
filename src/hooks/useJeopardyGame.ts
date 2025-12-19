@@ -452,7 +452,13 @@ export function useJeopardyGame({
     const nextIndex = getNextPlayerIndex()
     setPlayers((prev) =>
       prev.map((player, index) =>
-        index === nextIndex ? { ...player, stats: resetPlayerTurnStats(player.stats) } : player,
+        index === nextIndex 
+          ? { 
+              ...player, 
+              stats: resetPlayerTurnStats(player.stats),
+              actionCounts: {} // Reset action counts for the new turn
+            } 
+          : player,
       ),
     )
     setActivePlayerIndex(nextIndex)
@@ -843,7 +849,27 @@ export function useJeopardyGame({
   const setActivePlayer = useCallback((playerIndex: number) => {
     if (playerIndex >= 0 && playerIndex < players.length) {
       saveSnapshot()
+      // Manually setting active player implies starting a new turn for them
+      setPlayers((prev) =>
+        prev.map((player, index) =>
+          index === playerIndex
+            ? { 
+                ...player, 
+                stats: resetPlayerTurnStats(player.stats),
+                actionCounts: {} 
+              } 
+            : player,
+        ),
+      )
       setActivePlayerIndex(playerIndex)
+      setGoldenIdolBonus((prev) => {
+        // Increment Idol bonus on manual turn switch as well
+        const roll = Math.random()
+        const increment = roll < 0.7 
+          ? 5 + Math.floor(Math.random() * 26) 
+          : 31 + Math.floor(Math.random() * 70) 
+        return prev + increment
+      })
     }
   }, [players.length, saveSnapshot])
 
