@@ -7,17 +7,6 @@
   z-index: 10;
   pointer-events: auto;
   cursor: pointer;
-}
-
-.web-wrapper {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 250px;
-  height: 250px;
-  z-index: 10;
-  pointer-events: auto;
-  cursor: pointer;
   transition: all 0.2s ease-out; /* Add transition for wrapper */
   transform-origin: top right; /* Apply origin to wrapper */
   filter: drop-shadow(0 0 5px rgba(0,0,0,0.3)); /* Apply base shadow to wrapper */
@@ -246,6 +235,20 @@
   height: auto;
   cursor: pointer; /* Make the whole item show pointer */
   pointer-events: auto;
+  position: relative; /* Ensure relative positioning for badges */
+}
+
+.action-price-badge {
+  position: absolute;
+  top: -5px; /* Adjust as needed */
+  right: 10px; /* Adjust as needed */
+  z-index: 30;
+  width: 30px; /* Fixed width */
+  height: 30px; /* Fixed height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* Removed transform: rotate(5deg); */
 }
 
 .action-label {
@@ -404,11 +407,6 @@
   filter:
     drop-shadow(0 0 8px rgba(100, 200, 255, 0.8)) /* Diamond Blue glow */
     drop-shadow(0 0 16px rgba(150, 230, 255, 0.6)); /* Lighter Diamond Blue */
-}
-
-@keyframes idolPulse {
-  from { transform: translateY(-4px) scale(1.03); }
-  to { transform: translateY(4px) scale(1.08); }
 }
 
 /* Frozen action effect - Glacial Elemental */

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import '@/App.css'
 import '@/components/actions/Actions.css'
+import '@/components/actions/ExhaustedAction.css'
 
 import { GameBoard } from '@/components/game/GameBoard'
 import { QuestionDialog } from '@/components/game/QuestionDialog'
@@ -35,6 +36,7 @@ import frogIcon from '@/assets/images/actions/frog_of_fate.png'
 import frogUpgradedIcon from '@/assets/images/actions/frog_of_fate_upgraded.png'
 import idolIcon from '@/assets/images/actions/golden_idol.png'
 import idolUpgradedIcon from '@/assets/images/actions/golden_idol_upgraded.png'
+import { Badge } from '@/components/ui/8bit/badge'
 import { CardRevealModal } from '@/features/actions/cardJester/CardRevealModal'
 import { InventoryModal } from '@/components/game/InventoryModal'
 import { StolenCardModal } from '@/features/cards/StolenCardModal'
@@ -138,8 +140,11 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     adjustPlayerScore,
     increaseSpiderSense,
     upgradeAction,
+    incrementActionCount,
     alliances,
     createAlliance,
+    goldenIdolBonus,
+    resetGoldenIdolBonus,
   } = useJeopardyGame({
     categories,
     pointValues,
@@ -163,6 +168,25 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     return players[activePlayerIndex]?.upgradedActions?.[actionId] ?? false
   }
 
+  const getActionCount = (actionId: ActionId) => {
+    return players[activePlayerIndex]?.actionCounts?.[actionId] ?? 0
+  }
+
+  const isActionExhausted = (actionId: ActionId) => {
+    const count = getActionCount(actionId)
+    // Map ActionId to config key. Config uses camelCase.
+    const limits = gameConfig.mechanics.actionLimits
+    let limit = Infinity
+    if (actionId === 'card_jester') limit = limits.cardJester
+    else if (actionId === 'mad_seer') limit = limits.madSeer
+    else if (actionId === 'frog_of_fate') limit = limits.frogOfFate
+    else if (actionId === 'golden_idol') limit = limits.goldenIdol
+    else if (actionId === 'blood_sacrifice') limit = limits.bloodSacrifice
+    else if (actionId === 'web') limit = limits.web
+    
+    return count >= limit
+  }
+
   const handleWebClick = () => {
     if (freezeSelectMode && cardUsePending) {
       if (frozenActions.web) return
@@ -173,6 +197,9 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
       return
     }
     if (frozenActions.web) return
+    if (isActionExhausted('web')) return
+
+    incrementActionCount(activePlayerIndex, 'web')
     setSpiderFeedingActive(true)
   }
 
@@ -218,7 +245,19 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
   const handleCardJesterClick = () => {
     if (handleActionFreezeClick('card_jester')) return
     if (frozenActions.card_jester) return
+    if (isActionExhausted('card_jester')) return
     if (madSeerActive || frogSelecting || selectedTile || idolActive || bloodSacrificeActive) return
+
+    const price = gameConfig.mechanics.actionPrices.cardJester
+    const currentPlayer = players[activePlayerIndex]
+    
+    if (currentPlayer.score < price) {
+      // Not enough points
+      return
+    }
+
+    adjustPlayerScore(activePlayerIndex, -price)
+    incrementActionCount(activePlayerIndex, 'card_jester')
 
     const isUpgraded = isActionUpgraded('card_jester')
     const cardsToDraw = isUpgraded ? 2 : 1
@@ -385,7 +424,19 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
   const handleMadSeerStart = () => {
     if (handleActionFreezeClick('mad_seer')) return
     if (frozenActions.mad_seer) return
+    if (isActionExhausted('mad_seer')) return
     if (selectedTile || frogSelecting || idolActive) return
+
+    const price = gameConfig.mechanics.actionPrices.madSeer
+    const currentPlayer = players[activePlayerIndex]
+    
+    if (currentPlayer.score < price) {
+      return
+    }
+
+    adjustPlayerScore(activePlayerIndex, -price)
+    // incrementActionCount moved to handleMadSeerAccept and handleMadSeerReject
+
     playMadSeerStart()
     setMadSeerActive(true)
     setMadSeerPreviewTile(null)
@@ -449,19 +500,23 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     }
     setMadSeerPreviewTile(null)
     setMadSeerActive(false)
+    incrementActionCount(activePlayerIndex, 'mad_seer')
   }
 
   const handleMadSeerReject = () => {
     setMadSeerPreviewTile(null)
     setMadSeerActive(false)
+    incrementActionCount(activePlayerIndex, 'mad_seer')
   }
 
   const handleBloodSacrificeStart = () => {
     if (handleActionFreezeClick('blood_sacrifice')) return
     if (frozenActions.blood_sacrifice) return
+    if (isActionExhausted('blood_sacrifice')) return
     if (selectedTile || frogSelecting || idolActive || madSeerActive) return
     playBloodSacrificeStart()
     setBloodSacrificeActive(true)
+    incrementActionCount(activePlayerIndex, 'blood_sacrifice')
   }
 
   const handleBloodSacrificeConfirm = (amount: number) => {
@@ -549,14 +604,26 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     setTimeout(() => {
       setFrogLandingIds([])
       setFrogSelecting(false)
+      incrementActionCount(activePlayerIndex, 'frog_of_fate')
     }, 900)
   }
 
   const handleFrogClick = () => {
     if (handleActionFreezeClick('frog_of_fate')) return
     if (frozenActions.frog_of_fate) return
+    if (isActionExhausted('frog_of_fate')) return
     if (madSeerActive || frogSelecting || selectedTile || idolActive) return
     
+    const price = gameConfig.mechanics.actionPrices.frogOfFate
+    const currentPlayer = players[activePlayerIndex]
+    
+    if (currentPlayer.score < price) {
+      return
+    }
+
+    adjustPlayerScore(activePlayerIndex, -price)
+    // incrementActionCount moved to runFrogSelection after effect is done.
+
     const isUpgraded = isActionUpgraded('frog_of_fate')
     playFrogStart()
     runFrogSelection(isUpgraded ? 2 : 1)
@@ -565,8 +632,14 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
   const handleIdolClick = () => {
     if (handleActionFreezeClick('golden_idol')) return
     if (frozenActions.golden_idol) return
+    if (isActionExhausted('golden_idol')) return
     if (madSeerActive || frogSelecting || selectedTile || idolActive || selectedSurvivorIds) return
     
+    // Award the accumulated bonus
+    adjustPlayerScore(activePlayerIndex, goldenIdolBonus)
+    incrementActionCount(activePlayerIndex, 'golden_idol')
+    resetGoldenIdolBonus()
+
     const isUpgraded = isActionUpgraded('golden_idol')
     triggerIdol(tiles, updateTileModifiers, isUpgraded ? 2 : 1)
   }
@@ -602,6 +675,8 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
           className={`action-item ${
             frozenActions.card_jester ? 'action-frozen' : ''
           } ${
+            isActionExhausted('card_jester') ? 'action-exhausted' : ''
+          } ${
             freezeSelectMode && !frozenActions.card_jester ? 'action-freeze-target' : ''
           }`} 
           onClick={handleCardJesterClick}
@@ -616,6 +691,11 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
               <div className="ice-particle" />
             </div>
           )}
+          <div className="action-price-badge">
+            <Badge font="retro" variant="destructive" className="bg-[#8B0000] border-[#8B0000]">
+              {gameConfig.mechanics.actionPrices.cardJester}
+            </Badge>
+          </div>
           <img 
             src={isActionUpgraded('card_jester') ? cardJesterUpgradedIcon : cardJesterIcon} 
             alt="Card Jester" 
@@ -641,6 +721,8 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
           } ${
             frozenActions.mad_seer ? 'action-frozen' : ''
           } ${
+            isActionExhausted('mad_seer') ? 'action-exhausted' : ''
+          } ${
             freezeSelectMode && !frozenActions.mad_seer ? 'action-freeze-target' : ''
           }`} 
           onClick={handleMadSeerStart}
@@ -655,11 +737,18 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
               <div className="ice-particle" />
             </div>
           )}
+          <div className="action-price-badge">
+            <Badge font="retro" variant="destructive" className="bg-[#8B0000] border-[#8B0000]">
+              {gameConfig.mechanics.actionPrices.madSeer}
+            </Badge>
+          </div>
           <img 
             src={isActionUpgraded('mad_seer') ? madSeerUpgradedIcon : madSeerIcon} 
             alt="Mad Seer" 
             className={`mad-seer-icon ${isActionUpgraded('mad_seer') ? 'upgraded' : ''}`} 
           />
+
+
           <span className={`action-label ${isActionUpgraded('mad_seer') ? 'action-label-white' : 'action-label-purple'}`}>
             Mad Seer
           </span>
@@ -677,6 +766,8 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
         <div 
           className={`action-item ${
             frozenActions.blood_sacrifice ? 'action-frozen' : ''
+          } ${
+            isActionExhausted('blood_sacrifice') ? 'action-exhausted' : ''
           } ${
             freezeSelectMode && !frozenActions.blood_sacrifice ? 'action-freeze-target' : ''
           }`} 
@@ -773,6 +864,8 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
           className={`web-wrapper ${
             frozenActions.web ? 'action-frozen' : ''
           } ${
+            isActionExhausted('web') ? 'action-exhausted' : ''
+          } ${
             freezeSelectMode && !frozenActions.web ? 'action-freeze-target' : ''
           }`} 
           onClick={handleWebClick}
@@ -831,6 +924,8 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
           } ${
             frozenActions.frog_of_fate ? 'action-frozen' : ''
           } ${
+            isActionExhausted('frog_of_fate') ? 'action-exhausted' : ''
+          } ${
             freezeSelectMode && !frozenActions.frog_of_fate ? 'action-freeze-target' : ''
           }`} 
           onClick={handleFrogClick}
@@ -845,6 +940,11 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
               <div className="ice-particle" />
             </div>
           )}
+          <div className="action-price-badge">
+            <Badge font="retro" variant="destructive" className="bg-[#8B0000] border-[#8B0000]">
+              {gameConfig.mechanics.actionPrices.frogOfFate}
+            </Badge>
+          </div>
           <img 
             src={isActionUpgraded('frog_of_fate') ? frogUpgradedIcon : frogIcon} 
             alt="Frog of Fate" 
@@ -870,6 +970,8 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
           } ${
             frozenActions.golden_idol ? 'action-frozen' : ''
           } ${
+            isActionExhausted('golden_idol') ? 'action-exhausted' : ''
+          } ${
             freezeSelectMode && !frozenActions.golden_idol ? 'action-freeze-target' : ''
           }`} 
           onClick={handleIdolClick}
@@ -884,10 +986,24 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
               <div className="ice-particle" />
             </div>
           )}
+          <div className="action-price-badge">
+            <Badge 
+              font="retro" 
+              className="bg-[#FFD700] border-none text-black hover:bg-[#FFC000]"
+              style={{
+                boxShadow: `0 0 ${Math.min(50, (goldenIdolBonus ?? 0) / 4)}px ${(goldenIdolBonus ?? 0) > 50 ? 2 : 1}px rgba(255, 215, 0, 0.8)`
+              }}
+            >
+              +{goldenIdolBonus}
+            </Badge>
+          </div>
           <img 
             src={isActionUpgraded('golden_idol') ? idolUpgradedIcon : idolIcon} 
             alt="Golden Idol" 
             className={`golden-idol-icon ${isActionUpgraded('golden_idol') ? 'upgraded' : ''}`}
+            style={{
+              filter: `drop-shadow(0 0 ${Math.min(40, (goldenIdolBonus ?? 0) / 6)}px rgba(255, 215, 0, ${Math.min(1, 0.4 + (goldenIdolBonus ?? 0) / 200)}))`
+            }}
           />
           <span className={`action-label ${isActionUpgraded('golden_idol') ? 'action-label-blue' : 'action-label-gold'}`}>
             Golden Idol

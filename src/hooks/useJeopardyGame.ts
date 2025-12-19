@@ -62,6 +62,7 @@ const buildPlayerWithStats = (config: PlayerConfig): Player => {
   const basePlayer = {
     ...config,
     inventory: [...config.inventory],
+    actionCounts: { ...config.actionCounts },
   }
   
   // If player is named "TEST", give them 100 of every card
@@ -185,6 +186,7 @@ export function useJeopardyGame({
   const [puppetLocks, setPuppetLocks] = useState<Record<number, PuppetLock>>({})
   const [frozenActions, setFrozenActions] = useState<FrozenActions>({})
   const [alliances, setAlliances] = useState<Alliances>([])
+  const [goldenIdolBonus, setGoldenIdolBonus] = useState<number>(gameConfig.mechanics.goldenIdol.startBonus)
   const activePuppetLockCategory = puppetLocks[activePlayerIndex]?.category ?? null
 
   const selectedTile = selectedTileId
@@ -202,11 +204,12 @@ export function useJeopardyGame({
           puppetLocks: { ...puppetLocks },
           frozenActions: { ...frozenActions },
           alliances: [...alliances],
+          goldenIdolBonus,
         },
       ]
       return newHistory.slice(-5)
     })
-  }, [tiles, players, activePlayerIndex, puppetLocks, frozenActions, alliances])
+  }, [tiles, players, activePlayerIndex, puppetLocks, frozenActions, alliances, goldenIdolBonus])
 
   const updatePlayerStats = useCallback(
     (targetIndex: number, updater: (stats: PlayerStats) => PlayerStats) => {
@@ -455,6 +458,14 @@ export function useJeopardyGame({
     setActivePlayerIndex(nextIndex)
     setSelectedTileId(null)
     setAnswerRevealed(false)
+    setGoldenIdolBonus((prev) => {
+      // Distribution: 5-100, peak around 10-30
+      const roll = Math.random()
+      const increment = roll < 0.7 
+        ? 5 + Math.floor(Math.random() * 26) // 5-30 (range of 26)
+        : 31 + Math.floor(Math.random() * 70) // 31-100 (range of 70)
+      return prev + increment
+    })
   }
 
   const handleAnswer = (correct: boolean) => {
@@ -513,6 +524,7 @@ export function useJeopardyGame({
     setPuppetLocks(previousState.puppetLocks)
     setFrozenActions(previousState.frozenActions ?? {})
     setAlliances(previousState.alliances ?? [])
+    setGoldenIdolBonus(previousState.goldenIdolBonus ?? gameConfig.mechanics.goldenIdol.startBonus)
 
     setHistory((prev) => prev.slice(0, -1))
     setGameStats((prev) => prev.slice(0, -1))
@@ -877,6 +889,25 @@ export function useJeopardyGame({
     }
   }, [players.length, saveSnapshot])
 
+  const incrementActionCount = useCallback((playerIndex: number, actionId: ActionId) => {
+    if (playerIndex >= 0 && playerIndex < players.length) {
+      saveSnapshot()
+      setPlayers((prev) =>
+        prev.map((player, index) => {
+          if (index !== playerIndex) return player
+          const currentCount = player.actionCounts?.[actionId] ?? 0
+          return {
+            ...player,
+            actionCounts: {
+              ...player.actionCounts,
+              [actionId]: currentCount + 1,
+            },
+          }
+        })
+      )
+    }
+  }, [players.length, saveSnapshot])
+
   return {
     tiles,
     players,
@@ -906,9 +937,12 @@ export function useJeopardyGame({
     adjustPlayerScore,
     increaseSpiderSense,
     upgradeAction,
+    incrementActionCount,
     alliances,
     createAlliance,
     arePlayersAllied,
     getPlayerAlliance,
+    goldenIdolBonus,
+    resetGoldenIdolBonus: () => setGoldenIdolBonus(0),
   }
 }

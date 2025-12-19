@@ -42,6 +42,17 @@ export const gameConfig = {
       cardJester: 100,
       madSeer: 25,
       frogOfFate: 100,
+    },
+    actionLimits: {
+      cardJester: 1,
+      madSeer: 1,
+      frogOfFate: 1,
+      goldenIdol: 1,
+      bloodSacrifice: Infinity,
+      web: Infinity,
+    },
+    goldenIdol: {
+      startBonus: 10,
     }
   },
   players: defaultPlayers,

@@ -50,6 +50,8 @@ export type UpgradeableAction = 'mad_seer' | 'card_jester' | 'blood_sacrifice' |
 
 export type PlayerUpgrades = Partial<Record<UpgradeableAction, boolean>>
 
+export type PlayerActionCounts = Partial<Record<ActionId, number>>
+
 export type PlayerConfig = {
   name: string
   score: number
@@ -57,6 +59,7 @@ export type PlayerConfig = {
   portrait?: string
   spiderSenseLevel?: number
   upgradedActions?: PlayerUpgrades
+  actionCounts?: PlayerActionCounts
 }
 
 export type Player = PlayerConfig & {
@@ -101,6 +104,7 @@ export type GameStateSnapshot = {
   puppetLocks: Record<number, PuppetLock>
   frozenActions?: FrozenActions
   alliances?: Alliances
+  goldenIdolBonus?: number
 }
 
 export type GameStatEntry = {
