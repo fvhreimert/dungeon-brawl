@@ -10,6 +10,7 @@ export type RuntimeGameConfig = {
     subtractPointsOnWrongAnswer: boolean
   }
   mechanics: {
+    freeCardsPerTurn: number
     spiderSense: {
       bonusPerLevel: number
       maxLevel: number
@@ -53,6 +54,7 @@ const defaultRuntimeConfig: RuntimeGameConfig = {
     subtractPointsOnWrongAnswer: false,
   },
   mechanics: {
+    freeCardsPerTurn: gameConfig.mechanics.freeCardsPerTurn,
     spiderSense: {
       bonusPerLevel: gameConfig.mechanics.spiderSense.bonusPerLevel,
       maxLevel: gameConfig.mechanics.spiderSense.maxLevel,
@@ -103,6 +105,7 @@ export function gameplaySettingsToRuntimeConfig(settings: GameplaySettings): Run
       subtractPointsOnWrongAnswer: settings.subtractPointsOnWrongAnswer,
     },
     mechanics: {
+      freeCardsPerTurn: settings.freeCardsPerTurn,
       spiderSense: {
         bonusPerLevel: settings.spiderSenseBonusPerLevel / 100,
         maxLevel: settings.spiderSenseMaxLevel,

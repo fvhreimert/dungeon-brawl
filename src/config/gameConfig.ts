@@ -22,6 +22,7 @@ export const gameConfig = {
     maxScoreForMeter: 2000, // Used to calculate the width of the score bar
   },
   mechanics: {
+    freeCardsPerTurn: -1, // -1 means (player count - 1), or set specific number
     spiderSense: {
       bonusPerLevel: 0.05,
       maxLevel: 10,

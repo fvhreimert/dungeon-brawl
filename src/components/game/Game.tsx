@@ -48,6 +48,7 @@ import { TreasureSetModal } from '@/features/cards/TreasureSetModal'
 import { TreasureIslandModal } from '@/features/cards/TreasureIslandModal'
 import { SpiderFeedingModal } from '@/features/actions/web/SpiderFeedingModal'
 import { ActionUpgradeModal } from '@/features/actions/web/ActionUpgradeModal'
+import { TurnStartModal } from '@/components/game/TurnStartModal'
 import {
   buildCardDrawContext,
   pickCardForPlayer,
@@ -111,6 +112,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
   const [scoreAdjustPlayerIndex, setScoreAdjustPlayerIndex] = useState<number | null>(null)
   const [spiderFeedingActive, setSpiderFeedingActive] = useState(false)
   const [actionUpgradeActive, setActionUpgradeActive] = useState(false)
+  const [turnStartCards, setTurnStartCards] = useState<{ playerName: string; cards: CardDefinition[] } | null>(null)
 
   const { playStart: playFrogStart, playHop, playLand } = useFrogSounds()
   const { playStart: playMadSeerStart } = useMadSeerSounds()
@@ -152,6 +154,9 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     pointValues,
     players: initialPlayers,
     questionBank,
+    onTurnStart: (playerIndex, playerName, cards) => {
+      setTurnStartCards({ playerName, cards })
+    },
   })
 
   const puppetCategoryOptions = useMemo(() => {
@@ -704,7 +709,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
             className={`card-jester-icon ${isActionUpgraded('card_jester') ? 'upgraded' : ''}`}
           />
           <span className={`action-label ${isActionUpgraded('card_jester') ? 'action-label-green' : 'action-label-orange'}`}>
-            Card Jester
+            {isActionUpgraded('card_jester') ? 'Cards Jester' : 'Card Jester'}
           </span>
           {frozenActions.card_jester && (
             <div className="action-frozen-overlay front">
@@ -752,7 +757,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
 
 
           <span className={`action-label ${isActionUpgraded('mad_seer') ? 'action-label-white' : 'action-label-purple'}`}>
-            Mad Seer
+            {isActionUpgraded('mad_seer') ? 'Madder Seer' : 'Mad Seer'}
           </span>
           {frozenActions.mad_seer && (
             <div className="action-frozen-overlay front">
@@ -790,7 +795,9 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
             alt="Blood Sacrifice" 
             className={`blood-sacrifice-icon ${isActionUpgraded('blood_sacrifice') ? 'upgraded' : ''}`} 
           />
-          <span className="action-label action-label-red">Blood Sacrifice</span>
+          <span className="action-label action-label-red">
+            {isActionUpgraded('blood_sacrifice') ? 'Blood Sacrifices' : 'Blood Sacrifice'}
+          </span>
           {frozenActions.blood_sacrifice && (
             <div className="action-frozen-overlay front">
               <div className="ice-particle" />
@@ -953,7 +960,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
             className={`frog-of-fate-icon ${isActionUpgraded('frog_of_fate') ? 'upgraded' : ''}`}
           />
           <span className={`action-label ${isActionUpgraded('frog_of_fate') ? 'action-label-orange' : 'action-label-green'}`}>
-            Frog of Fate
+            {isActionUpgraded('frog_of_fate') ? 'Frog of Fates' : 'Frog of Fate'}
           </span>
           {frozenActions.frog_of_fate && (
             <div className="action-frozen-overlay front">
@@ -1009,7 +1016,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
             } as React.CSSProperties}
           />
           <span className={`action-label ${isActionUpgraded('golden_idol') ? 'action-label-blue' : 'action-label-gold'}`}>
-            Golden Idol
+            {isActionUpgraded('golden_idol') ? 'Diamond Idol' : 'Golden Idol'}
           </span>
           {frozenActions.golden_idol && (
             <div className="action-frozen-overlay front">
@@ -1210,6 +1217,14 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
           onReveal={handleRevealAnswer}
           onAnswer={handleAnswer}
           onClose={handleCloseDialog}
+        />
+      )}
+
+      {turnStartCards && (
+        <TurnStartModal
+          playerName={turnStartCards.playerName}
+          cards={turnStartCards.cards}
+          onClose={() => setTurnStartCards(null)}
         />
       )}
     </div>

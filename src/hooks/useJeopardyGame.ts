@@ -25,12 +25,17 @@ import { useRuntimeConfig } from '@/config/runtimeConfig'
 import {
   runCardEffect,
 } from '@/features/cards/cardEffectRegistry'
+import {
+  buildCardDrawContext,
+  pickCardForPlayer,
+} from '@/config/cardCatalog'
 
 type UseJeopardyGameParams = {
   categories: readonly string[]
   pointValues: readonly number[]
   players: readonly PlayerConfig[]
   questionBank: QAItem[]
+  onTurnStart?: (playerIndex: number, playerName: string, cards: CardDefinition[]) => void
 }
 
 const createEmptyTurnTotals = () => ({
@@ -137,6 +142,7 @@ export function useJeopardyGame({
   pointValues,
   players: initialPlayers,
   questionBank,
+  onTurnStart,
 }: UseJeopardyGameParams) {
   const runtimeConfig = useRuntimeConfig()
   const questionLookup = useMemo(() => {
@@ -189,11 +195,51 @@ export function useJeopardyGame({
   const [frozenActions, setFrozenActions] = useState<FrozenActions>({})
   const [alliances, setAlliances] = useState<Alliances>([])
   const [goldenIdolBonus, setGoldenIdolBonus] = useState<number>(runtimeConfig.mechanics.goldenIdol.startBonus)
+  const [isFirstTurn, setIsFirstTurn] = useState(true)
   const activePuppetLockCategory = puppetLocks[activePlayerIndex]?.category ?? null
 
   const selectedTile = selectedTileId
     ? tiles.find((tile) => tile.id === selectedTileId) ?? null
     : null
+
+  // Draw cards for the first player at the start of the game
+  useEffect(() => {
+    if (isFirstTurn && onTurnStart) {
+      const freeCardsConfig = runtimeConfig.mechanics.freeCardsPerTurn
+      const numCards = freeCardsConfig === -1 ? players.length - 1 : freeCardsConfig
+
+      if (numCards > 0) {
+        const drawnCards: CardDefinition[] = []
+        const cardInstances: CardInstance[] = []
+
+        for (let i = 0; i < numCards; i++) {
+          const drawContext = buildCardDrawContext(players, activePlayerIndex)
+          const entry = pickCardForPlayer(drawContext)
+          if (entry) {
+            drawnCards.push(entry.definition)
+            cardInstances.push(createCardInstance(entry.definition))
+          }
+        }
+
+        if (drawnCards.length > 0) {
+          // Add cards to first player's inventory
+          setPlayers((prev) =>
+            prev.map((player, index) =>
+              index === activePlayerIndex
+                ? { ...player, inventory: [...player.inventory, ...cardInstances] }
+                : player,
+            ),
+          )
+
+          // Show the modal
+          const firstPlayerName = players[activePlayerIndex]?.name ?? ''
+          onTurnStart(activePlayerIndex, firstPlayerName, drawnCards)
+        }
+      }
+
+      setIsFirstTurn(false)
+    }
+  }, [isFirstTurn, onTurnStart, runtimeConfig.mechanics.freeCardsPerTurn, players, activePlayerIndex])
 
   const saveSnapshot = useCallback(() => {
     setHistory((prev) => {
@@ -452,14 +498,45 @@ export function useJeopardyGame({
 
   const prepareNextPlayer = () => {
     const nextIndex = getNextPlayerIndex()
+
+    // Draw free cards for the next player
+    const freeCardsConfig = runtimeConfig.mechanics.freeCardsPerTurn
+    const numCards = freeCardsConfig === -1 ? players.length - 1 : freeCardsConfig
+
+    if (numCards > 0 && onTurnStart) {
+      const drawnCards: CardDefinition[] = []
+      for (let i = 0; i < numCards; i++) {
+        const drawContext = buildCardDrawContext(players, nextIndex)
+        const entry = pickCardForPlayer(drawContext)
+        if (entry) {
+          drawnCards.push(entry.definition)
+          // Add the card to the player's inventory
+          const cardInstance = createCardInstance(entry.definition)
+          setPlayers((prev) =>
+            prev.map((player, index) =>
+              index === nextIndex
+                ? { ...player, inventory: [...player.inventory, cardInstance] }
+                : player,
+            ),
+          )
+        }
+      }
+
+      // Call onTurnStart with the next player's info and cards
+      const nextPlayerName = players[nextIndex]?.name ?? ''
+      if (drawnCards.length > 0) {
+        onTurnStart(nextIndex, nextPlayerName, drawnCards)
+      }
+    }
+
     setPlayers((prev) =>
       prev.map((player, index) =>
-        index === nextIndex 
-          ? { 
-              ...player, 
+        index === nextIndex
+          ? {
+              ...player,
               stats: resetPlayerTurnStats(player.stats),
               actionCounts: {} // Reset action counts for the new turn
-            } 
+            }
           : player,
       ),
     )
@@ -469,7 +546,7 @@ export function useJeopardyGame({
     setGoldenIdolBonus((prev) => {
       // Distribution: 5-100, peak around 10-30
       const roll = Math.random()
-      const increment = roll < 0.7 
+      const increment = roll < 0.7
         ? 5 + Math.floor(Math.random() * 26) // 5-30 (range of 26)
         : 31 + Math.floor(Math.random() * 70) // 31-100 (range of 70)
       return prev + increment

@@ -13,6 +13,7 @@ import './ActionUpgradeModal.css'
 type ActionUpgradeInfo = {
   id: UpgradeableAction
   name: string
+  upgradedName: string
   image: string
   description: string
 }
@@ -21,30 +22,35 @@ const UPGRADE_INFO: ActionUpgradeInfo[] = [
   {
     id: 'mad_seer',
     name: 'Mad Seer',
+    upgradedName: 'Madder Seer',
     image: madSeerUpgraded,
     description: 'Reveals double the words in the vision, making questions easier to identify.',
   },
   {
     id: 'card_jester',
     name: 'Card Jester',
+    upgradedName: 'Cards Jester',
     image: cardJesterUpgraded,
     description: 'Draw 2 cards instead of 1 when using the Card Jester.',
   },
   {
     id: 'blood_sacrifice',
     name: 'Blood Sacrifice',
+    upgradedName: 'Blood Sacrifices',
     image: bloodSacrificeUpgraded,
     description: 'Maximum sacrifice increased to 200 points (from 100).',
   },
   {
     id: 'frog_of_fate',
     name: 'Frog of Fate',
+    upgradedName: 'Frog of Fates',
     image: frogOfFateUpgraded,
     description: 'Two frogs are deployed, applying 2x multipliers to 2 tiles.',
   },
   {
     id: 'golden_idol',
     name: 'Golden Idol',
+    upgradedName: 'Diamond Idol',
     image: goldenIdolUpgraded,
     description: 'Two survivor tiles remain instead of one, giving you a choice.',
   },
@@ -93,7 +99,7 @@ export function ActionUpgradeModal({
                   />
                 </div>
                 <div className="upgrade-info">
-                  <div className="upgrade-name">{info.name}</div>
+                  <div className="upgrade-name">{info.upgradedName}</div>
                   <div className="upgrade-description">{info.description}</div>
                 </div>
                 <RetroButton

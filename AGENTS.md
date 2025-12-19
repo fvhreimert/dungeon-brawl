@@ -45,7 +45,10 @@ The game starts with a main menu flow before entering the actual game board.
    - Settings are converted to `RuntimeGameConfig` via `src/config/runtimeConfig.tsx`
    - Key settings include:
      - **Points**: Starting points, tier values (100-500 default), score meter max
-     - **Gameplay**: Max tile multiplier, **Subtract Points on Wrong** (disabled by default)
+     - **Gameplay**:
+       - **Free Cards Per Turn**: Number of cards each player receives at turn start (0-10 or ∞ for player count - 1)
+       - Max tile multiplier
+       - **Subtract Points on Wrong** (disabled by default)
      - **Spider Sense**: Bonus per level, max level
      - **Alliances**: Duration multiplier
      - **Items**: Cursed Coin duration and value
@@ -163,7 +166,31 @@ Upgraded versions of actions are unlocked via the **Spider Web** mechanic. Playe
 - `useJeopardyGame` seeds stats, exposes `applyScoreChange`, and runs `runCardEffect` so every handler shares the same helpers (`updateCardState`, `transferCardBetweenPlayers`, `removeCardFromInventory`, etc.). Keep new registry behaviors isolated so each lifecycle path stays predictable.
 - Before adding cards, read `docs/card-creation-guide.md` for the current contract (catalog knobs, target selectors, and passive tracking guidance) and `docs/card-framework.md` for the lasting reference on how definition → instance → registry flows together.
 - Card draw tunings and metadata live in `src/config/cardCatalog.ts`; `CARD_CATALOG` mirrors `CARDS` while letting you tweak `baseWeight`, `weightModifiers`, `drawFilter`, and `targetSelectMode` per card before `Card Jester` (and future drawers) hits `pickCardForPlayer`. This config can prime future scalings for weights based on player state, inventory, or score deltas.
+- **Treasure Set Weight Modifiers:** The treasure set cards (Shovel, Compass, Treasure Map) have dynamic `weightModifiers` that increase draw probability when a player has partial sets:
+  - Each treasure card has a base weight of 8.
+  - If you have 1 treasure item, the other 2 items get +4 weight each (8→12).
+  - If you have 2 treasure items, the missing one gets +8 weight (8→16).
+  - If you have all 3, they all return to base weight 8 (no bonuses).
+  - This creates a "combo completion" mechanic that helps players finish their treasure sets.
 - Available `targetSelectMode` values: `'standard'` (blood sacrifice style), `'neutral'` (players with cards only), `'fel'` (green Soul Burst theme), `'puppet'` (Puppet Master flow with category selection), `'roulette'` (self-targeting gambling modal), `'treasure'` (treasure set combination), `'freeze'` (tile/action freeze selection), `'coalition'` (alliance formation), `'none'` (immediate activation, no target needed).
+
+## Turn Start Cards
+- **Logic:** `src/components/game/TurnStartModal.tsx`
+- **Mechanic:** At the start of each player's turn (including Player 1's first turn), players automatically receive free cards.
+- **Configuration:** Controlled by the `freeCardsPerTurn` setting in Game Settings:
+  - Set to `-1` (∞): Players receive `(player count - 1)` cards per turn.
+  - Set to `0-10`: Players receive exactly that many cards per turn.
+  - Default: `-1` (auto mode).
+- **Flow:**
+  1. When a turn begins, cards are automatically drawn using the weighted card system (`pickCardForPlayer`).
+  2. Cards are added to the player's inventory.
+  3. `TurnStartModal` displays with "[Player Name]'s Turn" header and the drawn cards side-by-side.
+  4. Player clicks anywhere or presses ESC/Space/Enter to dismiss and continue.
+- **Visual Effects:**
+  - Golden glowing, animated title with pulsating effect.
+  - Cards slide in with staggered animations.
+  - Modal uses the same card display as upgraded Card Jester (horizontal layout).
+- **Implementation:** Handled in `useJeopardyGame` hook via `prepareNextPlayer()` function and a dedicated useEffect for the first player's turn.
 
 ### Coalition (Alliance Mechanic)
 - **Card:** `coalition` in `src/data/cards.ts`

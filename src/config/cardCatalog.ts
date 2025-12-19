@@ -27,22 +27,75 @@ export type CardDrawContext = {
 }
 
 const CARD_CONFIG: Record<string, CardCatalogConfig> = {
-  niffler: { baseWeight: 1 },
-  soul_burst: { baseWeight: 1, targetSelectMode: 'fel' },
-  thieving_rat: { baseWeight: 1, targetSelectMode: 'neutral' },
-  cursed_coin: { baseWeight: 1 },
-  tick: { baseWeight: 1 },
+  niffler: { baseWeight: 5 },
+  soul_burst: { baseWeight: 3, targetSelectMode: 'fel' },
+  thieving_rat: { baseWeight: 7, targetSelectMode: 'neutral' },
+  cursed_coin: { baseWeight: 6 },
+  tick: { baseWeight: 1},
   spiny_shell: { baseWeight: 1, targetSelectMode: 'none' },
-  traveling_merchant: { baseWeight: 1, targetSelectMode: 'none' },
-  puppet_master: { baseWeight: 1, targetSelectMode: 'puppet' },
-  beggar: { baseWeight: 1 },
-  roulette: { baseWeight: 1, targetSelectMode: 'roulette' },
-  shovel: { baseWeight: 1, targetSelectMode: 'treasure' },
-  compass: { baseWeight: 1, targetSelectMode: 'treasure' },
-  treasure_map: { baseWeight: 1, targetSelectMode: 'treasure' },
-  glacial_elemental: { baseWeight: 1, targetSelectMode: 'freeze' },
-  coalition: { baseWeight: 1, targetSelectMode: 'coalition' },
-  loot_goblin: { baseWeight: 1, targetSelectMode: 'neutral_all' },
+  traveling_merchant: { baseWeight: 8, targetSelectMode: 'none' },
+  sheep: { baseWeight: 6},
+  puppet_master: { baseWeight: 3, targetSelectMode: 'puppet' },
+  beggar: { baseWeight: 3},
+  roulette: { baseWeight: 5, targetSelectMode: 'roulette' },
+  shovel: {
+    baseWeight: 8,
+    targetSelectMode: 'treasure',
+    weightModifiers: [
+      (context) => {
+        // If already have all 3, no bonus (card will stay at weight 8)
+        const hasAll = context.inventoryIds.has('shovel') &&
+                       context.inventoryIds.has('compass') &&
+                       context.inventoryIds.has('treasure_map')
+        if (hasAll) return 0
+
+        let bonus = 0
+        if (context.inventoryIds.has('compass')) bonus += 4
+        if (context.inventoryIds.has('treasure_map')) bonus += 4
+        return bonus
+      }
+    ]
+  },
+  compass: {
+    baseWeight: 8,
+    targetSelectMode: 'treasure',
+    weightModifiers: [
+      (context) => {
+        // If already have all 3, no bonus (card will stay at weight 8)
+        const hasAll = context.inventoryIds.has('shovel') &&
+                       context.inventoryIds.has('compass') &&
+                       context.inventoryIds.has('treasure_map')
+        if (hasAll) return 0
+
+        let bonus = 0
+        if (context.inventoryIds.has('shovel')) bonus += 4
+        if (context.inventoryIds.has('treasure_map')) bonus += 4
+        return bonus
+      }
+    ]
+  },
+  treasure_map: {
+    baseWeight: 8,
+    targetSelectMode: 'treasure',
+    weightModifiers: [
+      (context) => {
+        // If already have all 3, no bonus (card will stay at weight 8)
+        const hasAll = context.inventoryIds.has('shovel') &&
+                       context.inventoryIds.has('compass') &&
+                       context.inventoryIds.has('treasure_map')
+        if (hasAll) return 0
+
+        let bonus = 0
+        if (context.inventoryIds.has('shovel')) bonus += 4
+        if (context.inventoryIds.has('compass')) bonus += 4
+        return bonus
+      }
+    ]
+  },
+  glacial_elemental: { baseWeight: 4, targetSelectMode: 'freeze' },
+  coalition: { baseWeight: 3, targetSelectMode: 'coalition' },
+  loot_goblin: { baseWeight: 7, targetSelectMode: 'neutral_all' },
+  isopod: { baseWeight: 10 },
 }
 
 export const CARD_CATALOG: CardCatalogEntry[] = CARDS.map((definition) => {

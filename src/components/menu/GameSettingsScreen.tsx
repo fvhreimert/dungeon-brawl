@@ -12,6 +12,7 @@ export type GameplaySettings = {
   pointTier5: number
   maxScoreForMeter: number
   subtractPointsOnWrongAnswer: boolean
+  freeCardsPerTurn: number
   spiderSenseBonusPerLevel: number
   spiderSenseMaxLevel: number
   allianceBaseDurationMultiplier: number
@@ -44,6 +45,7 @@ const DEFAULT_SETTINGS: GameplaySettings = {
   pointTier5: gameConfig.gameplay.pointValues[4],
   maxScoreForMeter: gameConfig.gameplay.maxScoreForMeter,
   subtractPointsOnWrongAnswer: false,
+  freeCardsPerTurn: gameConfig.mechanics.freeCardsPerTurn,
   spiderSenseBonusPerLevel: gameConfig.mechanics.spiderSense.bonusPerLevel * 100,
   spiderSenseMaxLevel: gameConfig.mechanics.spiderSense.maxLevel,
   allianceBaseDurationMultiplier: gameConfig.mechanics.alliances.baseDurationMultiplier,
@@ -225,6 +227,15 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
           {/* Gameplay Section */}
           <div className="settings-section">
             <h2 className="section-title">Gameplay</h2>
+            <SettingRow
+              label="Free Cards Per Turn"
+              value={settings.freeCardsPerTurn}
+              onChange={(val) => updateSetting('freeCardsPerTurn', val)}
+              min={0}
+              max={10}
+              step={1}
+              isInfinity
+            />
             <SettingRow
               label="Score Meter Max"
               value={settings.maxScoreForMeter}
