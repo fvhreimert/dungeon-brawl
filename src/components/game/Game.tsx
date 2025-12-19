@@ -20,6 +20,7 @@ import { useBloodSacrificeSounds } from '@/features/actions/bloodSacrifice/useBl
 import { Scoreboard } from '@/components/game/Scoreboard'
 import { useJeopardyGame } from '@/hooks/useJeopardyGame'
 import { gameConfig } from '@/config/gameConfig'
+import { useRuntimeConfig } from '@/config/runtimeConfig'
 import type { QAItem, Tile, PlayerConfig, CardInstance, ActionId, UpgradeableAction } from '@/types/game'
 import { type CardDefinition } from '@/data/cards'
 
@@ -80,6 +81,7 @@ export type GameProps = {
 }
 
 export function Game({ categories, pointValues, players: initialPlayers, questionBank }: GameProps) {
+  const runtimeConfig = useRuntimeConfig()
   const [spiderIndex, setSpiderIndex] = useState(1)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [madSeerActive, setMadSeerActive] = useState(false)
@@ -174,8 +176,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
 
   const isActionExhausted = (actionId: ActionId) => {
     const count = getActionCount(actionId)
-    // Map ActionId to config key. Config uses camelCase.
-    const limits = gameConfig.mechanics.actionLimits
+    const limits = runtimeConfig.mechanics.actionLimits
     let limit = Infinity
     if (actionId === 'card_jester') limit = limits.cardJester
     else if (actionId === 'mad_seer') limit = limits.madSeer
@@ -248,7 +249,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     if (isActionExhausted('card_jester')) return
     if (madSeerActive || frogSelecting || selectedTile || idolActive || bloodSacrificeActive) return
 
-    const price = gameConfig.mechanics.actionPrices.cardJester
+    const price = runtimeConfig.mechanics.actionPrices.cardJester
     const currentPlayer = players[activePlayerIndex]
     
     if (currentPlayer.score < price) {
@@ -427,7 +428,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     if (isActionExhausted('mad_seer')) return
     if (selectedTile || frogSelecting || idolActive) return
 
-    const price = gameConfig.mechanics.actionPrices.madSeer
+    const price = runtimeConfig.mechanics.actionPrices.madSeer
     const currentPlayer = players[activePlayerIndex]
     
     if (currentPlayer.score < price) {
@@ -614,7 +615,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     if (isActionExhausted('frog_of_fate')) return
     if (madSeerActive || frogSelecting || selectedTile || idolActive) return
     
-    const price = gameConfig.mechanics.actionPrices.frogOfFate
+    const price = runtimeConfig.mechanics.actionPrices.frogOfFate
     const currentPlayer = players[activePlayerIndex]
     
     if (currentPlayer.score < price) {
@@ -694,7 +695,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
           )}
           <div className="action-price-badge">
             <Badge font="retro" variant="destructive" className="bg-[#8B0000] border-[#8B0000]">
-              {gameConfig.mechanics.actionPrices.cardJester}
+              {runtimeConfig.mechanics.actionPrices.cardJester}
             </Badge>
           </div>
           <img 
@@ -740,7 +741,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
           )}
           <div className="action-price-badge">
             <Badge font="retro" variant="destructive" className="bg-[#8B0000] border-[#8B0000]">
-              {gameConfig.mechanics.actionPrices.madSeer}
+              {runtimeConfig.mechanics.actionPrices.madSeer}
             </Badge>
           </div>
           <img 
@@ -943,7 +944,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
           )}
           <div className="action-price-badge">
             <Badge font="retro" variant="destructive" className="bg-[#8B0000] border-[#8B0000]">
-              {gameConfig.mechanics.actionPrices.frogOfFate}
+              {runtimeConfig.mechanics.actionPrices.frogOfFate}
             </Badge>
           </div>
           <img 

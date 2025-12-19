@@ -105,7 +105,7 @@ describe('useJeopardyGame', () => {
     expect(result.current.tiles[0].status).toBe('done')
   })
 
-  it('handles wrong answer', () => {
+  it('handles wrong answer (no penalty by default)', () => {
     const { result } = renderHook(() =>
       useJeopardyGame({
         categories: mockCategories,
@@ -127,7 +127,7 @@ describe('useJeopardyGame', () => {
       result.current.handleAnswer(false)
     })
 
-    expect(result.current.players[0].score).toBe(-100)
+    expect(result.current.players[0].score).toBe(0)
     expect(result.current.activePlayerIndex).toBe(1)
     expect(result.current.tiles[0].status).toBe('done')
   })

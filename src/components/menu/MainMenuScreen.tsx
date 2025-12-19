@@ -1,14 +1,15 @@
 import { useState } from 'react'
 import { Button as RetroButton } from '@/components/ui/8bit/button'
 import { Spinner } from '@/components/ui/8bit/spinner'
-import { getAvailableQuizzes, loadQuiz, quizToQAItems, getQuizCategories, inferPointValues } from '@/utils/quizLoader'
+import { getAvailableQuizzes, loadQuiz, quizToQAItems, getQuizCategories } from '@/utils/quizLoader'
 import { ALL_PORTRAITS } from '@/utils/portraits'
 import { generateQuizCategories, type CategoryInput } from '@/services/geminiService'
+import { GameSettingsScreen, type GameplaySettings } from './GameSettingsScreen'
 import type { Quiz, QuizFile } from '@/types/quiz'
 import type { PlayerConfig, QAItem } from '@/types/game'
 import './MainMenuScreen.css'
 
-type MenuState = 'main' | 'quiz-select' | 'generate-quiz' | 'generating' | 'player-setup'
+type MenuState = 'main' | 'quiz-select' | 'generate-quiz' | 'generating' | 'player-setup' | 'game-settings'
 
 const GEMINI_API_KEY = 'AIzaSyAEzBRKviKLj4TmZJA05qZxZ1I0UB4LL6E'
 
@@ -18,6 +19,7 @@ export type GameSettings = {
   pointValues: number[]
   questionBank: QAItem[]
   players: PlayerConfig[]
+  gameplaySettings: GameplaySettings
 }
 
 type MainMenuScreenProps = {
@@ -175,15 +177,31 @@ export function MainMenuScreen({ onStartGame }: MainMenuScreenProps) {
     setPortraitPickerIndex(null)
   }
 
-  const handleStartGame = () => {
+  const handleProceedToSettings = () => {
     if (!selectedQuiz) return
-    const pointValues = inferPointValues(selectedQuiz)
+    setMenuState('game-settings')
+  }
+
+  const handleBackFromSettings = () => {
+    setMenuState('player-setup')
+  }
+
+  const handleStartGame = (gameplaySettings: GameplaySettings) => {
+    if (!selectedQuiz) return
+    // Use custom point values from settings
+    const pointValues = [
+      gameplaySettings.pointTier1,
+      gameplaySettings.pointTier2,
+      gameplaySettings.pointTier3,
+      gameplaySettings.pointTier4,
+      gameplaySettings.pointTier5,
+    ]
     const questionBank = quizToQAItems(selectedQuiz, pointValues)
     const categories = getQuizCategories(selectedQuiz)
     
     const players: PlayerConfig[] = playerSetups.slice(0, playerCount).map((p) => ({
       name: p.name || 'Unnamed',
-      score: 0,
+      score: gameplaySettings.startingPoints,
       inventory: [],
       portrait: p.portrait,
     }))
@@ -194,6 +212,7 @@ export function MainMenuScreen({ onStartGame }: MainMenuScreenProps) {
       pointValues,
       questionBank,
       players,
+      gameplaySettings,
     })
   }
 
@@ -442,9 +461,9 @@ export function MainMenuScreen({ onStartGame }: MainMenuScreenProps) {
                 <RetroButton
                   font="retro"
                   className="start-game-btn"
-                  onClick={handleStartGame}
+                  onClick={handleProceedToSettings}
                 >
-                  Start Game
+                  Next
                 </RetroButton>
               </div>
             </div>
@@ -483,6 +502,14 @@ export function MainMenuScreen({ onStartGame }: MainMenuScreenProps) {
           </div>
         )}
       </div>
+
+      {/* Game Settings Screen - rendered as full screen overlay */}
+      {menuState === 'game-settings' && (
+        <GameSettingsScreen
+          onBack={handleBackFromSettings}
+          onStartGame={handleStartGame}
+        />
+      )}
     </div>
   )
 }

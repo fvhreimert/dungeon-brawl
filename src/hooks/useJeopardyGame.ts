@@ -21,6 +21,7 @@ import type {
 } from '@/types/game'
 import { CARDS, type CardDefinition } from '@/data/cards'
 import { gameConfig } from '@/config/gameConfig'
+import { useRuntimeConfig } from '@/config/runtimeConfig'
 import {
   runCardEffect,
 } from '@/features/cards/cardEffectRegistry'
@@ -137,6 +138,7 @@ export function useJeopardyGame({
   players: initialPlayers,
   questionBank,
 }: UseJeopardyGameParams) {
+  const runtimeConfig = useRuntimeConfig()
   const questionLookup = useMemo(() => {
     const map = new Map<string, QAItem>()
     questionBank.forEach((qa) => {
@@ -186,7 +188,7 @@ export function useJeopardyGame({
   const [puppetLocks, setPuppetLocks] = useState<Record<number, PuppetLock>>({})
   const [frozenActions, setFrozenActions] = useState<FrozenActions>({})
   const [alliances, setAlliances] = useState<Alliances>([])
-  const [goldenIdolBonus, setGoldenIdolBonus] = useState<number>(gameConfig.mechanics.goldenIdol.startBonus)
+  const [goldenIdolBonus, setGoldenIdolBonus] = useState<number>(runtimeConfig.mechanics.goldenIdol.startBonus)
   const activePuppetLockCategory = puppetLocks[activePlayerIndex]?.category ?? null
 
   const selectedTile = selectedTileId
@@ -480,14 +482,14 @@ export function useJeopardyGame({
     saveSnapshot()
     const effectiveValue = selectedTile.value * (selectedTile.multiplier ?? 1)
     
-    // Apply spider sense bonus for correct answers (5% per level)
+    // Apply spider sense bonus for correct answers
     let scoreChange: number
     if (correct) {
       const spiderSenseLevel = players[activePlayerIndex].spiderSenseLevel ?? 0
-      const bonusMultiplier = 1 + (spiderSenseLevel * gameConfig.mechanics.spiderSense.bonusPerLevel)
+      const bonusMultiplier = 1 + (spiderSenseLevel * runtimeConfig.mechanics.spiderSense.bonusPerLevel)
       scoreChange = Math.round(effectiveValue * bonusMultiplier)
     } else {
-      scoreChange = -effectiveValue
+      scoreChange = runtimeConfig.gameplay.subtractPointsOnWrongAnswer ? -effectiveValue : 0
     }
     
     recordStat(correct ? 'correct' : 'wrong', scoreChange)
@@ -530,7 +532,7 @@ export function useJeopardyGame({
     setPuppetLocks(previousState.puppetLocks)
     setFrozenActions(previousState.frozenActions ?? {})
     setAlliances(previousState.alliances ?? [])
-    setGoldenIdolBonus(previousState.goldenIdolBonus ?? gameConfig.mechanics.goldenIdol.startBonus)
+    setGoldenIdolBonus(previousState.goldenIdolBonus ?? runtimeConfig.mechanics.goldenIdol.startBonus)
 
     setHistory((prev) => prev.slice(0, -1))
     setGameStats((prev) => prev.slice(0, -1))
@@ -550,7 +552,7 @@ export function useJeopardyGame({
       prev.map((tile) => {
         if (tile.id !== tileId || tile.status === 'done') return tile
         const current = tile.multiplier ?? 1
-        const capped = Math.min(current * multiplier, gameConfig.mechanics.multipliers.maxTileMultiplier)
+        const capped = Math.min(current * multiplier, runtimeConfig.mechanics.multipliers.maxTileMultiplier)
         return { ...tile, multiplier: capped }
       }),
     )
@@ -644,7 +646,7 @@ export function useJeopardyGame({
 
   const createAlliance = useCallback(
     (initiatorIndex: number, targetIndex: number, cardInstanceId: string) => {
-      const allianceDuration = players.length * gameConfig.mechanics.alliances.baseDurationMultiplier
+      const allianceDuration = players.length * runtimeConfig.mechanics.alliances.baseDurationMultiplier
       const color = getNextAllianceColor()
       const newAlliance: Alliance = {
         id: `alliance-${Date.now()}-${Math.random().toString(36).slice(2)}`,
@@ -656,7 +658,7 @@ export function useJeopardyGame({
       setAlliances((prev) => [...prev, newAlliance])
       return newAlliance
     },
-    [players.length, getNextAllianceColor],
+    [players.length, getNextAllianceColor, runtimeConfig.mechanics.alliances.baseDurationMultiplier],
   )
 
   const tickDownAlliances = useCallback(() => {
@@ -699,8 +701,8 @@ export function useJeopardyGame({
     saveSnapshot()
     const cardInstance = createCardInstance(card)
     if (cardInstance.id === 'cursed_coin') {
-      cardInstance.state = { turnsRemaining: gameConfig.mechanics.items.cursedCoin.durationTurns }
-      applyScoreChange(activePlayerIndex, gameConfig.mechanics.items.cursedCoin.value, 'passiveItem')
+      cardInstance.state = { turnsRemaining: runtimeConfig.mechanics.items.cursedCoin.durationTurns }
+      applyScoreChange(activePlayerIndex, runtimeConfig.mechanics.items.cursedCoin.value, 'passiveItem')
     }
     setPlayers((prev) =>
       prev.map((player, index) => {
@@ -887,7 +889,7 @@ export function useJeopardyGame({
         prev.map((player, index) => {
           if (index !== playerIndex) return player
           const currentLevel = player.spiderSenseLevel ?? 0
-          if (currentLevel >= gameConfig.mechanics.spiderSense.maxLevel) return player
+          if (currentLevel >= runtimeConfig.mechanics.spiderSense.maxLevel) return player
           return {
             ...player,
             spiderSenseLevel: currentLevel + 1,
@@ -895,7 +897,7 @@ export function useJeopardyGame({
         })
       )
     }
-  }, [players.length, saveSnapshot])
+  }, [players.length, saveSnapshot, runtimeConfig.mechanics.spiderSense.maxLevel])
 
   const upgradeAction = useCallback((playerIndex: number, actionId: UpgradeableAction) => {
     if (playerIndex >= 0 && playerIndex < players.length) {

@@ -4,6 +4,7 @@ import './App.css'
 import { MainMenuScreen, type GameSettings } from '@/components/menu/MainMenuScreen'
 import { Game } from '@/components/game/Game'
 import { useGlobalClickSound } from '@/hooks/useGlobalClickSound'
+import { RuntimeConfigProvider, gameplaySettingsToRuntimeConfig } from '@/config/runtimeConfig'
 
 type AppState = 'menu' | 'game'
 
@@ -22,13 +23,17 @@ function App() {
     return <MainMenuScreen onStartGame={handleStartGame} />
   }
 
+  const runtimeConfig = gameplaySettingsToRuntimeConfig(gameSettings.gameplaySettings)
+
   return (
-    <Game
-      categories={gameSettings.categories}
-      pointValues={gameSettings.pointValues}
-      players={gameSettings.players}
-      questionBank={gameSettings.questionBank}
-    />
+    <RuntimeConfigProvider config={runtimeConfig}>
+      <Game
+        categories={gameSettings.categories}
+        pointValues={gameSettings.pointValues}
+        players={gameSettings.players}
+        questionBank={gameSettings.questionBank}
+      />
+    </RuntimeConfigProvider>
   )
 }
 

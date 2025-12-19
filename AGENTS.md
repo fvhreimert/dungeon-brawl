@@ -40,6 +40,18 @@ The game starts with a main menu flow before entering the actual game board.
    - Used portraits are grayed out (can't be selected by multiple players)
    - Portrait picker modal shows all portraits in a grid
 
+4. **Game Settings** (`src/components/menu/GameSettingsScreen.tsx`)
+   - Configurable gameplay options before starting a game
+   - Settings are converted to `RuntimeGameConfig` via `src/config/runtimeConfig.tsx`
+   - Key settings include:
+     - **Points**: Starting points, tier values (100-500 default), score meter max
+     - **Gameplay**: Max tile multiplier, **Subtract Points on Wrong** (disabled by default)
+     - **Spider Sense**: Bonus per level, max level
+     - **Alliances**: Duration multiplier
+     - **Items**: Cursed Coin duration and value
+     - **Action Prices**: Card Jester, Mad Seer, Frog of Fate costs
+     - **Action Limits**: Per-turn limits for each action (supports infinity)
+
 ### Quiz Format
 Quizzes are JSON files in `src/data/quizzes/` following this structure:
 ```json

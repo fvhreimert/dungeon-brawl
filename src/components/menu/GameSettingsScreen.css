@@ -1,0 +1,188 @@
+.game-settings-screen {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #040404;
+  background-image: url('../../assets/images/textures/background.png');
+  background-repeat: repeat;
+  background-attachment: fixed;
+  background-size: 1480px 780px;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  position: relative;
+}
+
+.game-settings-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  pointer-events: none;
+}
+
+.game-settings-container {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  padding: 24px;
+}
+
+.game-settings-title {
+  font-family: 'November', 'Press Start 2P', monospace;
+  font-size: clamp(28px, 5vw, 48px);
+  letter-spacing: 3px;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  background: linear-gradient(
+    180deg,
+    #FF4500 0%, #FF4500 12.5%,
+    #FF0000 12.5%, #FF0000 25%,
+    #E60000 25%, #E60000 37.5%,
+    #CC0000 37.5%, #CC0000 50%,
+    #B30000 50%, #B30000 62.5%,
+    #990000 62.5%, #990000 75%,
+    #800000 75%, #800000 87.5%,
+    #4D0000 87.5%, #4D0000 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(4px 4px 0 #000);
+  margin-bottom: 8px;
+}
+
+.settings-content {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  width: 100%;
+  overflow-y: auto;
+  padding: 8px 4px;
+  max-height: calc(90vh - 200px);
+}
+
+.settings-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.settings-content::-webkit-scrollbar-track {
+  background: #1a1a1a;
+}
+
+.settings-content::-webkit-scrollbar-thumb {
+  background: #444;
+  border: 2px solid #1a1a1a;
+}
+
+.settings-section {
+  background: linear-gradient(180deg, #1a1a1a 0%, #141414 100%);
+  border: 3px solid #333333;
+  box-shadow:
+    inset 0 0 0 2px #222222,
+    0 4px 0 #000000;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.section-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  color: #ffb347;
+  text-transform: uppercase;
+  text-align: center;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #333;
+  margin-bottom: 4px;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+}
+
+.setting-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: #ccc;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.4;
+}
+
+.setting-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.setting-btn {
+  width: 28px !important;
+  height: 28px !important;
+  padding: 0 !important;
+  font-size: 14px !important;
+  min-width: 28px !important;
+}
+
+.setting-value {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  color: #fff;
+  min-width: 60px;
+  text-align: center;
+}
+
+.settings-actions {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  margin-top: 8px;
+  width: 100%;
+  max-width: 600px;
+  justify-content: center;
+}
+
+.settings-btn-action {
+  flex: 1;
+  padding: 12px 16px !important;
+  font-size: 10px !important;
+}
+
+.settings-btn-action.start-btn {
+  flex: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .settings-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .game-settings-container {
+    padding: 16px;
+  }
+  
+  .setting-label {
+    font-size: 7px;
+  }
+  
+  .setting-value {
+    font-size: 9px;
+    min-width: 50px;
+  }
+}
