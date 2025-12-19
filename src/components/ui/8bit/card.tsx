@@ -35,7 +35,7 @@ const Card = React.forwardRef<HTMLDivElement, BitCardProps>(
         {...props}
       >
         {/* Layer 1: Backing & Content */}
-        <div className="card-backing-layer pixel-card-backing pixel-card-backing-layer relative z-10 w-[calc(100%-60px)] h-[calc(100%-60px)] flex p-0 box-border">
+        <div className="card-backing-layer pixel-card-backing pixel-card-backing-layer relative z-10 w-[calc(100%-58px)] h-[calc(100%-58px)] flex p-0 box-border">
           <div className="card-inner pixel-card-inner-shadow pixel-card-inner-bg relative z-20 flex-1 flex flex-col box-border">
             {children}
           </div>

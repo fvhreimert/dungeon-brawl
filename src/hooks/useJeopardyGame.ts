@@ -467,7 +467,7 @@ export function useJeopardyGame({
     let scoreChange: number
     if (correct) {
       const spiderSenseLevel = players[activePlayerIndex].spiderSenseLevel ?? 0
-      const bonusMultiplier = 1 + (spiderSenseLevel * 0.05)
+      const bonusMultiplier = 1 + (spiderSenseLevel * gameConfig.mechanics.spiderSense.bonusPerLevel)
       scoreChange = Math.round(effectiveValue * bonusMultiplier)
     } else {
       scoreChange = -effectiveValue
@@ -532,7 +532,7 @@ export function useJeopardyGame({
       prev.map((tile) => {
         if (tile.id !== tileId || tile.status === 'done') return tile
         const current = tile.multiplier ?? 1
-        const capped = Math.min(current * multiplier, 128)
+        const capped = Math.min(current * multiplier, gameConfig.mechanics.multipliers.maxTileMultiplier)
         return { ...tile, multiplier: capped }
       }),
     )
@@ -626,7 +626,7 @@ export function useJeopardyGame({
 
   const createAlliance = useCallback(
     (initiatorIndex: number, targetIndex: number, cardInstanceId: string) => {
-      const allianceDuration = players.length * 2
+      const allianceDuration = players.length * gameConfig.mechanics.alliances.baseDurationMultiplier
       const color = getNextAllianceColor()
       const newAlliance: Alliance = {
         id: `alliance-${Date.now()}-${Math.random().toString(36).slice(2)}`,
@@ -681,8 +681,8 @@ export function useJeopardyGame({
     saveSnapshot()
     const cardInstance = createCardInstance(card)
     if (cardInstance.id === 'cursed_coin') {
-      cardInstance.state = { turnsRemaining: 10 }
-      applyScoreChange(activePlayerIndex, 500, 'passiveItem')
+      cardInstance.state = { turnsRemaining: gameConfig.mechanics.items.cursedCoin.durationTurns }
+      applyScoreChange(activePlayerIndex, gameConfig.mechanics.items.cursedCoin.value, 'passiveItem')
     }
     setPlayers((prev) =>
       prev.map((player, index) => {
@@ -849,7 +849,7 @@ export function useJeopardyGame({
         prev.map((player, index) => {
           if (index !== playerIndex) return player
           const currentLevel = player.spiderSenseLevel ?? 0
-          if (currentLevel >= 10) return player
+          if (currentLevel >= gameConfig.mechanics.spiderSense.maxLevel) return player
           return {
             ...player,
             spiderSenseLevel: currentLevel + 1,

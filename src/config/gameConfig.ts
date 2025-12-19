@@ -5,10 +5,10 @@ import portrait3 from '@/assets/images/ui/portraits/Icons_03.png'
 import portrait4 from '@/assets/images/ui/portraits/Icons_04.png'
 
 const defaultPlayers: PlayerConfig[] = [
-  { name: 'Rogue', score: 1200, inventory: [], portrait: portrait1 },
-  { name: 'Mage', score: 900, inventory: [], portrait: portrait2 },
-  { name: 'Paladin', score: 700, inventory: [], portrait: portrait3 },
-  { name: 'Necro', score: 300, inventory: [], portrait: portrait4 },
+  { name: 'Rogue', score:0, inventory: [], portrait: portrait1 },
+  { name: 'Mage', score:0, inventory: [], portrait: portrait2 },
+  { name: 'Paladin', score:0, inventory: [], portrait: portrait3 },
+  { name: 'Necro', score:0, inventory: [], portrait: portrait4 },
 ]
 
 export const gameConfig = {
@@ -20,6 +20,29 @@ export const gameConfig = {
     categories: ['Arcana', 'Relics', 'Beasts', 'Lore', 'Traps'],
     pointValues: [100, 200, 300, 400, 500],
     maxScoreForMeter: 2000, // Used to calculate the width of the score bar
+  },
+  mechanics: {
+    spiderSense: {
+      bonusPerLevel: 0.05,
+      maxLevel: 10,
+    },
+    alliances: {
+      baseDurationMultiplier: 2, // multiplied by number of players
+    },
+    items: {
+      cursedCoin: {
+        durationTurns: 10,
+        value: 500,
+      }
+    },
+    multipliers: {
+      maxTileMultiplier: 128,
+    },
+    actionPrices: {
+      cardJester: 100,
+      madSeer: 25,
+      frogOfFate: 100,
+    }
   },
   players: defaultPlayers,
   ui: {

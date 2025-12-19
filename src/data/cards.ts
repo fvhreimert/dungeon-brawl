@@ -191,8 +191,8 @@ export const CARDS: CardDefinition[] = [
   {
     id: 'glacial_elemental',
     title: 'Glacial Elemental',
-    description: 'Freeze a tile until your next turn. Others cannot select it.',
-    inventoryDescription: 'Activate to freeze a tile for one round.',
+    description: 'Freeze a tile or an action until your next turn. Others cannot select it.',
+    inventoryDescription: 'Activate to freeze a tile or an action.',
     theme: 'theme-blue',
     imagePath: glacialElementalImg,
     framePath: glacialElementalFrame,
@@ -211,7 +211,7 @@ export const CARDS: CardDefinition[] = [
   {
     id: 'loot_goblin',
     title: 'Loot Goblin',
-    description: 'The loot goblin, is an active card, it should steal 200 points from a player of your choice.',
+    description: 'Steal 200 points from a player of your choice.',
     inventoryDescription: 'Steal 200 points from a player of your choice.',
     theme: 'theme-dungeon',
     imagePath: lootGoblinImg,

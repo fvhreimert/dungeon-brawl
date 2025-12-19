@@ -95,9 +95,6 @@
   left: 0;
 }
 
-.treasure-card-slot .card-description-box {
-  display: none;
-}
 
 .treasure-card-slot.owned {
   filter: drop-shadow(0 0 12px rgba(201, 162, 39, 0.5));

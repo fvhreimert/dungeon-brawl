@@ -6,6 +6,7 @@ import {
   Card,
   CardImage,
   CardTitle,
+  CardDescription,
 } from "@/components/ui/8bit/card";
 import './TreasureSetModal.css'
 
@@ -68,9 +69,10 @@ export function TreasureSetModal({ inventory, onStartDig, onClose }: TreasureSet
                 className={`treasure-card-slot ${isOwned ? 'owned' : 'missing'}`}
               >
                 {isOwned ? (
-                  <Card theme={card.theme} frameSrc={card.framePath}>
+                  <Card theme="theme-gold" frameSrc={card.framePath}>
                     <CardImage src={card.imagePath} alt={card.title} />
                     <CardTitle>{card.title}</CardTitle>
+                    <CardDescription>{card.description}</CardDescription>
                   </Card>
                 ) : (
                   <div className="missing-card-placeholder">
