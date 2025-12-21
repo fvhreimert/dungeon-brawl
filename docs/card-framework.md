@@ -11,7 +11,7 @@ This repository keeps cards decoupled from the rest of the game so new mechanics
 
 ## Hook responsibilities
 
-- `useJeopardyGame` owns the tile grid, player order, score history, and card lifecycle. It exposes `applyScoreChange`, which gates the `damageTaken` event, seeds `runCardEffect`, and resets turn totals whenever the active player changes.
+- `useJeopardyGame` owns the tile grid, player order, score history, card lifecycle, and game metrics tracking. It exposes `applyScoreChange`, which gates the `damageTaken` event, seeds `runCardEffect`, and resets turn totals whenever the active player changes. The hook also tracks comprehensive statistics for the post-game dashboard (see `docs/game-metrics.md`).
 - Card activations go through `activateCard`, which looks up the owner’s inventory entry, saves a snapshot (for undo), and fires `runCardEffect('activated', …)` so the registry and the card’s own state can resolve the effect.
 - Any card that needs a target should expose an `activated` handler in the registry and expect the UI to prompt `PlayerSelectModal` via the `handleCardUseRequest` / `handleCardTargetSelect` flow in `src/App.tsx`.
 - When a card needs to impose status effects outside of scoring (e.g., Puppet Master’s category locks), the `CardEffectContext` now exposes `setPuppetLockForPlayer(playerIndex, lock | null)`. Locks live alongside the undo history so they’re restored correctly when stepping back in time.

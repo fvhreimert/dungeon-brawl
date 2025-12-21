@@ -18,6 +18,10 @@ import type {
   Alliances,
   AllianceColor,
   UpgradeableAction,
+  GameMetrics,
+  PlayerMetrics,
+  CardUsageEntry,
+  TurnSnapshot,
 } from '@/types/game'
 import { CARDS, type CardDefinition } from '@/data/cards'
 import { gameConfig } from '@/config/gameConfig'
@@ -102,6 +106,38 @@ const resetPlayerTurnStats = (stats: PlayerStats): PlayerStats => ({
   pointsLostToQuestions: resetTurnTotals(stats.pointsLostToQuestions),
   pointsLostToActiveCards: resetTurnTotals(stats.pointsLostToActiveCards),
   pointsLostToPassiveItems: resetTurnTotals(stats.pointsLostToPassiveItems),
+})
+
+const createDefaultPlayerMetrics = (): PlayerMetrics => ({
+  questionsAnswered: 0,
+  questionsCorrect: 0,
+  questionsWrong: 0,
+  questionsPassed: 0,
+  totalQuestionPointsGained: 0,
+  totalQuestionPointsLost: 0,
+  damageTaken: 0,
+  damageDealt: 0,
+  cardsUsed: 0,
+  cardsReceived: 0,
+  actionsUsed: {},
+  isopodsFed: 0,
+  sheepFed: 0,
+  alliancesFormed: 0,
+  timesPuppeteered: 0,
+  tilesFrozen: 0,
+  treasureSetsCompleted: 0,
+  goldenIdolPointsGained: 0,
+  passiveIncomeGained: 0,
+  highestSingleGain: 0,
+  biggestLoss: 0,
+})
+
+const createInitialGameMetrics = (playerCount: number): GameMetrics => ({
+  turnSnapshots: [],
+  cardUsage: [],
+  playerMetrics: Array.from({ length: playerCount }, () => createDefaultPlayerMetrics()),
+  gameStartTime: Date.now(),
+  totalTurns: 0,
 })
 
 const updateStatsForScoreChange = (
@@ -195,51 +231,151 @@ export function useJeopardyGame({
   const [frozenActions, setFrozenActions] = useState<FrozenActions>({})
   const [alliances, setAlliances] = useState<Alliances>([])
   const [goldenIdolBonus, setGoldenIdolBonus] = useState<number>(runtimeConfig.mechanics.goldenIdol.startBonus)
-  const [isFirstTurn, setIsFirstTurn] = useState(true)
+  const [gameMetrics, setGameMetrics] = useState<GameMetrics>(() =>
+    createInitialGameMetrics(initialPlayers.length)
+  )
+  const turnCountRef = useRef(0)
   const activePuppetLockCategory = puppetLocks[activePlayerIndex]?.category ?? null
 
   const selectedTile = selectedTileId
     ? tiles.find((tile) => tile.id === selectedTileId) ?? null
     : null
 
-  // Draw cards for the first player at the start of the game
-  useEffect(() => {
-    if (isFirstTurn && onTurnStart) {
-      const freeCardsConfig = runtimeConfig.mechanics.freeCardsPerTurn
-      const numCards = freeCardsConfig === -1 ? players.length - 1 : freeCardsConfig
+  // Metrics tracking helpers
+  const incrementPlayerMetric = useCallback(
+    (playerIndex: number, field: keyof PlayerMetrics, amount: number = 1) => {
+      setGameMetrics((prev) => ({
+        ...prev,
+        playerMetrics: prev.playerMetrics.map((metrics, idx) =>
+          idx === playerIndex
+            ? { ...metrics, [field]: (metrics[field] as number) + amount }
+            : metrics
+        ),
+      }))
+    },
+    []
+  )
 
-      if (numCards > 0) {
-        const drawnCards: CardDefinition[] = []
-        const cardInstances: CardInstance[] = []
+  const recordCardUsage = useCallback(
+    (playerIndex: number, card: CardInstance, targetPlayerIndex?: number) => {
+      const entry: CardUsageEntry = {
+        turnNumber: turnCountRef.current,
+        playerIndex,
+        cardId: card.id,
+        cardName: card.title,
+        targetPlayerIndex,
+        timestamp: Date.now(),
+      }
+      setGameMetrics((prev) => ({
+        ...prev,
+        cardUsage: [...prev.cardUsage, entry],
+      }))
+      incrementPlayerMetric(playerIndex, 'cardsUsed')
+    },
+    [incrementPlayerMetric]
+  )
 
-        for (let i = 0; i < numCards; i++) {
-          const drawContext = buildCardDrawContext(players, activePlayerIndex)
-          const entry = pickCardForPlayer(drawContext)
-          if (entry) {
-            drawnCards.push(entry.definition)
-            cardInstances.push(createCardInstance(entry.definition))
+  const recordTurnSnapshot = useCallback(() => {
+    const snapshot: TurnSnapshot = {
+      turnNumber: turnCountRef.current,
+      activePlayerIndex,
+      playerScores: playersRef.current.map((p) => p.score),
+      timestamp: Date.now(),
+    }
+    setGameMetrics((prev) => ({
+      ...prev,
+      turnSnapshots: [...prev.turnSnapshots, snapshot],
+      totalTurns: turnCountRef.current,
+    }))
+  }, [activePlayerIndex])
+
+  const recordActionUsage = useCallback(
+    (playerIndex: number, actionId: ActionId) => {
+      setGameMetrics((prev) => ({
+        ...prev,
+        playerMetrics: prev.playerMetrics.map((metrics, idx) => {
+          if (idx !== playerIndex) return metrics
+          const currentCount = metrics.actionsUsed[actionId] ?? 0
+          return {
+            ...metrics,
+            actionsUsed: {
+              ...metrics.actionsUsed,
+              [actionId]: currentCount + 1,
+            },
           }
-        }
+        }),
+      }))
+    },
+    []
+  )
 
-        if (drawnCards.length > 0) {
-          // Add cards to first player's inventory
-          setPlayers((prev) =>
-            prev.map((player, index) =>
-              index === activePlayerIndex
-                ? { ...player, inventory: [...player.inventory, ...cardInstances] }
-                : player,
-            ),
-          )
+  const recordPointChange = useCallback(
+    (playerIndex: number, delta: number) => {
+      if (delta === 0) return
+      setGameMetrics((prev) => ({
+        ...prev,
+        playerMetrics: prev.playerMetrics.map((metrics, idx) => {
+          if (idx !== playerIndex) return metrics
+          return {
+            ...metrics,
+            highestSingleGain: delta > 0 ? Math.max(metrics.highestSingleGain, delta) : metrics.highestSingleGain,
+            biggestLoss: delta < 0 ? Math.max(metrics.biggestLoss, Math.abs(delta)) : metrics.biggestLoss,
+          }
+        }),
+      }))
+    },
+    []
+  )
 
-          // Show the modal
-          const firstPlayerName = players[activePlayerIndex]?.name ?? ''
-          onTurnStart(activePlayerIndex, firstPlayerName, drawnCards)
+  // Draw cards for the first player at the start of the game
+  const hasDrawnFirstTurnCardsRef = useRef(false)
+  useEffect(() => {
+    if (hasDrawnFirstTurnCardsRef.current || !onTurnStart) return
+    hasDrawnFirstTurnCardsRef.current = true
+
+    const freeCardsConfig = runtimeConfig.mechanics.freeCardsPerTurn
+    const numCards = freeCardsConfig === -1 ? players.length - 1 : freeCardsConfig
+
+    if (numCards > 0) {
+      const drawnCards: CardDefinition[] = []
+      const cardInstances: CardInstance[] = []
+
+      for (let i = 0; i < numCards; i++) {
+        const drawContext = buildCardDrawContext(players, activePlayerIndex)
+        const entry = pickCardForPlayer(drawContext)
+        if (entry) {
+          drawnCards.push(entry.definition)
+          cardInstances.push(createCardInstance(entry.definition))
         }
       }
 
-      setIsFirstTurn(false)
+      if (drawnCards.length > 0) {
+        // Add cards to first player's inventory
+        setPlayers((prev) =>
+          prev.map((player, index) =>
+            index === activePlayerIndex
+              ? { ...player, inventory: [...player.inventory, ...cardInstances] }
+              : player,
+          ),
+        )
+
+        // Track cards received for first player
+        setGameMetrics((prev) => ({
+          ...prev,
+          playerMetrics: prev.playerMetrics.map((metrics, idx) =>
+            idx === activePlayerIndex
+              ? { ...metrics, cardsReceived: metrics.cardsReceived + drawnCards.length }
+              : metrics
+          ),
+        }))
+
+        // Show the modal
+        const firstPlayerName = players[activePlayerIndex]?.name ?? ''
+        onTurnStart(activePlayerIndex, firstPlayerName, drawnCards)
+      }
     }
-  }, [isFirstTurn, onTurnStart, runtimeConfig.mechanics.freeCardsPerTurn, players, activePlayerIndex])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const saveSnapshot = useCallback(() => {
     setHistory((prev) => {
@@ -284,8 +420,12 @@ export function useJeopardyGame({
         delete next[targetIndex]
         return next
       })
+      // Track when a player gets puppeteered
+      if (lock) {
+        incrementPlayerMetric(targetIndex, 'timesPuppeteered')
+      }
     },
-    [],
+    [incrementPlayerMetric],
   )
 
   const clearPuppetLock = useCallback(
@@ -400,7 +540,23 @@ export function useJeopardyGame({
         }),
       )
 
+      // Track high/low point changes
+      recordPointChange(targetIndex, delta)
+
+      // Track passive income
+      if (delta > 0 && reason === 'passiveItem') {
+        incrementPlayerMetric(targetIndex, 'passiveIncomeGained', delta)
+      }
+
+      // Track damage metrics for non-question damage
       if (delta < 0 && reason !== 'question') {
+        const damageAmount = Math.abs(delta)
+        incrementPlayerMetric(targetIndex, 'damageTaken', damageAmount)
+        // If the active player dealt damage to someone else, track damageDealt
+        if (targetIndex !== activePlayerIndex) {
+          incrementPlayerMetric(activePlayerIndex, 'damageDealt', damageAmount)
+        }
+
         const inventory = playersRef.current[targetIndex]?.inventory ?? []
         inventory.forEach((card) =>
           runCardEffect(
@@ -417,7 +573,7 @@ export function useJeopardyGame({
               removeCardFromInventory,
               setPuppetLockForPlayer,
             },
-            { damage: Math.abs(delta), reason },
+            { damage: damageAmount, reason },
           ),
         )
       }
@@ -429,6 +585,8 @@ export function useJeopardyGame({
       transferCardBetweenPlayers,
       removeCardFromInventory,
       setPuppetLockForPlayer,
+      incrementPlayerMetric,
+      recordPointChange,
     ],
   )
 
@@ -467,6 +625,22 @@ export function useJeopardyGame({
         timestamp: Date.now(),
       },
     ])
+
+    // Track question metrics
+    incrementPlayerMetric(activePlayerIndex, 'questionsAnswered')
+    if (result === 'correct') {
+      incrementPlayerMetric(activePlayerIndex, 'questionsCorrect')
+      if (scoreChange > 0) {
+        incrementPlayerMetric(activePlayerIndex, 'totalQuestionPointsGained', scoreChange)
+      }
+    } else if (result === 'wrong') {
+      incrementPlayerMetric(activePlayerIndex, 'questionsWrong')
+      if (scoreChange < 0) {
+        incrementPlayerMetric(activePlayerIndex, 'totalQuestionPointsLost', Math.abs(scoreChange))
+      }
+    } else {
+      incrementPlayerMetric(activePlayerIndex, 'questionsPassed')
+    }
   }
 
   const handleTileClick = (tileId: string) => {
@@ -497,6 +671,10 @@ export function useJeopardyGame({
   const getNextPlayerIndex = () => (activePlayerIndex + 1) % players.length
 
   const prepareNextPlayer = () => {
+    // Record turn snapshot before changing player
+    turnCountRef.current += 1
+    recordTurnSnapshot()
+
     const nextIndex = getNextPlayerIndex()
 
     // Draw free cards for the next player
@@ -520,6 +698,11 @@ export function useJeopardyGame({
             ),
           )
         }
+      }
+
+      // Track cards received
+      if (drawnCards.length > 0) {
+        incrementPlayerMetric(nextIndex, 'cardsReceived', drawnCards.length)
       }
 
       // Call onTurnStart with the next player's info and cards
@@ -558,7 +741,7 @@ export function useJeopardyGame({
 
     saveSnapshot()
     const effectiveValue = selectedTile.value * (selectedTile.multiplier ?? 1)
-    
+
     // Apply spider sense bonus for correct answers
     let scoreChange: number
     if (correct) {
@@ -568,8 +751,12 @@ export function useJeopardyGame({
     } else {
       scoreChange = runtimeConfig.gameplay.subtractPointsOnWrongAnswer ? -effectiveValue : 0
     }
-    
+
     recordStat(correct ? 'correct' : 'wrong', scoreChange)
+
+    // Check if this is the last open tile before marking it done
+    const openTilesRemaining = tiles.filter((t) => t.status === 'open' && t.id !== selectedTile.id).length
+    const isLastQuestion = openTilesRemaining === 0
 
     setTiles((prev) =>
       prev.map((tile) =>
@@ -579,7 +766,11 @@ export function useJeopardyGame({
 
     applyScoreChange(activePlayerIndex, scoreChange, 'question')
     clearPuppetLock(activePlayerIndex)
-    prepareNextPlayer()
+
+    // Don't transition to next player if game is over
+    if (!isLastQuestion) {
+      prepareNextPlayer()
+    }
   }
 
   const handlePass = () => {
@@ -588,6 +779,10 @@ export function useJeopardyGame({
     saveSnapshot()
     recordStat('pass', 0)
 
+    // Check if this is the last open tile before marking it done
+    const openTilesRemaining = tiles.filter((t) => t.status === 'open' && t.id !== selectedTile.id).length
+    const isLastQuestion = openTilesRemaining === 0
+
     setTiles((prev) =>
       prev.map((tile) =>
         tile.id === selectedTile.id ? { ...tile, status: 'done', modifiers: {} } : tile,
@@ -595,7 +790,11 @@ export function useJeopardyGame({
     )
 
     clearPuppetLock(activePlayerIndex)
-    prepareNextPlayer()
+
+    // Don't transition to next player if game is over
+    if (!isLastQuestion) {
+      prepareNextPlayer()
+    }
   }
 
   const handleUndo = () => {
@@ -668,8 +867,9 @@ export function useJeopardyGame({
           }
         }),
       )
+      incrementPlayerMetric(frozenByPlayerIndex, 'tilesFrozen')
     },
-    [saveSnapshot],
+    [saveSnapshot, incrementPlayerMetric],
   )
 
   const unfreezeTilesForPlayer = useCallback((playerIndex: number) => {
@@ -733,9 +933,10 @@ export function useJeopardyGame({
         sourceCardInstanceId: cardInstanceId,
       }
       setAlliances((prev) => [...prev, newAlliance])
+      incrementPlayerMetric(initiatorIndex, 'alliancesFormed')
       return newAlliance
     },
-    [players.length, getNextAllianceColor, runtimeConfig.mechanics.alliances.baseDurationMultiplier],
+    [players.length, getNextAllianceColor, runtimeConfig.mechanics.alliances.baseDurationMultiplier, incrementPlayerMetric],
   )
 
   const tickDownAlliances = useCallback(() => {
@@ -803,6 +1004,7 @@ export function useJeopardyGame({
     if (goldEarned > 0) {
       applyScoreChange(playerIndex, goldEarned, 'activeCard')
     }
+    incrementPlayerMetric(playerIndex, 'treasureSetsCompleted')
   }
 
   const activateCard = (
@@ -816,6 +1018,10 @@ export function useJeopardyGame({
     )
     if (!card) return
     saveSnapshot()
+
+    // Track card usage
+    recordCardUsage(ownerIndex, card, targetPlayerIndex !== ownerIndex ? targetPlayerIndex : undefined)
+
     const result = runCardEffect(
       'activated',
       card,
@@ -928,29 +1134,71 @@ export function useJeopardyGame({
   const setActivePlayer = useCallback((playerIndex: number) => {
     if (playerIndex >= 0 && playerIndex < players.length) {
       saveSnapshot()
+
+      // Record turn snapshot before changing player
+      turnCountRef.current += 1
+      recordTurnSnapshot()
+
+      // Draw free cards for the new player (same as prepareNextPlayer)
+      const freeCardsConfig = runtimeConfig.mechanics.freeCardsPerTurn
+      const numCards = freeCardsConfig === -1 ? players.length - 1 : freeCardsConfig
+
+      if (numCards > 0 && onTurnStart) {
+        const drawnCards: CardDefinition[] = []
+        for (let i = 0; i < numCards; i++) {
+          const drawContext = buildCardDrawContext(players, playerIndex)
+          const entry = pickCardForPlayer(drawContext)
+          if (entry) {
+            drawnCards.push(entry.definition)
+            // Add the card to the player's inventory
+            const cardInstance = createCardInstance(entry.definition)
+            setPlayers((prev) =>
+              prev.map((player, index) =>
+                index === playerIndex
+                  ? { ...player, inventory: [...player.inventory, cardInstance] }
+                  : player,
+              ),
+            )
+          }
+        }
+
+        // Track cards received
+        if (drawnCards.length > 0) {
+          incrementPlayerMetric(playerIndex, 'cardsReceived', drawnCards.length)
+        }
+
+        // Call onTurnStart with the new player's info and cards
+        const newPlayerName = players[playerIndex]?.name ?? ''
+        if (drawnCards.length > 0) {
+          onTurnStart(playerIndex, newPlayerName, drawnCards)
+        }
+      }
+
       // Manually setting active player implies starting a new turn for them
       setPlayers((prev) =>
         prev.map((player, index) =>
           index === playerIndex
-            ? { 
-                ...player, 
+            ? {
+                ...player,
                 stats: resetPlayerTurnStats(player.stats),
-                actionCounts: {} 
-              } 
+                actionCounts: {}
+              }
             : player,
         ),
       )
       setActivePlayerIndex(playerIndex)
+      setSelectedTileId(null)
+      setAnswerRevealed(false)
       setGoldenIdolBonus((prev) => {
         // Increment Idol bonus on manual turn switch as well
         const roll = Math.random()
-        const increment = roll < 0.7 
-          ? 5 + Math.floor(Math.random() * 26) 
-          : 31 + Math.floor(Math.random() * 70) 
+        const increment = roll < 0.7
+          ? 5 + Math.floor(Math.random() * 26)
+          : 31 + Math.floor(Math.random() * 70)
         return prev + increment
       })
     }
-  }, [players.length, saveSnapshot])
+  }, [saveSnapshot, runtimeConfig.mechanics.freeCardsPerTurn, onTurnStart, players, recordTurnSnapshot, incrementPlayerMetric])
 
   const adjustPlayerScore = useCallback((playerIndex: number, delta: number) => {
     if (playerIndex >= 0 && playerIndex < players.length) {
@@ -1049,5 +1297,8 @@ export function useJeopardyGame({
     getPlayerAlliance,
     goldenIdolBonus,
     resetGoldenIdolBonus: () => setGoldenIdolBonus(0),
+    gameMetrics,
+    recordActionUsage,
+    incrementPlayerMetric,
   }
 }

@@ -117,3 +117,61 @@ export type GameStatEntry = {
   scoreChange: number
   timestamp: number
 }
+
+// Comprehensive game metrics tracking for endgame scoreboard
+export type CardUsageEntry = {
+  turnNumber: number
+  playerIndex: number
+  cardId: string
+  cardName: string
+  targetPlayerIndex?: number
+  timestamp: number
+}
+
+export type TurnSnapshot = {
+  turnNumber: number
+  activePlayerIndex: number
+  playerScores: number[] // Score for each player at end of turn
+  timestamp: number
+}
+
+export type ActionUsageStats = Partial<Record<ActionId, number>>
+
+export type PlayerMetrics = {
+  // Question stats
+  questionsAnswered: number
+  questionsCorrect: number
+  questionsWrong: number
+  questionsPassed: number
+  totalQuestionPointsGained: number
+  totalQuestionPointsLost: number
+  // Damage stats (non-question)
+  damageTaken: number // Points lost to cards/effects (not questions)
+  damageDealt: number // Points taken from other players via cards
+  // Card stats
+  cardsUsed: number
+  cardsReceived: number
+  // Action stats
+  actionsUsed: ActionUsageStats
+  // Spider/feeding stats
+  isopodsFed: number
+  sheepFed: number
+  // Misc gameplay stats
+  alliancesFormed: number
+  timesPuppeteered: number
+  tilesFrozen: number
+  treasureSetsCompleted: number
+  goldenIdolPointsGained: number
+  passiveIncomeGained: number
+  // Records
+  highestSingleGain: number
+  biggestLoss: number
+}
+
+export type GameMetrics = {
+  turnSnapshots: TurnSnapshot[]
+  cardUsage: CardUsageEntry[]
+  playerMetrics: PlayerMetrics[]
+  gameStartTime: number
+  totalTurns: number
+}

@@ -21,7 +21,7 @@ This reference walks through the main frameworks that protect and scale the card
 - `runCardEffect` wraps each handler with shared helpers (`applyScoreChange`, `updateCardState`, `transferCardBetweenPlayers`, etc.), so new behaviors stay isolated and explicit. If a card shouldn’t respond to a hook, omit the handler; if it needs to mutate its own state, use `updateCardState`.
 
 ## 4. Game hook & activation flow
-- `useJeopardyGame` seeds stats and inventory per player, exposes `addCardToInventory`/`activateCard`, and handles undo/history.
+- `useJeopardyGame` seeds stats and inventory per player, exposes `addCardToInventory`/`activateCard`, handles undo/history, and tracks game metrics for the post-game statistics dashboard. Card usage is automatically recorded via `recordCardUsage` when cards are played (see `docs/game-metrics.md`).
 - The activation path closes the inventory and reads the card's `targetSelectMode` from the catalog to decide which player selector to show: `'standard'` keeps the red blood sacrifice style; `'neutral'` disables opponents with empty inventories (Thieving Rat); `'fel'` renders the green Soul Burst/eldritch shell; `'puppet'` opens category selection for Puppet Master; `'roulette'` opens the gambling modal; `'none'` activates immediately. Keep `CARD_CONFIG[targetSelectMode]` updated if you add new selectors or need filters beyond those defaults.
 - When a card is activated it calls `runCardEffect('activated', …)`; the hook also exposes `transferCardBetweenPlayers`, `removeCardFromInventory`, and the context needed for the registry.
 - Passive hooks (e.g., `turnStart`, `damageTaken`) are fired automatically from `applyScoreChange` and the `runTurnStartEffects` callback using the same shared context.

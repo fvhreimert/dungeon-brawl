@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import '@/App.css'
 import '@/components/actions/Actions.css'
 import '@/components/actions/ExhaustedAction.css'
@@ -49,6 +49,8 @@ import { TreasureIslandModal } from '@/features/cards/TreasureIslandModal'
 import { SpiderFeedingModal } from '@/features/actions/web/SpiderFeedingModal'
 import { ActionUpgradeModal } from '@/features/actions/web/ActionUpgradeModal'
 import { TurnStartModal } from '@/components/game/TurnStartModal'
+import { GameOverScreen } from '@/components/game/GameOverScreen'
+import { StatsScreen } from '@/components/game/StatsScreen'
 import {
   buildCardDrawContext,
   pickCardForPlayer,
@@ -113,6 +115,9 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
   const [spiderFeedingActive, setSpiderFeedingActive] = useState(false)
   const [actionUpgradeActive, setActionUpgradeActive] = useState(false)
   const [turnStartCards, setTurnStartCards] = useState<{ playerName: string; cards: CardDefinition[] } | null>(null)
+  const [showGameOver, setShowGameOver] = useState(false)
+  const [showStats, setShowStats] = useState(false)
+  const [gameEndTime, setGameEndTime] = useState<number | null>(null)
 
   const { playStart: playFrogStart, playHop, playLand } = useFrogSounds()
   const { playStart: playMadSeerStart } = useMadSeerSounds()
@@ -149,12 +154,15 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     createAlliance,
     goldenIdolBonus,
     resetGoldenIdolBonus,
+    gameMetrics,
+    recordActionUsage,
+    incrementPlayerMetric,
   } = useJeopardyGame({
     categories,
     pointValues,
     players: initialPlayers,
     questionBank,
-    onTurnStart: (playerIndex, playerName, cards) => {
+    onTurnStart: (_playerIndex, playerName, cards) => {
       setTurnStartCards({ playerName, cards })
     },
   })
@@ -206,6 +214,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     if (isActionExhausted('web')) return
 
     incrementActionCount(activePlayerIndex, 'web')
+    recordActionUsage(activePlayerIndex, 'web')
     setSpiderFeedingActive(true)
   }
 
@@ -213,12 +222,14 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     removeCardFromInventory(activePlayerIndex, isopodInstanceId)
     setSpiderIndex((prev) => (prev < 8 ? prev + 1 : prev))
     increaseSpiderSense(activePlayerIndex)
+    incrementPlayerMetric(activePlayerIndex, 'isopodsFed')
   }
 
   const handleSpiderFeedSheep = (sheepInstanceId: string) => {
     removeCardFromInventory(activePlayerIndex, sheepInstanceId)
     setSpiderFeedingActive(false)
     setActionUpgradeActive(true)
+    incrementPlayerMetric(activePlayerIndex, 'sheepFed')
   }
 
   const handleUpgradeAction = (actionId: UpgradeableAction) => {
@@ -256,7 +267,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
 
     const price = runtimeConfig.mechanics.actionPrices.cardJester
     const currentPlayer = players[activePlayerIndex]
-    
+
     if (currentPlayer.score < price) {
       // Not enough points
       return
@@ -264,6 +275,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
 
     adjustPlayerScore(activePlayerIndex, -price)
     incrementActionCount(activePlayerIndex, 'card_jester')
+    recordActionUsage(activePlayerIndex, 'card_jester')
 
     const isUpgraded = isActionUpgraded('card_jester')
     const cardsToDraw = isUpgraded ? 2 : 1
@@ -507,6 +519,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     setMadSeerPreviewTile(null)
     setMadSeerActive(false)
     incrementActionCount(activePlayerIndex, 'mad_seer')
+    recordActionUsage(activePlayerIndex, 'mad_seer')
   }
 
   const handleMadSeerReject = () => {
@@ -523,6 +536,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     playBloodSacrificeStart()
     setBloodSacrificeActive(true)
     incrementActionCount(activePlayerIndex, 'blood_sacrifice')
+    recordActionUsage(activePlayerIndex, 'blood_sacrifice')
   }
 
   const handleBloodSacrificeConfirm = (amount: number) => {
@@ -546,6 +560,41 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
   }
 
   const getOpenTiles = () => tiles.filter((tile) => tile.status === 'open')
+
+  // Check if game is over (no open tiles left)
+  const isGameOver = useMemo(() => {
+    return tiles.length > 0 && tiles.every((tile) => tile.status === 'done')
+  }, [tiles])
+
+  // Show game over screen when game ends
+  useEffect(() => {
+    if (isGameOver && !showGameOver && !showStats) {
+      // Capture the end time when game ends
+      if (gameEndTime === null) {
+        setGameEndTime(Date.now())
+      }
+      // Small delay to let the last question animation complete
+      const timer = setTimeout(() => {
+        setShowGameOver(true)
+      }, 1500)
+      return () => clearTimeout(timer)
+    }
+  }, [isGameOver, showGameOver, showStats, gameEndTime])
+
+  const handleViewStats = () => {
+    setShowGameOver(false)
+    setShowStats(true)
+  }
+
+  const handleBackFromStats = () => {
+    setShowStats(false)
+    setShowGameOver(true)
+  }
+
+  const handlePlayAgain = () => {
+    // Reload the page to start fresh (or navigate to main menu)
+    window.location.reload()
+  }
 
   const runFrogSelection = async (count: number = 1) => {
     const openTiles = getOpenTiles()
@@ -611,6 +660,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
       setFrogLandingIds([])
       setFrogSelecting(false)
       incrementActionCount(activePlayerIndex, 'frog_of_fate')
+      recordActionUsage(activePlayerIndex, 'frog_of_fate')
     }, 900)
   }
 
@@ -640,16 +690,39 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     if (frozenActions.golden_idol) return
     if (isActionExhausted('golden_idol')) return
     if (madSeerActive || frogSelecting || selectedTile || idolActive || selectedSurvivorIds) return
-    
-    // Award the accumulated bonus
+
+    // Award the accumulated bonus and track it
     adjustPlayerScore(activePlayerIndex, goldenIdolBonus)
+    incrementPlayerMetric(activePlayerIndex, 'goldenIdolPointsGained', goldenIdolBonus)
+    recordActionUsage(activePlayerIndex, 'golden_idol')
 
     const isUpgraded = isActionUpgraded('golden_idol')
     await triggerIdol(tiles, updateTileModifiers, isUpgraded ? 2 : 1)
-    
+
     incrementActionCount(activePlayerIndex, 'golden_idol')
     resetGoldenIdolBonus()
   }
+
+  // Clear action states when turn changes
+  const prevActivePlayerRef = useRef(activePlayerIndex)
+  useEffect(() => {
+    if (prevActivePlayerRef.current !== activePlayerIndex) {
+      // Clear golden idol effect
+      if (selectedSurvivorIds) {
+        clearIdolEffect(tiles, updateTileModifiers)
+      }
+      // Clear other action states
+      setMadSeerActive(false)
+      setMadSeerPreviewTile(null)
+      setFrogSelecting(false)
+      setFrogHighlightIds([])
+      setFrogLandingIds([])
+      setBloodSacrificeActive(false)
+      setFreezeSelectMode(false)
+
+      prevActivePlayerRef.current = activePlayerIndex
+    }
+  }, [activePlayerIndex, selectedSurvivorIds, clearIdolEffect, tiles, updateTileModifiers])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -665,7 +738,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
 
     window.addEventListener('keydown', handleKeyDown)
     document.addEventListener('fullscreenchange', handleFullscreenChange)
-    
+
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
       document.removeEventListener('fullscreenchange', handleFullscreenChange)
@@ -1225,6 +1298,23 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
           playerName={turnStartCards.playerName}
           cards={turnStartCards.cards}
           onClose={() => setTurnStartCards(null)}
+        />
+      )}
+
+      {showGameOver && (
+        <GameOverScreen
+          players={players}
+          onViewStats={handleViewStats}
+          onPlayAgain={handlePlayAgain}
+        />
+      )}
+
+      {showStats && (
+        <StatsScreen
+          players={players}
+          gameMetrics={gameMetrics}
+          gameEndTime={gameEndTime ?? Date.now()}
+          onBack={handleBackFromStats}
         />
       )}
     </div>
