@@ -115,6 +115,9 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
   const [spiderFeedingActive, setSpiderFeedingActive] = useState(false)
   const [actionUpgradeActive, setActionUpgradeActive] = useState(false)
   const [blackMarketData, setBlackMarketData] = useState<{ playerIndex: number; playerName: string; cards: CardDefinition[] } | null>(null)
+  const [showTurnIntro, setShowTurnIntro] = useState(false)
+  const [introExiting, setIntroExiting] = useState(false)
+  const [cardsEntering, setCardsEntering] = useState(false)
   const [showGameOver, setShowGameOver] = useState(false)
   const [showStats, setShowStats] = useState(false)
   const [gameEndTime, setGameEndTime] = useState<number | null>(null)
@@ -167,6 +170,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     questionBank,
     onBlackMarketStart: (playerIndex, playerName, cards) => {
       setBlackMarketData({ playerIndex, playerName, cards })
+      setShowTurnIntro(true)
     },
   })
 
@@ -749,8 +753,40 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     }
   }, [handleUndo])
 
+  // Handle turn intro transition with exit animation
+  useEffect(() => {
+    if (showTurnIntro && blackMarketData) {
+      // Start exit animation after showing intro
+      const exitTimer = setTimeout(() => {
+        setIntroExiting(true)
+      }, 1400) // Show intro for 1.4 seconds before starting exit
+
+      // Complete transition after exit animation
+      const transitionTimer = setTimeout(() => {
+        setShowTurnIntro(false)
+        setIntroExiting(false)
+        setCardsEntering(true)
+      }, 1800) // Exit animation takes 0.4s
+
+      // Clear cards entering state after animation
+      const cardsTimer = setTimeout(() => {
+        setCardsEntering(false)
+      }, 2400) // Cards animation takes 0.6s
+
+      return () => {
+        clearTimeout(exitTimer)
+        clearTimeout(transitionTimer)
+        clearTimeout(cardsTimer)
+      }
+    }
+  }, [showTurnIntro, blackMarketData])
+
   // Change title based on Black Market state
-  const displayTitle = blackMarketData ? "BLACK MARKET" : gameConfig.meta.title
+  const displayTitle = showTurnIntro
+    ? `${blackMarketData?.playerName?.toUpperCase()}'S TURN`
+    : blackMarketData
+      ? "BLACK MARKET"
+      : gameConfig.meta.title
   const isBlackMarketActive = !!blackMarketData
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -935,13 +971,32 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
         </header>
 
         {isBlackMarketActive ? (
-          <BlackMarketModal
-            playerName={blackMarketData.playerName}
-            cards={blackMarketData.cards}
-            rerollsRemaining={players[blackMarketData.playerIndex]?.rerollsRemaining ?? 0}
-            onReroll={handleBlackMarketReroll}
-            onAccept={handleBlackMarketAccept}
-          />
+          showTurnIntro ? (
+            <section className={`board-shell turn-intro-shell ${introExiting ? 'turn-intro-exiting' : ''}`}>
+              {/* Match black market structure for consistent height */}
+              <div className="black-market-header-spacer" />
+              <div className="black-market-grid turn-intro-grid">
+                <div className="turn-intro-content">
+                  <img
+                    src={players[blackMarketData.playerIndex]?.portrait}
+                    alt={blackMarketData.playerName}
+                    className="turn-intro-portrait"
+                  />
+                  <h2 className="turn-intro-title">{blackMarketData.playerName}'s Turn</h2>
+                  <p className="turn-intro-subtitle">Choose your cards!</p>
+                </div>
+              </div>
+            </section>
+          ) : (
+            <BlackMarketModal
+              playerName={blackMarketData.playerName}
+              cards={blackMarketData.cards}
+              rerollsRemaining={players[blackMarketData.playerIndex]?.rerollsRemaining ?? 0}
+              onReroll={handleBlackMarketReroll}
+              onAccept={handleBlackMarketAccept}
+              isEntering={cardsEntering}
+            />
+          )
         ) : (
           <GameBoard
             categories={categories}

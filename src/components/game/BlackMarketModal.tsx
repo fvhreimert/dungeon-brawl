@@ -17,13 +17,15 @@ interface BlackMarketModalProps {
   rerollsRemaining: number
   onReroll: (cardIndex: number) => CardDefinition | null
   onAccept: (cards: CardDefinition[]) => void
+  isEntering?: boolean
 }
 
 export function BlackMarketModal({
   cards: initialCards,
   rerollsRemaining,
   onReroll,
-  onAccept
+  onAccept,
+  isEntering = false
 }: BlackMarketModalProps) {
   const [cards, setCards] = useState<CardDefinition[]>(initialCards)
   const [pressedReroll, setPressedReroll] = useState<number | null>(null)
@@ -35,6 +37,7 @@ export function BlackMarketModal({
     setRerollingIndex(index)
     setPressedReroll(index)
 
+    // Swap card at the midpoint of animation (when card is invisible)
     setTimeout(() => {
       const newCard = onReroll(index)
       if (newCard) {
@@ -45,8 +48,12 @@ export function BlackMarketModal({
         })
       }
       setPressedReroll(null)
+    }, 175)
+
+    // Clear rerolling state after animation completes
+    setTimeout(() => {
       setRerollingIndex(null)
-    }, 150)
+    }, 350)
   }, [rerollsRemaining, rerollingIndex, onReroll])
 
   const handleAccept = useCallback(() => {
@@ -54,7 +61,7 @@ export function BlackMarketModal({
   }, [cards, onAccept])
 
   return (
-    <section className="board-shell black-market-shell">
+    <section className={`board-shell black-market-shell ${isEntering ? 'black-market-entering' : ''}`}>
       {/* Placeholder for category row height */}
       <div className="black-market-header-spacer" />
 

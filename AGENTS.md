@@ -178,24 +178,32 @@ Upgraded versions of actions are unlocked via the **Spider Web** mechanic. Playe
 
 ## Black Market (Turn Start Card Selection)
 - **Logic:** `src/components/game/BlackMarketModal.tsx` and `src/components/game/BlackMarketModal.css`
-- **Mechanic:** At the start of each player's turn, the question grid is temporarily replaced with the "Black Market" interface where players can view, reroll, and accept their free cards before continuing.
+- **Mechanic:** At the start of each player's turn, a turn intro animation plays followed by the "Black Market" interface where players can view, reroll, and accept their free cards before continuing.
 - **Configuration:** Controlled by the `freeCardsPerTurn` and `startingRerolls` settings:
   - `freeCardsPerTurn`: Set to `-1` for `(player count - 1)` cards, or `0-10` for exact count. Default: `-1`.
   - `startingRerolls`: Number of rerolls each player starts with. Default: `10`. Configured in `gameConfig.ts`.
 - **Flow:**
   1. When a turn begins, cards are drawn using the weighted card system (`pickCardForPlayer`).
-  2. The question grid (board-shell) is replaced with `BlackMarketModal`.
-  3. The main title changes from "DUNGEON BRAWL" to "BLACK MARKET" (dark blueish-purple metallic style).
-  4. The current player's name in the Scoreboard turns red with a glow effect.
-  5. Cards are displayed full-size (320×480px) in a horizontally centered row with theme-colored glows.
-  6. Each card has a reroll button below it (uses `reroll.png` and `reroll_pressed.png` assets).
-  7. Player can reroll individual cards (consumes 1 reroll per use) to get a new random card.
-  8. "Accept" button in the lower-right corner confirms selection and adds cards to inventory.
-  9. After accepting, the Black Market closes and the normal question grid returns.
+  2. **Turn Intro Animation** plays first:
+     - Shows player's portrait with a bounce animation.
+     - Displays "[Player Name]'s Turn" and "Choose your cards!" text.
+     - Title bar shows "[PLAYER]'S TURN".
+     - Lasts ~1.4 seconds, then fades out with scale-down animation.
+  3. The question grid (board-shell) is replaced with `BlackMarketModal` with entrance animation.
+  4. The main title changes to "BLACK MARKET" (dark blueish-purple metallic style).
+  5. Cards fly in one-by-one from below with staggered timing and bounce effect.
+  6. The current player's name in the Scoreboard turns red with a glow effect.
+  7. Cards are displayed full-size in a horizontally centered row with theme-colored glows.
+  8. Each card has a reroll button below it (uses `reroll.png` and `reroll_pressed.png` assets).
+  9. Player can reroll individual cards (consumes 1 reroll per use) to get a new random card.
+  10. "Accept" button in the lower-right corner confirms selection and adds cards to inventory.
+  11. After accepting, the Black Market closes and the normal question grid returns.
 - **Visual Effects:**
+  - **Turn Intro:** Portrait bounces in, title slides up, subtitle fades in. Exit animation scales down and fades out.
+  - **Cards Entrance:** Cards fly in from below with staggered delays (0.1s apart) and subtle bounce.
   - Cards have a subtle glow using their theme's `--col-gold-main` CSS variable.
   - Cards scale up slightly on hover (1.06x) with increased glow.
-  - Reroll animation: card flips with rotateY and opacity transition.
+  - Reroll animation: card slides down and fades out, new card slides up and fades in (350ms duration).
   - Disabled reroll buttons are grayed out when no rerolls remain.
 - **State Management:**
   - `rerollsRemaining` tracked per player in `Player` type (`src/types/game.ts`).
