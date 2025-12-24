@@ -12,6 +12,8 @@ export type RuntimeGameConfig = {
   }
   mechanics: {
     freeCardsPerTurn: number
+    startingRerolls: number
+    spiderIsopodRerollBonus: number
     spiderSense: {
       bonusPerLevel: number
       maxLevel: number
@@ -56,6 +58,8 @@ const defaultRuntimeConfig: RuntimeGameConfig = {
   },
   mechanics: {
     freeCardsPerTurn: gameConfig.mechanics.freeCardsPerTurn,
+    startingRerolls: gameConfig.mechanics.startingRerolls,
+    spiderIsopodRerollBonus: gameConfig.mechanics.spiderIsopodRerollBonus,
     spiderSense: {
       bonusPerLevel: gameConfig.mechanics.spiderSense.bonusPerLevel,
       maxLevel: gameConfig.mechanics.spiderSense.maxLevel,
@@ -107,6 +111,8 @@ export function gameplaySettingsToRuntimeConfig(settings: GameplaySettings): Run
     },
     mechanics: {
       freeCardsPerTurn: settings.freeCardsPerTurn,
+      startingRerolls: settings.startingRerolls,
+      spiderIsopodRerollBonus: settings.spiderIsopodRerollBonus,
       spiderSense: {
         bonusPerLevel: settings.spiderSenseBonusPerLevel / 100,
         maxLevel: settings.spiderSenseMaxLevel,

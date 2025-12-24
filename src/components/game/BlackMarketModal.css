@@ -1,0 +1,135 @@
+/* Black market uses board-shell from GameBoard.css */
+.black-market-shell {
+  /* Inherits all board-shell styles */
+}
+
+/* Match category-row height exactly */
+.black-market-header-spacer {
+  min-height: 52px;
+  margin-bottom: 14px;
+}
+
+/* Match question-grid structure exactly */
+.black-market-grid {
+  display: flex;
+  flex-direction: column;
+  height: calc(5 * 96px + 4 * 12px); /* 5 rows × 96px + 4 gaps × 12px = 528px */
+  position: relative;
+}
+
+.black-market-cards-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  min-height: 0; /* Allow shrinking */
+}
+
+.black-market-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  max-height: 100%;
+}
+
+/* Full size cards with subtle theme-colored glow */
+.black-market-card-item {
+  --card-height: calc(5 * 96px + 4 * 12px - 46px); /* Grid height minus reroll button (40px) and gap (6px) = 482px */
+  --card-width: calc(var(--card-height) * 0.667); /* Maintain 2:3 aspect ratio */
+  flex-shrink: 0;
+  transition: transform 0.3s ease, z-index 0s, filter 0.3s ease;
+  cursor: default;
+  filter: drop-shadow(0 0 8px var(--col-gold-main));
+}
+
+.black-market-card-item:hover {
+  transform: scale(1.06) translateY(-8px);
+  z-index: 100;
+  filter: drop-shadow(0 0 12px var(--col-gold-main));
+}
+
+.black-market-card-item.card-rerolling {
+  animation: cardReroll 0.3s ease-out;
+}
+
+@keyframes cardReroll {
+  0% {
+    transform: scale(1) rotateY(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.8) rotateY(90deg);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1) rotateY(0deg);
+    opacity: 1;
+  }
+}
+
+.reroll-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.1s ease, filter 0.1s ease;
+}
+
+.reroll-button:hover:not(.reroll-disabled) {
+  transform: scale(1.1);
+}
+
+.reroll-button:active:not(.reroll-disabled) {
+  transform: scale(0.95);
+}
+
+.reroll-button.reroll-disabled {
+  cursor: not-allowed;
+  filter: grayscale(100%) brightness(0.5);
+  opacity: 0.5;
+}
+
+.reroll-icon {
+  width: 40px;
+  height: 40px;
+  image-rendering: pixelated;
+}
+
+/* Accept button - bottom right corner */
+.black-market-accept-button {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  padding: 10px 20px;
+  background: linear-gradient(180deg, #2a5a2a 0%, #1a3a1a 100%);
+  border: 3px solid #3a7a3a;
+  color: #8fef8f;
+  text-shadow: 1px 1px 0 #0a1a0a;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow:
+    0 4px 0 #0f200f,
+    0 0 15px rgba(80, 200, 80, 0.3);
+}
+
+.black-market-accept-button:hover {
+  background: linear-gradient(180deg, #3a7a3a 0%, #2a5a2a 100%);
+  border-color: #5aaa5a;
+  color: #afffaf;
+  transform: translateY(-2px);
+  box-shadow:
+    0 6px 0 #0f200f,
+    0 0 25px rgba(80, 200, 80, 0.5);
+}
+
+.black-market-accept-button:active {
+  transform: translateY(2px);
+  box-shadow:
+    0 2px 0 #0f200f,
+    0 0 10px rgba(80, 200, 80, 0.3);
+}

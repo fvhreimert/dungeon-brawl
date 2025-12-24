@@ -4,7 +4,7 @@
 - `src/`: React + TypeScript source. Entry is `src/main.tsx`; root layout in `src/App.tsx` with styles in `src/App.css` and global tokens in `src/index.css`.
 - `src/config/`: Centralized configuration (`gameConfig.ts`) for gameplay settings, UI labels, default players (including portraits).
 - `src/components/menu/`: Main menu components (`MainMenuScreen`) for game setup flow before entering the game.
-- `src/components/game/`: Feature components (`Game`, `GameBoard`, `Scoreboard`, `QuestionDialog`, `InventoryModal`, `PlayerSelectModal`, `ScoreAdjustModal`) that render the Jeopardy flow. Each component has its own CSS file.
+- `src/components/game/`: Feature components (`Game`, `GameBoard`, `Scoreboard`, `QuestionDialog`, `InventoryModal`, `PlayerSelectModal`, `ScoreAdjustModal`, `BlackMarketModal`) that render the Jeopardy flow. Each component has its own CSS file.
 - `src/features/`: Complex feature logic and components, organized by domain.
   - `features/actions/`: Contains logic for Dungeon Actions (Mad Seer, Frog of Fate, Golden Idol, Card Jester, Blood Sacrifice).
 - `src/components/ui/`: UI primitives, including 8bit components in `ui/8bit/` (buttons, badges, cards).
@@ -15,6 +15,7 @@
 - `src/utils/`: Utility functions for quiz loading (`quizLoader.ts`) and portrait management (`portraits.ts`).
 - `src/assets/`: Media files (images, sounds) to be imported directly into components.
   - `src/assets/images/ui/portraits/`: Player portrait images (Icons_01.png through Icons_40.png).
+  - `src/assets/images/ui/`: UI images including `reroll.png` and `reroll_pressed.png` for Black Market reroll buttons.
   - `src/assets/sounds/UI/`: UI sounds like `click.mp3` for button feedback.
 - `public/`: Static assets (fonts, `vite.svg`) and assets requiring stable URL paths (e.g., cursor in `public/images/`).
 - Config: Vite (`vite.config.ts`), TypeScript (`tsconfig*.json`), Tailwind (`tailwind.config.js`), ESLint (`eslint.config.js`).
@@ -47,6 +48,7 @@ The game starts with a main menu flow before entering the actual game board.
      - **Points**: Starting points, tier values (100-500 default), score meter max
      - **Gameplay**:
        - **Free Cards Per Turn**: Number of cards each player receives at turn start (0-10 or ∞ for player count - 1)
+       - **Starting Rerolls**: Number of card rerolls each player starts with (default: 10, configured in `gameConfig.ts`)
        - Max tile multiplier
        - **Subtract Points on Wrong** (disabled by default)
      - **Spider Sense**: Bonus per level, max level
@@ -174,23 +176,36 @@ Upgraded versions of actions are unlocked via the **Spider Web** mechanic. Playe
   - This creates a "combo completion" mechanic that helps players finish their treasure sets.
 - Available `targetSelectMode` values: `'standard'` (blood sacrifice style), `'neutral'` (players with cards only), `'fel'` (green Soul Burst theme), `'puppet'` (Puppet Master flow with category selection), `'roulette'` (self-targeting gambling modal), `'treasure'` (treasure set combination), `'freeze'` (tile/action freeze selection), `'coalition'` (alliance formation), `'none'` (immediate activation, no target needed).
 
-## Turn Start Cards
-- **Logic:** `src/components/game/TurnStartModal.tsx`
-- **Mechanic:** At the start of each player's turn (including Player 1's first turn), players automatically receive free cards.
-- **Configuration:** Controlled by the `freeCardsPerTurn` setting in Game Settings:
-  - Set to `-1` (∞): Players receive `(player count - 1)` cards per turn.
-  - Set to `0-10`: Players receive exactly that many cards per turn.
-  - Default: `-1` (auto mode).
+## Black Market (Turn Start Card Selection)
+- **Logic:** `src/components/game/BlackMarketModal.tsx` and `src/components/game/BlackMarketModal.css`
+- **Mechanic:** At the start of each player's turn, the question grid is temporarily replaced with the "Black Market" interface where players can view, reroll, and accept their free cards before continuing.
+- **Configuration:** Controlled by the `freeCardsPerTurn` and `startingRerolls` settings:
+  - `freeCardsPerTurn`: Set to `-1` for `(player count - 1)` cards, or `0-10` for exact count. Default: `-1`.
+  - `startingRerolls`: Number of rerolls each player starts with. Default: `10`. Configured in `gameConfig.ts`.
 - **Flow:**
-  1. When a turn begins, cards are automatically drawn using the weighted card system (`pickCardForPlayer`).
-  2. Cards are added to the player's inventory.
-  3. `TurnStartModal` displays with "[Player Name]'s Turn" header and the drawn cards side-by-side.
-  4. Player clicks anywhere or presses ESC/Space/Enter to dismiss and continue.
+  1. When a turn begins, cards are drawn using the weighted card system (`pickCardForPlayer`).
+  2. The question grid (board-shell) is replaced with `BlackMarketModal`.
+  3. The main title changes from "DUNGEON BRAWL" to "BLACK MARKET" (dark blueish-purple metallic style).
+  4. The current player's name in the Scoreboard turns red with a glow effect.
+  5. Cards are displayed full-size (320×480px) in a horizontally centered row with theme-colored glows.
+  6. Each card has a reroll button below it (uses `reroll.png` and `reroll_pressed.png` assets).
+  7. Player can reroll individual cards (consumes 1 reroll per use) to get a new random card.
+  8. "Accept" button in the lower-right corner confirms selection and adds cards to inventory.
+  9. After accepting, the Black Market closes and the normal question grid returns.
 - **Visual Effects:**
-  - Golden glowing, animated title with pulsating effect.
-  - Cards slide in with staggered animations.
-  - Modal uses the same card display as upgraded Card Jester (horizontal layout).
-- **Implementation:** Handled in `useJeopardyGame` hook via `prepareNextPlayer()` function and a dedicated useEffect for the first player's turn.
+  - Cards have a subtle glow using their theme's `--col-gold-main` CSS variable.
+  - Cards scale up slightly on hover (1.06x) with increased glow.
+  - Reroll animation: card flips with rotateY and opacity transition.
+  - Disabled reroll buttons are grayed out when no rerolls remain.
+- **State Management:**
+  - `rerollsRemaining` tracked per player in `Player` type (`src/types/game.ts`).
+  - `blackMarketData` state in `Game.tsx` stores pending cards and player info.
+  - `acceptBlackMarketCards()` and `consumeReroll()` functions in `useJeopardyGame` hook.
+  - Cards are NOT added to inventory until player clicks "Accept".
+- **Implementation:**
+  - `onBlackMarketStart` callback in `useJeopardyGame` triggers the modal.
+  - Modal reuses `board-shell` class from `GameBoard.css` to maintain exact sizing.
+  - Scoreboard receives `isBlackMarketActive` prop to style active player name red.
 
 ### Coalition (Alliance Mechanic)
 - **Card:** `coalition` in `src/data/cards.ts`

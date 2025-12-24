@@ -60,6 +60,7 @@ export type PlayerConfig = {
   spiderSenseLevel?: number
   upgradedActions?: PlayerUpgrades
   actionCounts?: PlayerActionCounts
+  rerollsRemaining?: number
 }
 
 export type Player = PlayerConfig & {

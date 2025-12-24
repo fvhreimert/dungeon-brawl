@@ -142,6 +142,11 @@
   padding: 0 4px;
 }
 
+.player-name-active-turn {
+  color: #b51a2c;
+  text-shadow: 0 0 8px rgba(181, 26, 44, 0.5);
+}
+
 .player-passive-value {
   display: inline-flex;
   align-items: center;

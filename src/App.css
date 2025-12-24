@@ -147,6 +147,24 @@
   position: relative;
 }
 
+/* Black Market title style - dark blueish purple metallic */
+.title.title-black-market {
+  background: linear-gradient(
+    180deg,
+    #7b6bab 0%, #7b6bab 12.5%,
+    #6a5a9a 12.5%, #6a5a9a 25%,
+    #5a4a8a 25%, #5a4a8a 37.5%,
+    #4a3a7a 37.5%, #4a3a7a 50%,
+    #3a2a6a 50%, #3a2a6a 62.5%,
+    #2a1a5a 62.5%, #2a1a5a 75%,
+    #1a0a4a 75%, #1a0a4a 87.5%,
+    #10053a 87.5%, #10053a 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(4px 4px 0 #000000) drop-shadow(0 0 12px rgba(100, 80, 160, 0.4));
+}
+
 .layout-column.right {
   grid-column: 3;
   width: 100%;

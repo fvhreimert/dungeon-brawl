@@ -39,7 +39,7 @@ type UseJeopardyGameParams = {
   pointValues: readonly number[]
   players: readonly PlayerConfig[]
   questionBank: QAItem[]
-  onTurnStart?: (playerIndex: number, playerName: string, cards: CardDefinition[]) => void
+  onBlackMarketStart?: (playerIndex: number, playerName: string, cards: CardDefinition[]) => void
 }
 
 const createEmptyTurnTotals = () => ({
@@ -68,13 +68,14 @@ const createCardInstance = (definition: CardDefinition): CardInstance => {
   }
 }
 
-const buildPlayerWithStats = (config: PlayerConfig): Player => {
+const buildPlayerWithStats = (config: PlayerConfig, startingRerolls: number): Player => {
   const basePlayer = {
     ...config,
     inventory: [...config.inventory],
     actionCounts: { ...config.actionCounts },
+    rerollsRemaining: config.rerollsRemaining ?? startingRerolls,
   }
-  
+
   // If player is named "TEST", give them 100 of every card
   if (config.name === 'TEST') {
     const testCards: CardInstance[] = []
@@ -85,7 +86,7 @@ const buildPlayerWithStats = (config: PlayerConfig): Player => {
     }
     basePlayer.inventory = [...testCards, ...basePlayer.inventory]
   }
-  
+
   const stats = createDefaultPlayerStats()
   return { ...basePlayer, stats }
 }
@@ -178,7 +179,7 @@ export function useJeopardyGame({
   pointValues,
   players: initialPlayers,
   questionBank,
-  onTurnStart,
+  onBlackMarketStart,
 }: UseJeopardyGameParams) {
   const runtimeConfig = useRuntimeConfig()
   const questionLookup = useMemo(() => {
@@ -213,7 +214,7 @@ export function useJeopardyGame({
 
   const [tiles, setTiles] = useState<Tile[]>(generatedTiles)
   const [players, setPlayers] = useState<Player[]>(
-    initialPlayers.map((player) => buildPlayerWithStats(player)),
+    initialPlayers.map((player) => buildPlayerWithStats(player, runtimeConfig.mechanics.startingRerolls)),
   )
   const playersRef = useRef<Player[]>(players)
   useEffect(() => {
@@ -327,10 +328,10 @@ export function useJeopardyGame({
     []
   )
 
-  // Draw cards for the first player at the start of the game
+  // Draw cards for the first player at the start of the game (Black Market)
   const hasDrawnFirstTurnCardsRef = useRef(false)
   useEffect(() => {
-    if (hasDrawnFirstTurnCardsRef.current || !onTurnStart) return
+    if (hasDrawnFirstTurnCardsRef.current || !onBlackMarketStart) return
     hasDrawnFirstTurnCardsRef.current = true
 
     const freeCardsConfig = runtimeConfig.mechanics.freeCardsPerTurn
@@ -338,40 +339,19 @@ export function useJeopardyGame({
 
     if (numCards > 0) {
       const drawnCards: CardDefinition[] = []
-      const cardInstances: CardInstance[] = []
 
       for (let i = 0; i < numCards; i++) {
         const drawContext = buildCardDrawContext(players, activePlayerIndex)
         const entry = pickCardForPlayer(drawContext)
         if (entry) {
           drawnCards.push(entry.definition)
-          cardInstances.push(createCardInstance(entry.definition))
         }
       }
 
       if (drawnCards.length > 0) {
-        // Add cards to first player's inventory
-        setPlayers((prev) =>
-          prev.map((player, index) =>
-            index === activePlayerIndex
-              ? { ...player, inventory: [...player.inventory, ...cardInstances] }
-              : player,
-          ),
-        )
-
-        // Track cards received for first player
-        setGameMetrics((prev) => ({
-          ...prev,
-          playerMetrics: prev.playerMetrics.map((metrics, idx) =>
-            idx === activePlayerIndex
-              ? { ...metrics, cardsReceived: metrics.cardsReceived + drawnCards.length }
-              : metrics
-          ),
-        }))
-
-        // Show the modal
+        // Show the Black Market modal - cards will be added when player accepts
         const firstPlayerName = players[activePlayerIndex]?.name ?? ''
-        onTurnStart(activePlayerIndex, firstPlayerName, drawnCards)
+        onBlackMarketStart(activePlayerIndex, firstPlayerName, drawnCards)
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -677,38 +657,24 @@ export function useJeopardyGame({
 
     const nextIndex = getNextPlayerIndex()
 
-    // Draw free cards for the next player
+    // Draw free cards for the next player (Black Market)
     const freeCardsConfig = runtimeConfig.mechanics.freeCardsPerTurn
     const numCards = freeCardsConfig === -1 ? players.length - 1 : freeCardsConfig
 
-    if (numCards > 0 && onTurnStart) {
+    if (numCards > 0 && onBlackMarketStart) {
       const drawnCards: CardDefinition[] = []
       for (let i = 0; i < numCards; i++) {
         const drawContext = buildCardDrawContext(players, nextIndex)
         const entry = pickCardForPlayer(drawContext)
         if (entry) {
           drawnCards.push(entry.definition)
-          // Add the card to the player's inventory
-          const cardInstance = createCardInstance(entry.definition)
-          setPlayers((prev) =>
-            prev.map((player, index) =>
-              index === nextIndex
-                ? { ...player, inventory: [...player.inventory, cardInstance] }
-                : player,
-            ),
-          )
         }
       }
 
-      // Track cards received
-      if (drawnCards.length > 0) {
-        incrementPlayerMetric(nextIndex, 'cardsReceived', drawnCards.length)
-      }
-
-      // Call onTurnStart with the next player's info and cards
+      // Call onBlackMarketStart with the next player's info and cards
       const nextPlayerName = players[nextIndex]?.name ?? ''
       if (drawnCards.length > 0) {
-        onTurnStart(nextIndex, nextPlayerName, drawnCards)
+        onBlackMarketStart(nextIndex, nextPlayerName, drawnCards)
       }
     }
 
@@ -1139,38 +1105,24 @@ export function useJeopardyGame({
       turnCountRef.current += 1
       recordTurnSnapshot()
 
-      // Draw free cards for the new player (same as prepareNextPlayer)
+      // Draw free cards for the new player (Black Market)
       const freeCardsConfig = runtimeConfig.mechanics.freeCardsPerTurn
       const numCards = freeCardsConfig === -1 ? players.length - 1 : freeCardsConfig
 
-      if (numCards > 0 && onTurnStart) {
+      if (numCards > 0 && onBlackMarketStart) {
         const drawnCards: CardDefinition[] = []
         for (let i = 0; i < numCards; i++) {
           const drawContext = buildCardDrawContext(players, playerIndex)
           const entry = pickCardForPlayer(drawContext)
           if (entry) {
             drawnCards.push(entry.definition)
-            // Add the card to the player's inventory
-            const cardInstance = createCardInstance(entry.definition)
-            setPlayers((prev) =>
-              prev.map((player, index) =>
-                index === playerIndex
-                  ? { ...player, inventory: [...player.inventory, cardInstance] }
-                  : player,
-              ),
-            )
           }
         }
 
-        // Track cards received
-        if (drawnCards.length > 0) {
-          incrementPlayerMetric(playerIndex, 'cardsReceived', drawnCards.length)
-        }
-
-        // Call onTurnStart with the new player's info and cards
+        // Call onBlackMarketStart with the new player's info and cards
         const newPlayerName = players[playerIndex]?.name ?? ''
         if (drawnCards.length > 0) {
-          onTurnStart(playerIndex, newPlayerName, drawnCards)
+          onBlackMarketStart(playerIndex, newPlayerName, drawnCards)
         }
       }
 
@@ -1198,7 +1150,7 @@ export function useJeopardyGame({
         return prev + increment
       })
     }
-  }, [saveSnapshot, runtimeConfig.mechanics.freeCardsPerTurn, onTurnStart, players, recordTurnSnapshot, incrementPlayerMetric])
+  }, [saveSnapshot, runtimeConfig.mechanics.freeCardsPerTurn, onBlackMarketStart, players, recordTurnSnapshot])
 
   const adjustPlayerScore = useCallback((playerIndex: number, delta: number) => {
     if (playerIndex >= 0 && playerIndex < players.length) {
@@ -1223,6 +1175,21 @@ export function useJeopardyGame({
       )
     }
   }, [players.length, saveSnapshot, runtimeConfig.mechanics.spiderSense.maxLevel])
+
+  const addRerolls = useCallback((playerIndex: number, amount: number) => {
+    if (playerIndex >= 0 && playerIndex < players.length && amount > 0) {
+      saveSnapshot()
+      setPlayers((prev) =>
+        prev.map((player, index) => {
+          if (index !== playerIndex) return player
+          return {
+            ...player,
+            rerollsRemaining: (player.rerollsRemaining ?? 0) + amount,
+          }
+        })
+      )
+    }
+  }, [players.length, saveSnapshot])
 
   const upgradeAction = useCallback((playerIndex: number, actionId: UpgradeableAction) => {
     if (playerIndex >= 0 && playerIndex < players.length) {
@@ -1261,6 +1228,43 @@ export function useJeopardyGame({
     }
   }, [players.length, saveSnapshot])
 
+  // Black Market functions
+  const acceptBlackMarketCards = useCallback((cards: CardDefinition[]) => {
+    const cardInstances = cards.map(card => createCardInstance(card))
+
+    setPlayers((prev) =>
+      prev.map((player, index) =>
+        index === activePlayerIndex
+          ? { ...player, inventory: [...player.inventory, ...cardInstances] }
+          : player,
+      ),
+    )
+
+    // Track cards received
+    if (cards.length > 0) {
+      incrementPlayerMetric(activePlayerIndex, 'cardsReceived', cards.length)
+    }
+  }, [activePlayerIndex, incrementPlayerMetric])
+
+  const consumeReroll = useCallback((playerIndex: number): CardDefinition | null => {
+    const player = playersRef.current[playerIndex]
+    if (!player || (player.rerollsRemaining ?? 0) <= 0) return null
+
+    // Decrease reroll count
+    setPlayers((prev) =>
+      prev.map((p, index) =>
+        index === playerIndex
+          ? { ...p, rerollsRemaining: (p.rerollsRemaining ?? 0) - 1 }
+          : p,
+      ),
+    )
+
+    // Draw a new card
+    const drawContext = buildCardDrawContext(playersRef.current, playerIndex)
+    const entry = pickCardForPlayer(drawContext)
+    return entry?.definition ?? null
+  }, [])
+
   return {
     tiles,
     players,
@@ -1289,6 +1293,7 @@ export function useJeopardyGame({
     setActivePlayer,
     adjustPlayerScore,
     increaseSpiderSense,
+    addRerolls,
     upgradeAction,
     incrementActionCount,
     alliances,
@@ -1300,5 +1305,7 @@ export function useJeopardyGame({
     gameMetrics,
     recordActionUsage,
     incrementPlayerMetric,
+    acceptBlackMarketCards,
+    consumeReroll,
   }
 }

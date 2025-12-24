@@ -48,7 +48,7 @@ import { TreasureSetModal } from '@/features/cards/TreasureSetModal'
 import { TreasureIslandModal } from '@/features/cards/TreasureIslandModal'
 import { SpiderFeedingModal } from '@/features/actions/web/SpiderFeedingModal'
 import { ActionUpgradeModal } from '@/features/actions/web/ActionUpgradeModal'
-import { TurnStartModal } from '@/components/game/TurnStartModal'
+import { BlackMarketModal } from '@/components/game/BlackMarketModal'
 import { GameOverScreen } from '@/components/game/GameOverScreen'
 import { StatsScreen } from '@/components/game/StatsScreen'
 import {
@@ -114,7 +114,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
   const [scoreAdjustPlayerIndex, setScoreAdjustPlayerIndex] = useState<number | null>(null)
   const [spiderFeedingActive, setSpiderFeedingActive] = useState(false)
   const [actionUpgradeActive, setActionUpgradeActive] = useState(false)
-  const [turnStartCards, setTurnStartCards] = useState<{ playerName: string; cards: CardDefinition[] } | null>(null)
+  const [blackMarketData, setBlackMarketData] = useState<{ playerIndex: number; playerName: string; cards: CardDefinition[] } | null>(null)
   const [showGameOver, setShowGameOver] = useState(false)
   const [showStats, setShowStats] = useState(false)
   const [gameEndTime, setGameEndTime] = useState<number | null>(null)
@@ -148,6 +148,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     setActivePlayer,
     adjustPlayerScore,
     increaseSpiderSense,
+    addRerolls,
     upgradeAction,
     incrementActionCount,
     alliances,
@@ -157,13 +158,15 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     gameMetrics,
     recordActionUsage,
     incrementPlayerMetric,
+    acceptBlackMarketCards,
+    consumeReroll,
   } = useJeopardyGame({
     categories,
     pointValues,
     players: initialPlayers,
     questionBank,
-    onTurnStart: (_playerIndex, playerName, cards) => {
-      setTurnStartCards({ playerName, cards })
+    onBlackMarketStart: (playerIndex, playerName, cards) => {
+      setBlackMarketData({ playerIndex, playerName, cards })
     },
   })
 
@@ -222,6 +225,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     removeCardFromInventory(activePlayerIndex, isopodInstanceId)
     setSpiderIndex((prev) => (prev < 8 ? prev + 1 : prev))
     increaseSpiderSense(activePlayerIndex)
+    addRerolls(activePlayerIndex, runtimeConfig.mechanics.spiderIsopodRerollBonus)
     incrementPlayerMetric(activePlayerIndex, 'isopodsFed')
   }
 
@@ -745,8 +749,21 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     }
   }, [handleUndo])
 
-  // Always use DUNGEON BRAWL as the title
-  const displayTitle = gameConfig.meta.title
+  // Change title based on Black Market state
+  const displayTitle = blackMarketData ? "BLACK MARKET" : gameConfig.meta.title
+  const isBlackMarketActive = !!blackMarketData
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleBlackMarketReroll = (_cardIndex: number): CardDefinition | null => {
+    if (!blackMarketData) return null
+    const newCard = consumeReroll(blackMarketData.playerIndex)
+    return newCard
+  }
+
+  const handleBlackMarketAccept = (cards: CardDefinition[]) => {
+    acceptBlackMarketCards(cards)
+    setBlackMarketData(null)
+  }
 
   return (
     <div className="app">
@@ -886,7 +903,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
 
       <div className="dungeon-frame">
         <header className="title-wrap relative">
-          <h1 className="title">{displayTitle}</h1>
+          <h1 className={`title ${isBlackMarketActive ? 'title-black-market' : ''}`}>{displayTitle}</h1>
           <button 
             onClick={toggleFullscreen}
             className="fullscreen-toggle"
@@ -917,27 +934,38 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
           </button>
         </header>
 
-        <GameBoard
-          categories={categories}
-          tiles={tiles}
-          onTileSelect={handleTileSelect}
-          highlightOpenTiles={madSeerActive}
-          highlightedTileId={madSeerPreviewTile?.id ?? null}
-          boardLocked={!!selectedTile || !!madSeerPreviewTile || frogSelecting || idolActive}
-          frogHighlightIds={frogHighlightIds}
-          frogLandingIds={frogLandingIds}
-          idolSurvivorIds={selectedSurvivorIds}
-          puppetLockCategory={activePuppetLockCategory}
-          freezeSelectMode={freezeSelectMode}
-        />
+        {isBlackMarketActive ? (
+          <BlackMarketModal
+            playerName={blackMarketData.playerName}
+            cards={blackMarketData.cards}
+            rerollsRemaining={players[blackMarketData.playerIndex]?.rerollsRemaining ?? 0}
+            onReroll={handleBlackMarketReroll}
+            onAccept={handleBlackMarketAccept}
+          />
+        ) : (
+          <GameBoard
+            categories={categories}
+            tiles={tiles}
+            onTileSelect={handleTileSelect}
+            highlightOpenTiles={madSeerActive}
+            highlightedTileId={madSeerPreviewTile?.id ?? null}
+            boardLocked={!!selectedTile || !!madSeerPreviewTile || frogSelecting || idolActive}
+            frogHighlightIds={frogHighlightIds}
+            frogLandingIds={frogLandingIds}
+            idolSurvivorIds={selectedSurvivorIds}
+            puppetLockCategory={activePuppetLockCategory}
+            freezeSelectMode={freezeSelectMode}
+          />
+        )}
 
-        <Scoreboard 
-            players={players} 
+        <Scoreboard
+            players={players}
             activePlayerIndex={activePlayerIndex}
             alliances={alliances}
             onInventoryClick={handleInventoryClick}
             onSetActivePlayer={setActivePlayer}
             onAdjustScoreClick={(playerIndex) => setScoreAdjustPlayerIndex(playerIndex)}
+            isBlackMarketActive={isBlackMarketActive}
         />
       </div>
 
@@ -1290,14 +1318,6 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
           onReveal={handleRevealAnswer}
           onAnswer={handleAnswer}
           onClose={handleCloseDialog}
-        />
-      )}
-
-      {turnStartCards && (
-        <TurnStartModal
-          playerName={turnStartCards.playerName}
-          cards={turnStartCards.cards}
-          onClose={() => setTurnStartCards(null)}
         />
       )}
 

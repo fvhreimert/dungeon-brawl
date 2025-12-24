@@ -23,6 +23,8 @@ export const gameConfig = {
   },
   mechanics: {
     freeCardsPerTurn: -1, // -1 means (player count - 1), or set specific number
+    startingRerolls: 10, // Number of card rerolls each player starts with
+    spiderIsopodRerollBonus: 2, // Number of rerolls gained from feeding spider an isopod
     spiderSense: {
       bonusPerLevel: 0.05,
       maxLevel: 10,

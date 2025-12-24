@@ -13,6 +13,8 @@ export type GameplaySettings = {
   maxScoreForMeter: number
   subtractPointsOnWrongAnswer: boolean
   freeCardsPerTurn: number
+  startingRerolls: number
+  spiderIsopodRerollBonus: number
   spiderSenseBonusPerLevel: number
   spiderSenseMaxLevel: number
   allianceBaseDurationMultiplier: number
@@ -46,6 +48,8 @@ const DEFAULT_SETTINGS: GameplaySettings = {
   maxScoreForMeter: gameConfig.gameplay.maxScoreForMeter,
   subtractPointsOnWrongAnswer: false,
   freeCardsPerTurn: gameConfig.mechanics.freeCardsPerTurn,
+  startingRerolls: gameConfig.mechanics.startingRerolls,
+  spiderIsopodRerollBonus: gameConfig.mechanics.spiderIsopodRerollBonus,
   spiderSenseBonusPerLevel: gameConfig.mechanics.spiderSense.bonusPerLevel * 100,
   spiderSenseMaxLevel: gameConfig.mechanics.spiderSense.maxLevel,
   allianceBaseDurationMultiplier: gameConfig.mechanics.alliances.baseDurationMultiplier,
@@ -256,6 +260,27 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
               label="Subtract Points on Wrong"
               value={settings.subtractPointsOnWrongAnswer}
               onChange={(val) => updateSetting('subtractPointsOnWrongAnswer', val)}
+            />
+          </div>
+
+          {/* Rerolls Section */}
+          <div className="settings-section">
+            <h2 className="section-title">Rerolls</h2>
+            <SettingRow
+              label="Starting Rerolls"
+              value={settings.startingRerolls}
+              onChange={(val) => updateSetting('startingRerolls', val)}
+              min={0}
+              max={50}
+              step={1}
+            />
+            <SettingRow
+              label="Isopod Feed Bonus"
+              value={settings.spiderIsopodRerollBonus}
+              onChange={(val) => updateSetting('spiderIsopodRerollBonus', val)}
+              min={0}
+              max={10}
+              step={1}
             />
           </div>
 

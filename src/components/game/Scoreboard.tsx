@@ -25,6 +25,7 @@ type ScoreboardProps = {
   onInventoryClick: (playerIndex: number) => void
   onSetActivePlayer: (playerIndex: number) => void
   onAdjustScoreClick: (playerIndex: number) => void
+  isBlackMarketActive?: boolean
 }
 
 export function Scoreboard({
@@ -34,6 +35,7 @@ export function Scoreboard({
   onInventoryClick,
   onSetActivePlayer,
   onAdjustScoreClick,
+  isBlackMarketActive = false,
 }: ScoreboardProps) {
   const getPlayerAlliances = (playerIndex: number): Alliance[] => {
     return alliances.filter((alliance) => alliance.playerIndices.includes(playerIndex))
@@ -72,7 +74,7 @@ export function Scoreboard({
               </div>
             )}
             <div className="score-card-content">
-              <div className="player-name">{player.name}</div>
+              <div className={`player-name ${isBlackMarketActive && index === activePlayerIndex ? 'player-name-active-turn' : ''}`}>{player.name}</div>
               <div className="score-card-row">
                 {player.portrait && (
                   <img
