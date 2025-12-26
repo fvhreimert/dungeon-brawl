@@ -31,6 +31,8 @@ export type GameplaySettings = {
   bloodSacrificeLimit: number
   webLimit: number
   goldenIdolStartBonus: number
+  blackMarketEnabled: boolean
+  blackMarketCardsToShow: number
 }
 
 type GameSettingsScreenProps = {
@@ -66,6 +68,8 @@ const DEFAULT_SETTINGS: GameplaySettings = {
   bloodSacrificeLimit: gameConfig.mechanics.actionLimits.bloodSacrifice === Infinity ? -1 : gameConfig.mechanics.actionLimits.bloodSacrifice,
   webLimit: gameConfig.mechanics.actionLimits.web === Infinity ? -1 : gameConfig.mechanics.actionLimits.web,
   goldenIdolStartBonus: gameConfig.mechanics.goldenIdol.startBonus,
+  blackMarketEnabled: gameConfig.mechanics.blackMarket.enabled,
+  blackMarketCardsToShow: gameConfig.mechanics.blackMarket.cardsToShow,
 }
 
 type SettingRowProps = {
@@ -440,6 +444,24 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
               min={0}
               max={100}
               step={5}
+            />
+          </div>
+
+          {/* Black Market Section */}
+          <div className="settings-section">
+            <h2 className="section-title">Black Market</h2>
+            <SettingToggle
+              label="Enable Black Market"
+              value={settings.blackMarketEnabled}
+              onChange={(val) => updateSetting('blackMarketEnabled', val)}
+            />
+            <SettingRow
+              label="Cards to Show"
+              value={settings.blackMarketCardsToShow}
+              onChange={(val) => updateSetting('blackMarketCardsToShow', val)}
+              min={1}
+              max={5}
+              step={1}
             />
           </div>
         </div>

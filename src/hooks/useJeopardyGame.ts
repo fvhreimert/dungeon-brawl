@@ -334,8 +334,10 @@ export function useJeopardyGame({
     if (hasDrawnFirstTurnCardsRef.current || !onBlackMarketStart) return
     hasDrawnFirstTurnCardsRef.current = true
 
-    const freeCardsConfig = runtimeConfig.mechanics.freeCardsPerTurn
-    const numCards = freeCardsConfig === -1 ? players.length - 1 : freeCardsConfig
+    const blackMarketConfig = runtimeConfig.mechanics.blackMarket
+    if (!blackMarketConfig?.enabled) return
+
+    const numCards = blackMarketConfig.cardsToShow ?? 3
 
     if (numCards > 0) {
       const drawnCards: CardDefinition[] = []
@@ -658,10 +660,10 @@ export function useJeopardyGame({
     const nextIndex = getNextPlayerIndex()
 
     // Draw free cards for the next player (Black Market)
-    const freeCardsConfig = runtimeConfig.mechanics.freeCardsPerTurn
-    const numCards = freeCardsConfig === -1 ? players.length - 1 : freeCardsConfig
+    const blackMarketConfig = runtimeConfig.mechanics.blackMarket
+    const numCards = blackMarketConfig?.cardsToShow ?? 3
 
-    if (numCards > 0 && onBlackMarketStart) {
+    if (blackMarketConfig?.enabled && numCards > 0 && onBlackMarketStart) {
       const drawnCards: CardDefinition[] = []
       for (let i = 0; i < numCards; i++) {
         const drawContext = buildCardDrawContext(players, nextIndex)
@@ -1106,10 +1108,10 @@ export function useJeopardyGame({
       recordTurnSnapshot()
 
       // Draw free cards for the new player (Black Market)
-      const freeCardsConfig = runtimeConfig.mechanics.freeCardsPerTurn
-      const numCards = freeCardsConfig === -1 ? players.length - 1 : freeCardsConfig
+      const blackMarketConfig = runtimeConfig.mechanics.blackMarket
+      const numCards = blackMarketConfig?.cardsToShow ?? 3
 
-      if (numCards > 0 && onBlackMarketStart) {
+      if (blackMarketConfig?.enabled && numCards > 0 && onBlackMarketStart) {
         const drawnCards: CardDefinition[] = []
         for (let i = 0; i < numCards; i++) {
           const drawContext = buildCardDrawContext(players, playerIndex)
@@ -1150,7 +1152,7 @@ export function useJeopardyGame({
         return prev + increment
       })
     }
-  }, [saveSnapshot, runtimeConfig.mechanics.freeCardsPerTurn, onBlackMarketStart, players, recordTurnSnapshot])
+  }, [saveSnapshot, runtimeConfig.mechanics.blackMarket, onBlackMarketStart, players, recordTurnSnapshot])
 
   const adjustPlayerScore = useCallback((playerIndex: number, delta: number) => {
     if (playerIndex >= 0 && playerIndex < players.length) {

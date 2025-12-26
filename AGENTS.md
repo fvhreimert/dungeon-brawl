@@ -179,9 +179,10 @@ Upgraded versions of actions are unlocked via the **Spider Web** mechanic. Playe
 ## Black Market (Turn Start Card Selection)
 - **Logic:** `src/components/game/BlackMarketModal.tsx` and `src/components/game/BlackMarketModal.css`
 - **Mechanic:** At the start of each player's turn, a turn intro animation plays followed by the "Black Market" interface where players can view, reroll, and accept their free cards before continuing.
-- **Configuration:** Controlled by the `freeCardsPerTurn` and `startingRerolls` settings:
-  - `freeCardsPerTurn`: Set to `-1` for `(player count - 1)` cards, or `0-10` for exact count. Default: `-1`.
-  - `startingRerolls`: Number of rerolls each player starts with. Default: `10`. Configured in `gameConfig.ts`.
+- **Configuration:** Controlled by the `blackMarket` settings in `gameConfig.ts` and the Game Settings screen:
+  - `blackMarket.enabled`: Set to `true` to show the Black Market at the start of each turn, or `false` to skip it entirely. Default: `true`.
+  - `blackMarket.cardsToShow`: Number of cards displayed in the Black Market (1-5). Default: `3`. Cards are scaled down for 4-5 cards to fit the display.
+  - `startingRerolls`: Number of rerolls each player starts with. Default: `10`.
 - **Flow:**
   1. When a turn begins, cards are drawn using the weighted card system (`pickCardForPlayer`).
   2. **Turn Intro Animation** plays first:

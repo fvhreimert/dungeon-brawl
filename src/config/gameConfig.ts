@@ -56,7 +56,11 @@ export const gameConfig = {
     },
     goldenIdol: {
       startBonus: 10,
-    }
+    },
+    blackMarket: {
+      enabled: true, // Set to false to skip black market entirely
+      cardsToShow: 3, // Number of cards displayed in the black market (1-5)
+    },
   },
   players: defaultPlayers,
   ui: {

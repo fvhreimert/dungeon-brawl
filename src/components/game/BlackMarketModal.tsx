@@ -66,10 +66,10 @@ export function BlackMarketModal({
       <div className="black-market-header-spacer" />
 
       {/* Cards grid area - matches question-grid */}
-      <div className="black-market-grid">
+      <div className="black-market-grid" data-card-count={cards.length}>
         <div className="black-market-cards-row">
           {cards.map((card, index) => (
-            <div key={`${card.id}-${index}`} className="black-market-card-wrapper">
+            <div key={`card-slot-${index}`} className="black-market-card-wrapper">
               <Card
                 theme={card.theme}
                 frameSrc={card.framePath}

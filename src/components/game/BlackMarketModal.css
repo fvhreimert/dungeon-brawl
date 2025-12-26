@@ -1,7 +1,4 @@
-/* Black market uses board-shell from GameBoard.css */
-.black-market-shell {
-  /* Inherits all board-shell styles */
-}
+/* Black market uses board-shell from GameBoard.css - no additional styles needed */
 
 /* Match category-row height exactly */
 .black-market-header-spacer {
@@ -11,20 +8,26 @@
 
 /* Match question-grid structure exactly */
 .black-market-grid {
+  --grid-height: calc(5 * 96px + 4 * 12px); /* 5 rows × 96px + 4 gaps × 12px = 528px */
+  --card-count: 3; /* Default, overridden via inline style */
+  --card-gap: 16px;
+  --reroll-height: 46px; /* reroll button (40px) + gap (6px) */
+  --available-height: calc(var(--grid-height) - var(--reroll-height) - 40px); /* Extra padding for breathing room */
   display: flex;
   flex-direction: column;
-  height: calc(5 * 96px + 4 * 12px); /* 5 rows × 96px + 4 gaps × 12px = 528px */
+  height: var(--grid-height);
   position: relative;
 }
 
 .black-market-cards-row {
   display: flex;
-  gap: 16px;
+  gap: var(--card-gap);
   flex-wrap: nowrap;
   justify-content: center;
   align-items: center;
   flex: 1;
   min-height: 0; /* Allow shrinking */
+  transform: translateY(-20px);
 }
 
 .black-market-card-wrapper {
@@ -33,44 +36,110 @@
   align-items: center;
   gap: 6px;
   max-height: 100%;
+  /* Optimize rendering performance */
+  contain: layout style;
+  isolation: isolate;
 }
 
 /* Full size cards with subtle theme-colored glow */
 .black-market-card-item {
-  --card-height: calc(5 * 96px + 4 * 12px - 46px); /* Grid height minus reroll button (40px) and gap (6px) = 482px */
-  --card-width: calc(var(--card-height) * 0.667); /* Maintain 2:3 aspect ratio */
+  /* Original full-size dimensions */
+  --card-height: calc(5 * 96px + 4 * 12px - 46px); /* 482px */
+  --card-width: calc(var(--card-height) * 0.667); /* Maintain 2:3 aspect ratio ~321px */
   flex-shrink: 0;
   transition: transform 0.3s ease, z-index 0s, filter 0.3s ease;
   cursor: default;
   filter: drop-shadow(0 0 8px var(--col-gold-main));
+  /* GPU acceleration for smoother animations */
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* 4 cards: scale wrapper and use negative margins to fix layout spacing */
+.black-market-grid[data-card-count="4"] .black-market-card-wrapper {
+  --scale: 0.72;
+  --base-width: 321px;
+  --base-height: 528px;
+  transform: scale(var(--scale));
+  transform-origin: center center;
+  /* Negative margins to compensate for the unchanged layout size */
+  margin-left: calc(var(--base-width) * (1 - var(--scale)) / -2);
+  margin-right: calc(var(--base-width) * (1 - var(--scale)) / -2);
+  margin-top: calc(var(--base-height) * (1 - var(--scale)) / -2);
+  margin-bottom: calc(var(--base-height) * (1 - var(--scale)) / -2);
+}
+
+/* 5 cards: scale wrapper and use negative margins to fix layout spacing */
+.black-market-grid[data-card-count="5"] .black-market-card-wrapper {
+  --scale: 0.58;
+  --base-width: 321px;
+  --base-height: 528px;
+  transform: scale(var(--scale));
+  transform-origin: center center;
+  margin-left: calc(var(--base-width) * (1 - var(--scale)) / -2);
+  margin-right: calc(var(--base-width) * (1 - var(--scale)) / -2);
+  margin-top: calc(var(--base-height) * (1 - var(--scale)) / -2);
+  margin-bottom: calc(var(--base-height) * (1 - var(--scale)) / -2);
+}
+
+/* Override the entry animation to include scale for 4/5 cards */
+.black-market-entering.black-market-grid[data-card-count="4"] .black-market-card-wrapper,
+.black-market-entering.black-market-grid[data-card-count="5"] .black-market-card-wrapper {
+  animation: none;
+}
+
+.black-market-entering .black-market-grid[data-card-count="4"] .black-market-card-wrapper:nth-child(1),
+.black-market-entering .black-market-grid[data-card-count="4"] .black-market-card-wrapper:nth-child(2),
+.black-market-entering .black-market-grid[data-card-count="4"] .black-market-card-wrapper:nth-child(3),
+.black-market-entering .black-market-grid[data-card-count="4"] .black-market-card-wrapper:nth-child(4),
+.black-market-entering .black-market-grid[data-card-count="5"] .black-market-card-wrapper:nth-child(1),
+.black-market-entering .black-market-grid[data-card-count="5"] .black-market-card-wrapper:nth-child(2),
+.black-market-entering .black-market-grid[data-card-count="5"] .black-market-card-wrapper:nth-child(3),
+.black-market-entering .black-market-grid[data-card-count="5"] .black-market-card-wrapper:nth-child(4),
+.black-market-entering .black-market-grid[data-card-count="5"] .black-market-card-wrapper:nth-child(5) {
+  animation: none;
+}
+
+/* Gap for scaled cards */
+.black-market-grid[data-card-count="4"] .black-market-cards-row,
+.black-market-grid[data-card-count="5"] .black-market-cards-row {
+  gap: 16px;
 }
 
 .black-market-card-item:hover {
-  transform: scale(1.06) translateY(-8px);
+  transform: scale(1.06) translateY(-8px) translateZ(0);
   z-index: 100;
   filter: drop-shadow(0 0 12px var(--col-gold-main));
 }
 
 .black-market-card-item.card-rerolling {
-  animation: cardReroll 0.35s ease-in-out;
-  transition: none; /* Disable transition during animation */
+  animation: cardReroll 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transition: none !important; /* Disable transition during animation */
+  transition-property: none !important; /* Override Tailwind transitions */
+  pointer-events: none; /* Prevent hover interference */
+}
+
+/* Also override nested element transitions during reroll */
+.black-market-card-item.card-rerolling * {
+  transition: none !important;
 }
 
 @keyframes cardReroll {
   0% {
-    transform: translateY(0);
+    transform: translateY(0) translateZ(0);
     opacity: 1;
   }
   45% {
-    transform: translateY(30px);
+    transform: translateY(30px) translateZ(0);
     opacity: 0;
   }
   55% {
-    transform: translateY(-20px);
+    transform: translateY(-20px) translateZ(0);
     opacity: 0;
   }
   100% {
-    transform: translateY(0);
+    transform: translateY(0) translateZ(0);
     opacity: 1;
   }
 }
@@ -106,7 +175,7 @@
 /* Accept button - bottom right corner */
 .black-market-accept-button {
   position: absolute;
-  bottom: 0;
+  bottom: 8px;
   right: 0;
   font-family: 'Press Start 2P', monospace;
   font-size: 10px;
@@ -139,10 +208,7 @@
     0 0 10px rgba(80, 200, 80, 0.3);
 }
 
-/* Turn Intro Styles */
-.turn-intro-shell {
-  /* Uses same structure as black-market-shell for consistent height */
-}
+/* Turn Intro Styles - uses same structure as black-market-shell for consistent height */
 
 .turn-intro-grid {
   display: flex;
@@ -279,8 +345,16 @@
   animation: cardFlyIn 0.5s ease-out 0.2s both;
 }
 
+.black-market-entering .black-market-card-wrapper:nth-child(4) {
+  animation: cardFlyIn 0.5s ease-out 0.3s both;
+}
+
+.black-market-entering .black-market-card-wrapper:nth-child(5) {
+  animation: cardFlyIn 0.5s ease-out 0.4s both;
+}
+
 .black-market-entering .black-market-accept-button {
-  animation: acceptButtonFadeIn 0.3s ease-out 0.4s both;
+  animation: acceptButtonFadeIn 0.3s ease-out 0.5s both;
 }
 
 @keyframes cardsSlideIn {

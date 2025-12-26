@@ -46,6 +46,10 @@ export type RuntimeGameConfig = {
     goldenIdol: {
       startBonus: number
     }
+    blackMarket: {
+      enabled: boolean
+      cardsToShow: number
+    }
   }
 }
 
@@ -91,6 +95,10 @@ const defaultRuntimeConfig: RuntimeGameConfig = {
     },
     goldenIdol: {
       startBonus: gameConfig.mechanics.goldenIdol.startBonus,
+    },
+    blackMarket: {
+      enabled: gameConfig.mechanics.blackMarket.enabled,
+      cardsToShow: gameConfig.mechanics.blackMarket.cardsToShow,
     },
   },
 }
@@ -144,6 +152,10 @@ export function gameplaySettingsToRuntimeConfig(settings: GameplaySettings): Run
       },
       goldenIdol: {
         startBonus: settings.goldenIdolStartBonus,
+      },
+      blackMarket: {
+        enabled: settings.blackMarketEnabled ?? true,
+        cardsToShow: settings.blackMarketCardsToShow ?? 3,
       },
     },
   }
