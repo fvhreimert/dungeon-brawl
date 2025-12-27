@@ -9,6 +9,7 @@ import allianceBlue from '@/assets/images/ui/alliance_blue.png'
 import spiderSenseIcon from '@/assets/images/ui/spider_sense.png'
 import { calculatePassiveDeltaForPlayer } from '@/features/cards/cardEffectRegistry'
 import { AnimatedScore } from './AnimatedScore'
+import { QuestIndicator } from '@/features/quests/QuestIndicator'
 import './Scoreboard.css'
 
 const ALLIANCE_BANNERS: Record<AllianceColor, string> = {
@@ -25,6 +26,7 @@ type ScoreboardProps = {
   onInventoryClick: (playerIndex: number) => void
   onSetActivePlayer: (playerIndex: number) => void
   onAdjustScoreClick: (playerIndex: number) => void
+  onQuestClick: (playerIndex: number) => void
   isBlackMarketActive?: boolean
 }
 
@@ -35,6 +37,7 @@ export function Scoreboard({
   onInventoryClick,
   onSetActivePlayer,
   onAdjustScoreClick,
+  onQuestClick,
   isBlackMarketActive = false,
 }: ScoreboardProps) {
   const getPlayerAlliances = (playerIndex: number): Alliance[] => {
@@ -59,6 +62,12 @@ export function Scoreboard({
             }`}
             onDoubleClick={() => onSetActivePlayer(index)}
           >
+            {(player.quests?.length ?? 0) > 0 && (
+              <QuestIndicator
+                quests={player.quests ?? []}
+                onClick={() => onQuestClick(index)}
+              />
+            )}
             {playerAlliances.length > 0 && (
               <div className="alliance-banners-container">
                 {playerAlliances.map((alliance) => (

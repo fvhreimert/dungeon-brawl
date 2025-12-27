@@ -361,6 +361,20 @@ const CARD_EFFECTS: Record<string, CardEffectDefinition> = {
       },
     },
   },
+  martin: {
+    handlers: {
+      activated: ({ ownerPlayerIndex, card }) => {
+        // Grant a random quest (currently only blood_quest)
+        return {
+          grantQuest: {
+            playerIndex: ownerPlayerIndex,
+            questId: 'blood_quest',
+            sourceCardInstanceId: card.instanceId,
+          },
+        }
+      },
+    },
+  },
 }
 
 export function getCardEffectDefinition(cardId: string) {

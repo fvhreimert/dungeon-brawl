@@ -96,6 +96,7 @@ const CARD_CONFIG: Record<string, CardCatalogConfig> = {
   coalition: { baseWeight: 3, targetSelectMode: 'coalition' },
   loot_goblin: { baseWeight: 7, targetSelectMode: 'neutral_all' },
   isopod: { baseWeight: 10 },
+  martin: { baseWeight: 4, targetSelectMode: 'none' },
 }
 
 export const CARD_CATALOG: CardCatalogEntry[] = CARDS.map((definition) => {

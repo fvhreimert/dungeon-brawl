@@ -56,6 +56,8 @@ import lootGoblinImg from '@/assets/images/cards/images/loot_goblin.png'
 import lootGoblinFrame from '@/assets/images/cards/frames/loot_goblin.png'
 import isopodImg from '@/assets/images/cards/images/isopod.png'
 import isopodFrame from '@/assets/images/cards/frames/isopod.png'
+import martinImg from '@/assets/images/cards/images/martin.png'
+import martinFrame from '@/assets/images/cards/frames/martin.png'
 
 export const CARDS: CardDefinition[] = [
   {
@@ -225,5 +227,15 @@ export const CARDS: CardDefinition[] = [
     theme: 'theme-common',
     imagePath: isopodImg,
     framePath: isopodFrame,
+  },
+  {
+    id: 'martin',
+    title: 'Martin',
+    description: 'Martin bestows upon you a sacred quest. Complete it for great rewards.',
+    inventoryDescription: 'Activate to receive a quest.',
+    theme: 'theme-gold',
+    imagePath: martinImg,
+    framePath: martinFrame,
+    consumesOnActivate: true,
   },
 ]

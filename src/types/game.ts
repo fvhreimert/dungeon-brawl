@@ -65,6 +65,7 @@ export type PlayerConfig = {
 
 export type Player = PlayerConfig & {
   stats: PlayerStats
+  quests?: Quest[]
 }
 
 export type ScoreChangeReason = 'question' | 'activeCard' | 'passiveItem' | 'other'
@@ -93,6 +94,33 @@ export type Alliance = {
   color: AllianceColor
   playerIndices: number[]
   turnsRemaining: number
+  sourceCardInstanceId: string
+}
+
+// Quest System Types
+export type QuestId = 'blood_quest' | 'seer_quest'
+
+export type QuestStatus = 'active' | 'completed'
+
+export type QuestReward = {
+  type: 'cards' | 'points'
+  amount: number
+  description: string
+}
+
+export type QuestProgress = {
+  current: number
+  target: number
+}
+
+export type Quest = {
+  id: string
+  questId: QuestId
+  title: string
+  description: string
+  progress: QuestProgress
+  status: QuestStatus
+  reward: QuestReward
   sourceCardInstanceId: string
 }
 

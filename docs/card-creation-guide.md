@@ -32,7 +32,28 @@ This reference walks through the main frameworks that protect and scale the card
 - Activation clicks close the modal and prompt `PlayerSelectModal` (or the new neutral selector) when a card needs a target. The UI pipeline always sits atop the modal stack so cards can show reveal modals or confirm prompts after the effect resolves.
 - For passive-only cards, no extra UI is required beyond the existing toolkit, but keep dynamic strings centralized (see `inventoryDescriptionResolvers` in `InventoryModal.tsx`) when card state matters.
 
-## 6. Keeping it flexible for the future
+## 6. Quest-Granting Cards
+Cards can grant quests to players by returning a `grantQuest` effect result:
+
+```typescript
+my_quest_card: {
+  handlers: {
+    activated: ({ ownerPlayerIndex, card }) => {
+      return {
+        grantQuest: {
+          playerIndex: ownerPlayerIndex,
+          questId: 'blood_quest',
+          sourceCardInstanceId: card.instanceId,
+        },
+      }
+    },
+  },
+},
+```
+
+See `docs/quest-system-guide.md` for the full quest system architecture.
+
+## 7. Keeping it flexible for the future
 - When introducing new card mechanics, update `docs/card-creation-guide.md` and `AGENTS.md` to capture the new contract so teammates can follow it.
 - This guide assumes the `CardDefinition → CardCatalog → CardEffectRegistry → useJeopardyGame/InventoryModal` chain; if you add new systems (e.g., draft pools, per-player decks), extend the catalog or registry helpers rather than scattering logic.
 - Tests should live close to their hooks (`src/hooks/useJeopardyGame.test.ts`) once you add behavior for the card; linting (`npm run lint`) has already been part of this workflow, and you can add Vitest coverage where needed.

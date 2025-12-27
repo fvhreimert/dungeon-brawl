@@ -21,7 +21,7 @@ import { Scoreboard } from '@/components/game/Scoreboard'
 import { useJeopardyGame } from '@/hooks/useJeopardyGame'
 import { gameConfig } from '@/config/gameConfig'
 import { useRuntimeConfig } from '@/config/runtimeConfig'
-import type { QAItem, Tile, PlayerConfig, CardInstance, ActionId, UpgradeableAction } from '@/types/game'
+import type { QAItem, Tile, PlayerConfig, CardInstance, ActionId, UpgradeableAction, Quest } from '@/types/game'
 import { type CardDefinition } from '@/data/cards'
 
 import cardJesterIcon from '@/assets/images/actions/card_jester.png'
@@ -51,6 +51,7 @@ import { ActionUpgradeModal } from '@/features/actions/web/ActionUpgradeModal'
 import { BlackMarketModal } from '@/components/game/BlackMarketModal'
 import { GameOverScreen } from '@/components/game/GameOverScreen'
 import { StatsScreen } from '@/components/game/StatsScreen'
+import { QuestModal } from '@/features/quests/QuestModal'
 import {
   buildCardDrawContext,
   pickCardForPlayer,
@@ -121,6 +122,8 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
   const [showGameOver, setShowGameOver] = useState(false)
   const [showStats, setShowStats] = useState(false)
   const [gameEndTime, setGameEndTime] = useState<number | null>(null)
+  const [selectedQuest, setSelectedQuest] = useState<Quest | null>(null)
+  const [selectedQuestPlayerIndex, setSelectedQuestPlayerIndex] = useState<number | null>(null)
 
   const { playStart: playFrogStart, playHop, playLand } = useFrogSounds()
   const { playStart: playMadSeerStart } = useMadSeerSounds()
@@ -163,6 +166,9 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     incrementPlayerMetric,
     acceptBlackMarketCards,
     consumeReroll,
+    grantQuest,
+    claimQuestReward,
+    updateQuestProgress,
   } = useJeopardyGame({
     categories,
     pointValues,
@@ -317,6 +323,11 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
       targetIndex: number
       cardInstanceId: string
     }
+    grantQuest?: {
+      playerIndex: number
+      questId: 'blood_quest'
+      sourceCardInstanceId: string
+    }
     playSound?: string
   }
 
@@ -341,10 +352,20 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
 
     if (result?.createAlliance) {
       createAlliance(
-        result.createAlliance.initiatorIndex, 
+        result.createAlliance.initiatorIndex,
         result.createAlliance.targetIndex,
         result.createAlliance.cardInstanceId
       )
+    }
+
+    if (result?.grantQuest) {
+      const quest = grantQuest(
+        result.grantQuest.playerIndex,
+        result.grantQuest.questId,
+        result.grantQuest.sourceCardInstanceId
+      )
+      setSelectedQuest(quest)
+      setSelectedQuestPlayerIndex(result.grantQuest.playerIndex)
     }
   }
 
@@ -355,6 +376,41 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
 
   const handleMerchantClose = () => {
     setMerchantOffers(null)
+  }
+
+  const handleQuestClick = (playerIndex: number) => {
+    const player = players[playerIndex]
+    const quests = player?.quests ?? []
+
+    // Show first completed quest, or first active quest
+    const completedQuest = quests.find((q) => q.status === 'completed')
+    const activeQuest = quests.find((q) => q.status === 'active')
+
+    if (completedQuest) {
+      setSelectedQuest(completedQuest)
+      setSelectedQuestPlayerIndex(playerIndex)
+    } else if (activeQuest) {
+      setSelectedQuest(activeQuest)
+      setSelectedQuestPlayerIndex(playerIndex)
+    }
+  }
+
+  const handleCloseQuestModal = () => {
+    setSelectedQuest(null)
+    setSelectedQuestPlayerIndex(null)
+  }
+
+  const handleClaimQuestReward = () => {
+    if (selectedQuest && selectedQuestPlayerIndex !== null) {
+      const rewardCards = claimQuestReward(selectedQuestPlayerIndex, selectedQuest.id)
+      setSelectedQuest(null)
+      setSelectedQuestPlayerIndex(null)
+
+      // Show the reward cards in the reveal modal
+      if (rewardCards && rewardCards.length > 0) {
+        setRevealedCards(rewardCards)
+      }
+    }
   }
 
   const handleCardUseRequest = (card: CardInstance) => {
@@ -528,12 +584,14 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     setMadSeerActive(false)
     incrementActionCount(activePlayerIndex, 'mad_seer')
     recordActionUsage(activePlayerIndex, 'mad_seer')
+    updateQuestProgress(activePlayerIndex, 'seer_quest', 1)
   }
 
   const handleMadSeerReject = () => {
     setMadSeerPreviewTile(null)
     setMadSeerActive(false)
     incrementActionCount(activePlayerIndex, 'mad_seer')
+    updateQuestProgress(activePlayerIndex, 'seer_quest', 1)
   }
 
   const handleBloodSacrificeStart = () => {
@@ -1020,6 +1078,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
             onInventoryClick={handleInventoryClick}
             onSetActivePlayer={setActivePlayer}
             onAdjustScoreClick={(playerIndex) => setScoreAdjustPlayerIndex(playerIndex)}
+            onQuestClick={handleQuestClick}
             isBlackMarketActive={isBlackMarketActive}
         />
       </div>
@@ -1390,6 +1449,18 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
           gameMetrics={gameMetrics}
           gameEndTime={gameEndTime ?? Date.now()}
           onBack={handleBackFromStats}
+        />
+      )}
+
+      {selectedQuest && (
+        <QuestModal
+          quest={selectedQuest}
+          onClose={handleCloseQuestModal}
+          onClaim={
+            selectedQuest.status === 'completed' && selectedQuestPlayerIndex !== null
+              ? handleClaimQuestReward
+              : undefined
+          }
         />
       )}
     </div>

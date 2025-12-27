@@ -22,6 +22,8 @@ import type {
   PlayerMetrics,
   CardUsageEntry,
   TurnSnapshot,
+  Quest,
+  QuestId,
 } from '@/types/game'
 import { CARDS, type CardDefinition } from '@/data/cards'
 import { gameConfig } from '@/config/gameConfig'
@@ -33,6 +35,7 @@ import {
   buildCardDrawContext,
   pickCardForPlayer,
 } from '@/config/cardCatalog'
+import { createQuestInstance } from '@/data/quests'
 
 type UseJeopardyGameParams = {
   categories: readonly string[]
@@ -941,7 +944,112 @@ export function useJeopardyGame({
     saveSnapshot()
     applyScoreChange(activePlayerIndex, -amount, 'activeCard')
     applyScoreChange(targetPlayerIndex, -amount, 'activeCard')
+
+    // Track Blood Quest progress for the active player
+    const player = playersRef.current[activePlayerIndex]
+    const bloodQuest = player?.quests?.find(
+      (q) => q.questId === 'blood_quest' && q.status === 'active',
+    )
+    if (bloodQuest) {
+      updateQuestProgress(activePlayerIndex, 'blood_quest', amount)
+    }
   }
+
+  // Quest management functions
+  const grantQuest = useCallback(
+    (playerIndex: number, questId: QuestId, sourceCardInstanceId: string): Quest => {
+      const quest = createQuestInstance(questId, sourceCardInstanceId)
+      setPlayers((prev) =>
+        prev.map((player, idx) => {
+          if (idx !== playerIndex) return player
+          const currentQuests = player.quests ?? []
+          return {
+            ...player,
+            quests: [...currentQuests, quest],
+          }
+        }),
+      )
+      return quest
+    },
+    [],
+  )
+
+  const updateQuestProgress = useCallback(
+    (playerIndex: number, questId: QuestId, progressDelta: number) => {
+      setPlayers((prev) =>
+        prev.map((player, idx) => {
+          if (idx !== playerIndex) return player
+          const quests =
+            player.quests?.map((quest) => {
+              if (quest.questId !== questId || quest.status !== 'active') return quest
+
+              const newProgress = Math.min(
+                quest.progress.current + progressDelta,
+                quest.progress.target,
+              )
+              const isComplete = newProgress >= quest.progress.target
+
+              return {
+                ...quest,
+                progress: { ...quest.progress, current: newProgress },
+                status: isComplete ? ('completed' as const) : ('active' as const),
+              }
+            }) ?? []
+
+          return { ...player, quests }
+        }),
+      )
+    },
+    [],
+  )
+
+  const claimQuestReward = useCallback(
+    (playerIndex: number, questInstanceId: string): CardDefinition[] | null => {
+      const player = playersRef.current[playerIndex]
+      const quest = player?.quests?.find((q) => q.id === questInstanceId)
+
+      if (!quest || quest.status !== 'completed') return null
+
+      const rewardedCards: CardDefinition[] = []
+
+      // Award cards
+      if (quest.reward.type === 'cards') {
+        const drawContext = buildCardDrawContext(playersRef.current, playerIndex)
+        for (let i = 0; i < quest.reward.amount; i++) {
+          const entry = pickCardForPlayer(drawContext)
+          if (entry) {
+            rewardedCards.push(entry.definition)
+            const cardInstance = createCardInstance(entry.definition)
+            setPlayers((prev) =>
+              prev.map((p, idx) => {
+                if (idx !== playerIndex) return p
+                return {
+                  ...p,
+                  inventory: [cardInstance, ...p.inventory],
+                }
+              }),
+            )
+          }
+        }
+      } else if (quest.reward.type === 'points') {
+        applyScoreChange(playerIndex, quest.reward.amount, 'activeCard')
+      }
+
+      // Remove quest from player
+      setPlayers((prev) =>
+        prev.map((p, idx) => {
+          if (idx !== playerIndex) return p
+          return {
+            ...p,
+            quests: p.quests?.filter((q) => q.id !== questInstanceId) ?? [],
+          }
+        }),
+      )
+
+      return rewardedCards.length > 0 ? rewardedCards : null
+    },
+    [applyScoreChange],
+  )
 
   const addCardToInventory = (card: CardDefinition) => {
     saveSnapshot()
@@ -1309,5 +1417,8 @@ export function useJeopardyGame({
     incrementPlayerMetric,
     acceptBlackMarketCards,
     consumeReroll,
+    grantQuest,
+    updateQuestProgress,
+    claimQuestReward,
   }
 }

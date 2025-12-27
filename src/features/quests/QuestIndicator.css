@@ -1,0 +1,75 @@
+.quest-indicator {
+  position: absolute;
+  top: -8px;
+  left: 6px;
+  cursor: pointer;
+  z-index: 10;
+  transition: transform 0.15s;
+}
+
+.quest-indicator:hover {
+  transform: scale(1.15);
+}
+
+.quest-indicator-icon {
+  width: 32px;
+  height: 32px;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
+}
+
+/* Exclamation mark centered on icon */
+.quest-indicator-exclamation {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 18px;
+  font-weight: bold;
+  color: #fff;
+  text-shadow:
+    -2px -2px 0 #000,
+    2px -2px 0 #000,
+    -2px 2px 0 #000,
+    2px 2px 0 #000,
+    -1px 0 0 #000,
+    1px 0 0 #000,
+    0 -1px 0 #000,
+    0 1px 0 #000,
+    0 0 0 3px #000;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* Completed quest glow effect */
+.quest-indicator.has-completed .quest-indicator-icon {
+  animation: questCompleteGlow 0.8s ease-in-out infinite;
+}
+
+.quest-indicator.has-completed .quest-indicator-exclamation {
+  color: #ffd700;
+  animation: exclamationPulse 0.8s ease-in-out infinite;
+}
+
+@keyframes questCompleteGlow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.6))
+      drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
+  }
+  50% {
+    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 1))
+      drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
+  }
+}
+
+@keyframes exclamationPulse {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+}
