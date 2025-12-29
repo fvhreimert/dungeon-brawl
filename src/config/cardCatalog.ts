@@ -97,6 +97,7 @@ const CARD_CONFIG: Record<string, CardCatalogConfig> = {
   loot_goblin: { baseWeight: 7, targetSelectMode: 'neutral_all' },
   isopod: { baseWeight: 10 },
   martin: { baseWeight: 4, targetSelectMode: 'none' },
+  infinite_money_glitch: { baseWeight: 3 },
 }
 
 export const CARD_CATALOG: CardCatalogEntry[] = CARDS.map((definition) => {

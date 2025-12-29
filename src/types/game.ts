@@ -98,7 +98,7 @@ export type Alliance = {
 }
 
 // Quest System Types
-export type QuestId = 'blood_quest' | 'seer_quest'
+export type QuestId = 'blood_quest' | 'seer_quest' | 'jester_quest' | 'frog_quest' | 'idol_quest' | 'glacial_quest' | 'wisdom_quest' | 'spider_quest'
 
 export type QuestStatus = 'active' | 'completed'
 
@@ -106,6 +106,10 @@ export type QuestReward = {
   type: 'cards' | 'points'
   amount: number
   description: string
+  upgradeAction?: UpgradeableAction
+  bonusPoints?: number
+  bonusCards?: number
+  specificCardId?: string
 }
 
 export type QuestProgress = {

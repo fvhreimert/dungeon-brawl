@@ -58,6 +58,8 @@ import isopodImg from '@/assets/images/cards/images/isopod.png'
 import isopodFrame from '@/assets/images/cards/frames/isopod.png'
 import martinImg from '@/assets/images/cards/images/martin.png'
 import martinFrame from '@/assets/images/cards/frames/martin.png'
+import infiniteMoneyGlitchImg from '@/assets/images/cards/images/infinite_money_glitch.png'
+import infiniteMoneyGlitchFrame from '@/assets/images/cards/frames/infinite_money_glitch.png'
 
 export const CARDS: CardDefinition[] = [
   {
@@ -237,5 +239,14 @@ export const CARDS: CardDefinition[] = [
     imagePath: martinImg,
     framePath: martinFrame,
     consumesOnActivate: true,
+  },
+  {
+    id: 'infinite_money_glitch',
+    title: 'Infinite Money Glitch',
+    description: 'Gain 1% of your points passively every turn.',
+    inventoryDescription: '+1% of score per turn',
+    theme: 'theme-gold',
+    imagePath: infiniteMoneyGlitchImg,
+    framePath: infiniteMoneyGlitchFrame,
   },
 ]

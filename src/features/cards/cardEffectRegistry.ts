@@ -1,6 +1,13 @@
-import type { Player, PlayerStats, ScoreChangeReason, CardInstance, PuppetLock } from '@/types/game'
+import type { Player, PlayerStats, ScoreChangeReason, CardInstance, PuppetLock, QuestId } from '@/types/game'
 import type { CardDefinition } from '@/data/cards'
 import { buildCardDrawContext, pickCardForPlayer } from '@/config/cardCatalog'
+import { QUEST_DEFINITIONS } from '@/data/quests'
+
+const ALL_QUEST_IDS = Object.keys(QUEST_DEFINITIONS) as QuestId[]
+const pickRandomQuest = (): QuestId => {
+  const randomIndex = Math.floor(Math.random() * ALL_QUEST_IDS.length)
+  return ALL_QUEST_IDS[randomIndex]
+}
 
 export type CardEventPayloads = {
   turnStart: Record<string, never>
@@ -18,6 +25,7 @@ export type CardEventPayloads = {
 export type CardEffectEvent = keyof CardEventPayloads
 
 const calculateTickPenalty = (score: number) => Math.max(1, Math.floor(Math.abs(score) * 0.01))
+const calculateMoneyGlitchGain = (score: number) => Math.max(1, Math.floor(Math.abs(score) * 0.01))
 const hasCursedCoinTurns = (card: CardInstance) =>
   typeof card.state?.turnsRemaining === 'number' ? card.state.turnsRemaining : 0
 const calculateShellDamage = (score: number) => {
@@ -364,16 +372,37 @@ const CARD_EFFECTS: Record<string, CardEffectDefinition> = {
   martin: {
     handlers: {
       activated: ({ ownerPlayerIndex, card }) => {
-        // Grant a random quest (currently only blood_quest)
         return {
           grantQuest: {
             playerIndex: ownerPlayerIndex,
-            questId: 'blood_quest',
+            questId: pickRandomQuest(),
             sourceCardInstanceId: card.instanceId,
           },
         }
       },
     },
+  },
+  infinite_money_glitch: {
+    handlers: {
+      turnAdvanced: ({
+        ownerPlayerIndex,
+        players,
+        card,
+        applyScoreChange,
+        updateCardState,
+      }) => {
+        const player = players[ownerPlayerIndex]
+        if (!player) return
+        const gain = calculateMoneyGlitchGain(player.score)
+        applyScoreChange(ownerPlayerIndex, gain, 'passiveItem')
+        updateCardState(ownerPlayerIndex, card.instanceId, (prevState) => ({
+          ...prevState,
+          totalGained:
+            (typeof prevState.totalGained === 'number' ? prevState.totalGained : 0) + gain,
+        }))
+      },
+    },
+    getPassiveDelta: ({ playerScore }) => calculateMoneyGlitchGain(playerScore),
   },
 }
 

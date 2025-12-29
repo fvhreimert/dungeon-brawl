@@ -148,12 +148,12 @@
 .quest-title {
   font-family: 'Press Start 2P', monospace;
   font-size: 28px;
-  color: #8b0000;
+  color: #5a4020;
   text-shadow:
-    2px 2px 0 #000,
-    -1px -1px 0 #000,
-    1px -1px 0 #000,
-    -1px 1px 0 #000;
+    2px 2px 0 #2a1a05,
+    -1px -1px 0 #2a1a05,
+    1px -1px 0 #2a1a05,
+    -1px 1px 0 #2a1a05;
   letter-spacing: 2px;
   margin: 0;
   text-transform: uppercase;
@@ -226,13 +226,13 @@
 }
 
 .quest-progress-tick.filled {
-  background: #cc0000;
-  box-shadow: inset 0 -2px 0 #8b0000, inset 0 2px 0 rgba(255, 100, 100, 0.3);
+  background: #8b6914;
+  box-shadow: inset 0 -2px 0 #5a4020, inset 0 2px 0 rgba(160, 120, 32, 0.4);
 }
 
 .quest-progress-tick.filled.completed {
-  background: #daa520;
-  box-shadow: inset 0 -2px 0 #b8860b, inset 0 2px 0 rgba(255, 230, 100, 0.3);
+  background: #a07820;
+  box-shadow: inset 0 -2px 0 #6a5015, inset 0 2px 0 rgba(180, 150, 60, 0.5);
 }
 
 @keyframes tickGlow {
@@ -288,15 +288,76 @@
   letter-spacing: 2px;
 }
 
-.quest-reward-value {
+/* Visual reward icons */
+.quest-reward-icons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.quest-reward-cards {
+  display: flex;
+  align-items: center;
+}
+
+.quest-reward-card {
+  width: 48px;
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  transition: transform 0.2s ease;
+}
+
+.quest-reward-card:hover {
+  transform: translateY(-4px);
+}
+
+.quest-reward-points {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quest-reward-points-value {
   font-family: 'Press Start 2P', monospace;
-  font-size: 18px;
+  font-size: 24px;
   color: #daa520;
   text-shadow:
     2px 2px 0 #5a3a1a,
     -1px -1px 0 #5a3a1a,
     1px -1px 0 #5a3a1a,
     -1px 1px 0 #5a3a1a;
+}
+
+.quest-reward-plus {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 28px;
+  color: #daa520;
+  text-shadow:
+    2px 2px 0 #5a3a1a,
+    -1px -1px 0 #5a3a1a,
+    1px -1px 0 #5a3a1a,
+    -1px 1px 0 #5a3a1a;
+}
+
+.quest-upgrade-icon {
+  width: 72px;
+  height: 72px;
+  image-rendering: pixelated;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
+  animation: upgradeGlow 2s ease-in-out infinite;
+}
+
+@keyframes upgradeGlow {
+  0%, 100% {
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 8px rgba(218, 165, 32, 0.3));
+  }
+  50% {
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 16px rgba(218, 165, 32, 0.6));
+  }
 }
 
 /* Action buttons */

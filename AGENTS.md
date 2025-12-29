@@ -181,43 +181,53 @@ Upgraded versions of actions are unlocked via the **Spider Web** mechanic. Playe
 The quest system allows cards to grant players objectives that track progress over time and reward completion.
 
 ### Core Concepts
-- **Quest Definitions:** Located in `src/data/quests.ts`. Each quest has an id, title, description, target value, reward, and icon.
+- **Quest Definitions:** Located in `src/data/quests.ts`. Each quest has an id, title, description, target value, reward, icon, and optional upgrade icon.
 - **Quest Instances:** Created via `createQuestInstance(questId, sourceCardInstanceId)` when a card grants a quest.
 - **Quest State:** Stored in `player.quests` array on each player in `useJeopardyGame`.
 
-### Quest Types
-- `QuestId`: Union type of all quest IDs (e.g., `'blood_quest'`)
-- `QuestStatus`: `'active'` | `'completed'`
-- `Quest`: Instance with id, questId, title, description, progress, status, reward, and sourceCardInstanceId
-
 ### Current Quests
-- **Blood Quest** (`blood_quest`): Sacrifice 300 HP total via Blood Sacrifice action. Reward: 3 free cards.
+| Quest | Target | Reward |
+|-------|--------|--------|
+| **Blood Quest** | 300 HP sacrificed | 3 cards + Blood Sacrifice upgrade |
+| **Seer Quest** | 5 Mad Seer uses | 125 gold + Mad Seer upgrade |
+| **Jester's Quest** | 3 Card Jester purchases | 200 gold + Card Jester upgrade |
+| **Frog's Quest** | 3 Frog of Fate uses | 3 cards + Frog of Fate upgrade |
+| **Idol's Quest** | 3 Golden Idol uses | 3 cards + Golden Idol upgrade |
+| **Glacial Quest** | 2 Glacial Elemental uses | 300 gold + 3 cards |
+| **Wisdom Quest** | 3 correct answers in a row | 3 cards + 300 gold |
+| **Spider's Quest** | 3 isopods fed to spider | 5 isopod cards |
+
+### Reward System
+Rewards support flexible combinations:
+- **Primary reward:** `type: 'cards'` or `type: 'points'` with `amount`
+- **Action upgrades:** `upgradeAction` grants permanent action upgrades
+- **Mixed rewards:** `bonusPoints` and `bonusCards` add extras on top of primary
+- **Specific cards:** `specificCardId` gives exact card types instead of random draws
+
+### Quest Progress
+- **Standard progress:** `updateQuestProgress(playerIndex, questId, delta)` increments progress
+- **Streak-based quests:** `resetQuestProgress(playerIndex, questId)` resets to 0 on failure (e.g., Wisdom Quest resets on wrong answer)
 
 ### UI Components
-- **QuestIndicator** (`src/features/quests/QuestIndicator.tsx`): Small indicator shown on player panels when they have active quests.
-  - Uses `quest_indicator.png` for active quests, `quest_indicator_complete.png` when completed.
-  - Displays centered "!" exclamation mark with pixel art styling.
-  - Glows when a quest is completed and ready to claim.
-- **QuestModal** (`src/features/quests/QuestModal.tsx`): Pixel-art scroll themed modal showing quest details.
-  - Displays quest icon, title, description, and progress bar (300 ticks for granular tracking).
-  - "Claim Reward" button appears when quest is completed.
-  - Rewards are shown via `CardRevealModal` when claimed.
+- **QuestIndicator:** Shows on player panels when they have quests. Glows when completed.
+- **QuestModal:** Pixel-art scroll themed modal with progress bar, visual reward display (card backs, gold, upgrade icons).
 
 ### Quest Flow
 1. Player activates a quest-granting card (e.g., Martin).
 2. Card effect returns `grantQuest: { playerIndex, questId, sourceCardInstanceId }`.
 3. `Game.tsx` handles the effect and calls `grantQuest()` from the game hook.
 4. Quest indicator appears on the player's panel in the Scoreboard.
-5. Progress updates automatically (e.g., Blood Quest tracks HP sacrificed via Blood Sacrifice).
+5. Progress updates automatically based on quest type.
 6. When target is reached, quest status changes to `'completed'` and indicator glows.
 7. Player clicks indicator to open QuestModal and claim reward.
-8. `claimQuestReward()` returns the reward cards, which are shown in CardRevealModal.
+8. `claimQuestReward()` awards all rewards (cards, points, upgrades, bonuses).
 
 ### Adding New Quests
 1. Add quest ID to `QuestId` type in `src/types/game.ts`.
 2. Add definition to `QUEST_DEFINITIONS` in `src/data/quests.ts`.
-3. Add progress tracking logic in `useJeopardyGame.ts` (e.g., in the relevant action function).
-4. Create a card that grants the quest via `grantQuest` effect result.
+3. Add progress tracking at the appropriate location (action handler, effect, etc.).
+4. For streak quests, also call `resetQuestProgress()` on failure conditions.
+5. Create a card that grants the quest via `grantQuest` effect result.
 
 See `docs/quest-system-guide.md` for detailed implementation guidance.
 

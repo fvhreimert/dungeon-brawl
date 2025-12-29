@@ -14,44 +14,126 @@ export interface QuestDefinition {
   target: number
   reward: QuestReward
   iconPath: string
+  upgradeIconPath?: string  // Optional icon for action upgrade rewards
 }
 ```
+
+### Current Quests
+
+| Quest ID | Title | Target | Reward |
+|----------|-------|--------|--------|
+| `blood_quest` | Blood Quest | 300 HP sacrificed | 3 cards + Blood Sacrifice upgrade |
+| `seer_quest` | Seer Quest | 5 Mad Seer uses | 125 gold + Mad Seer upgrade |
+| `jester_quest` | Jester's Quest | 3 Card Jester purchases | 200 gold + Card Jester upgrade |
+| `frog_quest` | Frog's Quest | 3 Frog of Fate uses | 3 cards + Frog of Fate upgrade |
+| `idol_quest` | Idol's Quest | 3 Golden Idol uses | 3 cards + Golden Idol upgrade |
+| `glacial_quest` | Glacial Quest | 2 Glacial Elemental uses | 300 gold + 3 cards |
+| `wisdom_quest` | Wisdom Quest | 3 correct answers in a row | 3 cards + 300 gold |
+| `spider_quest` | Spider's Quest | 3 isopods fed to spider | 5 isopod cards |
 
 ### Adding a New Quest Definition
 
 1. Import any required assets (icons):
 ```typescript
 import myQuestIcon from '@/assets/images/actions/my_quest_icon.png'
+import myQuestUpgradedIcon from '@/assets/images/actions/my_quest_upgraded.png'
 ```
 
 2. Add your quest to `QUEST_DEFINITIONS`:
 ```typescript
 export const QUEST_DEFINITIONS: Record<QuestId, QuestDefinition> = {
-  blood_quest: { /* existing */ },
+  // ... existing quests
   my_new_quest: {
     id: 'my_new_quest',
     title: 'My New Quest',
-    description: 'Do something interesting 50 times.',
-    target: 50,
-    reward: { type: 'cards', amount: 2, description: '2 Free Cards' },
+    description: 'Do something interesting 5 times.',
+    target: 5,
+    reward: {
+      type: 'cards',
+      amount: 3,
+      description: '3 Free Cards + My Action Upgrade',
+      upgradeAction: 'my_action',
+    },
     iconPath: myQuestIcon,
+    upgradeIconPath: myQuestUpgradedIcon,
   },
 }
 ```
 
-### Reward Types
-- `{ type: 'cards', amount: N, description: string }` - Awards N random cards
-- `{ type: 'points', amount: N, description: string }` - Awards N points (not yet implemented)
+## 2. Reward Types
 
-## 2. Quest Types
+The `QuestReward` type supports flexible reward combinations:
+
+```typescript
+export type QuestReward = {
+  type: 'cards' | 'points'     // Primary reward type
+  amount: number               // Amount of primary reward
+  description: string          // Display text
+  upgradeAction?: UpgradeableAction  // Optional action upgrade
+  bonusPoints?: number         // Additional points on top of primary reward
+  bonusCards?: number          // Additional cards on top of primary reward
+  specificCardId?: string      // Give specific card type instead of random
+}
+```
+
+### Reward Examples
+
+**Cards only:**
+```typescript
+{ type: 'cards', amount: 3, description: '3 Free Cards' }
+```
+
+**Points only:**
+```typescript
+{ type: 'points', amount: 200, description: '200 Gold' }
+```
+
+**Cards + Action Upgrade:**
+```typescript
+{
+  type: 'cards',
+  amount: 3,
+  description: '3 Free Cards + Blood Sacrifice Upgrade',
+  upgradeAction: 'blood_sacrifice',
+}
+```
+
+**Points + Bonus Cards (mixed reward):**
+```typescript
+{
+  type: 'points',
+  amount: 300,
+  description: '300 Gold + 3 Free Cards',
+  bonusCards: 3,
+}
+```
+
+**Specific Cards (not random):**
+```typescript
+{
+  type: 'cards',
+  amount: 5,
+  description: '5 Free Isopods',
+  specificCardId: 'isopod',
+}
+```
+
+## 3. Quest Types
 
 Quest types are defined in `src/types/game.ts`:
 
 ```typescript
-export type QuestId = 'blood_quest' | 'my_new_quest'  // Add new IDs here
+export type QuestId =
+  | 'blood_quest'
+  | 'seer_quest'
+  | 'jester_quest'
+  | 'frog_quest'
+  | 'idol_quest'
+  | 'glacial_quest'
+  | 'wisdom_quest'
+  | 'spider_quest'
+
 export type QuestStatus = 'active' | 'completed'
-export type QuestReward = { type: 'cards' | 'points'; amount: number; description: string }
-export type QuestProgress = { current: number; target: number }
 
 export type Quest = {
   id: string                    // Unique instance ID (uuid)
@@ -67,7 +149,7 @@ export type Quest = {
 
 When adding a new quest, update the `QuestId` union type.
 
-## 3. Quest Instance Creation
+## 4. Quest Instance Creation
 
 Quests are created via the factory function in `src/data/quests.ts`:
 
@@ -80,7 +162,7 @@ This creates a new quest instance with:
 - Progress initialized to `{ current: 0, target: definition.target }`
 - Status set to `'active'`
 
-## 4. Granting Quests via Cards
+## 5. Granting Quests via Cards
 
 To create a card that grants a quest, add a card effect in `src/features/cards/cardEffectRegistry.ts`:
 
@@ -102,47 +184,42 @@ my_quest_card: {
 
 The `grantQuest` effect result is handled in `Game.tsx`, which calls the `grantQuest()` function from `useJeopardyGame`.
 
-## 5. Tracking Quest Progress
+## 6. Tracking Quest Progress
 
-Progress tracking happens in `useJeopardyGame.ts`. Find the appropriate action or event and call `updateQuestProgress`:
+Progress tracking happens in `useJeopardyGame.ts` or `Game.tsx`. Find the appropriate action or event and call `updateQuestProgress`:
 
-### Example: Blood Quest tracks HP sacrificed
-
-In `performBloodSacrifice()`:
-```typescript
-// After applying the sacrifice...
-const player = playersRef.current[activePlayerIndex]
-const bloodQuest = player?.quests?.find(
-  (q) => q.questId === 'blood_quest' && q.status === 'active'
-)
-if (bloodQuest) {
-  updateQuestProgress(activePlayerIndex, 'blood_quest', amount)
-}
-```
-
-### Progress Update Function
+### Standard Progress Update
 
 ```typescript
-const updateQuestProgress = useCallback(
-  (playerIndex: number, questId: QuestId, delta: number) => {
-    setPlayers((prev) =>
-      prev.map((p, i) => {
-        if (i !== playerIndex) return p
-        const updatedQuests = (p.quests ?? []).map((q) => {
-          if (q.questId !== questId || q.status !== 'active') return q
-          const newCurrent = Math.min(q.progress.current + delta, q.progress.target)
-          const newStatus = newCurrent >= q.progress.target ? 'completed' : 'active'
-          return { ...q, progress: { ...q.progress, current: newCurrent }, status: newStatus }
-        })
-        return { ...p, quests: updatedQuests }
-      })
-    )
-  },
-  []
-)
+updateQuestProgress(activePlayerIndex, 'my_quest_id', 1)
 ```
 
-## 6. Quest UI Components
+### Resetting Progress (for streak-based quests)
+
+For quests like `wisdom_quest` that reset on failure:
+
+```typescript
+// On success - increment progress
+updateQuestProgress(activePlayerIndex, 'wisdom_quest', 1)
+
+// On failure - reset to zero
+resetQuestProgress(activePlayerIndex, 'wisdom_quest')
+```
+
+### Progress Tracking Locations
+
+| Quest | Tracked In | Location |
+|-------|------------|----------|
+| `blood_quest` | `useJeopardyGame.ts` | `trackBloodSacrificeForQuest()` |
+| `seer_quest` | `Game.tsx` | `handleMadSeerAccept/Reject()` |
+| `jester_quest` | `Game.tsx` | `handleCardJesterClick()` |
+| `frog_quest` | `Game.tsx` | `handleFrogClick()` |
+| `idol_quest` | `Game.tsx` | `handleIdolClick()` |
+| `glacial_quest` | `Game.tsx` | `handleTileSelect()` (freeze mode) |
+| `wisdom_quest` | `useJeopardyGame.ts` | `handleAnswer()` |
+| `spider_quest` | `Game.tsx` | `handleSpiderFeedIsopod()` |
+
+## 7. Quest UI Components
 
 ### QuestIndicator
 Located at `src/features/quests/QuestIndicator.tsx`.
@@ -164,22 +241,25 @@ Pixel-art scroll themed modal showing quest details. Props:
 - `onClaim?: () => void` - Claim reward handler (shown when completed)
 
 Features:
-- Quest icon display (large, no frame)
+- Quest icon display (from quest definition)
 - Progress bar with 300 ticks for granular tracking
+- Visual reward display (card backs, gold amount, upgrade icon)
 - "Claim Reward" button when quest is completed
 
-## 7. Claiming Rewards
+## 8. Claiming Rewards
 
 When a player claims a quest reward:
 
 1. Player clicks "Claim Reward" in QuestModal
 2. `handleClaimQuestReward()` in `Game.tsx` is called
 3. This calls `claimQuestReward(playerIndex, questId)` from the hook
-4. The function:
-   - Finds and removes the completed quest
-   - Awards the reward (draws cards for `type: 'cards'`)
-   - Returns the awarded cards (or null)
-5. `Game.tsx` shows the cards via `CardRevealModal`
+4. The function awards rewards in this order:
+   - Primary reward (cards or points)
+   - Action upgrade (if `upgradeAction` is set)
+   - Bonus points (if `bonusPoints` is set)
+   - Bonus cards (if `bonusCards` is set)
+5. Quest is removed from player
+6. `Game.tsx` shows any awarded cards via `CardRevealModal`
 
 ```typescript
 const handleClaimQuestReward = () => {
@@ -193,7 +273,7 @@ const handleClaimQuestReward = () => {
 }
 ```
 
-## 8. Integration Points
+## 9. Integration Points
 
 ### Scoreboard Integration
 `Scoreboard.tsx` renders `QuestIndicator` for each player:
@@ -222,7 +302,7 @@ if (effectResult?.grantQuest) {
 }
 ```
 
-## 9. Styling
+## 10. Styling
 
 Quest UI uses pixel-art styling consistent with the game:
 - `QuestIndicator.css`: Indicator positioning, exclamation mark styling, glow animations
@@ -233,13 +313,15 @@ Key CSS classes:
 - `.quest-modal`: Main modal container with drop-shadow
 - `.scroll-rod`, `.scroll-body`: Scroll decoration elements
 - `.quest-progress-bar`, `.quest-progress-tick`: 300-tick progress bar
+- `.quest-reward-cards`, `.quest-upgrade-icon`: Visual reward display
 
-## 10. Adding a Complete New Quest
+## 11. Adding a Complete New Quest
 
 Checklist:
 1. [ ] Add quest ID to `QuestId` type in `src/types/game.ts`
 2. [ ] Add definition to `QUEST_DEFINITIONS` in `src/data/quests.ts`
-3. [ ] Create/import quest icon asset
-4. [ ] Add progress tracking in `useJeopardyGame.ts` at the appropriate event
-5. [ ] Create a card that grants the quest (definition, catalog config, effect handler)
-6. [ ] Test the full flow: grant -> progress -> complete -> claim
+3. [ ] Create/import quest icon asset (and upgrade icon if applicable)
+4. [ ] Add progress tracking at the appropriate event location
+5. [ ] If quest can reset (streak-based), use `resetQuestProgress()` on failure
+6. [ ] Create a card that grants the quest (definition, catalog config, effect handler)
+7. [ ] Test the full flow: grant -> progress -> complete -> claim

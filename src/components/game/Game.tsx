@@ -210,8 +210,18 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     else if (actionId === 'golden_idol') limit = limits.goldenIdol
     else if (actionId === 'blood_sacrifice') limit = limits.bloodSacrifice
     else if (actionId === 'web') limit = limits.web
-    
+
     return count >= limit
+  }
+
+  // Visual exhausted state - only show after effect completes
+  const shouldShowExhausted = (actionId: ActionId) => {
+    if (!isActionExhausted(actionId)) return false
+    // Don't show exhausted visual while the action is still animating
+    if (actionId === 'mad_seer' && madSeerActive) return false
+    if (actionId === 'frog_of_fate' && frogSelecting) return false
+    if (actionId === 'golden_idol' && idolActive) return false
+    return true
   }
 
   const handleWebClick = () => {
@@ -237,6 +247,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     increaseSpiderSense(activePlayerIndex)
     addRerolls(activePlayerIndex, runtimeConfig.mechanics.spiderIsopodRerollBonus)
     incrementPlayerMetric(activePlayerIndex, 'isopodsFed')
+    updateQuestProgress(activePlayerIndex, 'spider_quest', 1)
   }
 
   const handleSpiderFeedSheep = (sheepInstanceId: string) => {
@@ -256,6 +267,12 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     if (frozenActions[actionId]) return false
     freezeAction(actionId, activePlayerIndex, cardUsePending.instanceId)
     activateCard(cardUsePending.instanceId, activePlayerIndex, { actionId })
+
+    // Track quest progress for glacial elemental
+    if (cardUsePending.id === 'glacial_elemental') {
+      updateQuestProgress(activePlayerIndex, 'glacial_quest', 1)
+    }
+
     setFreezeSelectMode(false)
     setCardUsePending(null)
     return true
@@ -290,6 +307,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     adjustPlayerScore(activePlayerIndex, -price)
     incrementActionCount(activePlayerIndex, 'card_jester')
     recordActionUsage(activePlayerIndex, 'card_jester')
+    updateQuestProgress(activePlayerIndex, 'jester_quest', 1)
 
     const isUpgraded = isActionUpgraded('card_jester')
     const cardsToDraw = isUpgraded ? 2 : 1
@@ -507,17 +525,18 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     if (handleActionFreezeClick('mad_seer')) return
     if (frozenActions.mad_seer) return
     if (isActionExhausted('mad_seer')) return
-    if (selectedTile || frogSelecting || idolActive) return
+    if (selectedTile || frogSelecting || idolActive || madSeerActive) return
 
     const price = runtimeConfig.mechanics.actionPrices.madSeer
     const currentPlayer = players[activePlayerIndex]
-    
+
     if (currentPlayer.score < price) {
       return
     }
 
     adjustPlayerScore(activePlayerIndex, -price)
-    // incrementActionCount moved to handleMadSeerAccept and handleMadSeerReject
+    incrementActionCount(activePlayerIndex, 'mad_seer')
+    recordActionUsage(activePlayerIndex, 'mad_seer')
 
     playMadSeerStart()
     setMadSeerActive(true)
@@ -529,14 +548,19 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     if (freezeSelectMode && cardUsePending) {
       const tile = tiles.find((t) => t.id === tileId)
       if (!tile || tile.status !== 'open' || tile.modifiers?.isCrumbled || tile.modifiers?.frozen) return
-      
+
       // Freeze the tile
       freezeTile(tileId, activePlayerIndex, cardUsePending.instanceId)
-      
+
       // Activate the card (consumes it)
       const effectResult = activateCard(cardUsePending.instanceId, activePlayerIndex, { tileId })
       processCardEffectResult(effectResult)
-      
+
+      // Track quest progress for glacial elemental
+      if (cardUsePending.id === 'glacial_elemental') {
+        updateQuestProgress(activePlayerIndex, 'glacial_quest', 1)
+      }
+
       // Reset freeze mode
       setFreezeSelectMode(false)
       setCardUsePending(null)
@@ -582,15 +606,12 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     }
     setMadSeerPreviewTile(null)
     setMadSeerActive(false)
-    incrementActionCount(activePlayerIndex, 'mad_seer')
-    recordActionUsage(activePlayerIndex, 'mad_seer')
     updateQuestProgress(activePlayerIndex, 'seer_quest', 1)
   }
 
   const handleMadSeerReject = () => {
     setMadSeerPreviewTile(null)
     setMadSeerActive(false)
-    incrementActionCount(activePlayerIndex, 'mad_seer')
     updateQuestProgress(activePlayerIndex, 'seer_quest', 1)
   }
 
@@ -725,8 +746,6 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     setTimeout(() => {
       setFrogLandingIds([])
       setFrogSelecting(false)
-      incrementActionCount(activePlayerIndex, 'frog_of_fate')
-      recordActionUsage(activePlayerIndex, 'frog_of_fate')
     }, 900)
   }
 
@@ -735,16 +754,18 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     if (frozenActions.frog_of_fate) return
     if (isActionExhausted('frog_of_fate')) return
     if (madSeerActive || frogSelecting || selectedTile || idolActive) return
-    
+
     const price = runtimeConfig.mechanics.actionPrices.frogOfFate
     const currentPlayer = players[activePlayerIndex]
-    
+
     if (currentPlayer.score < price) {
       return
     }
 
     adjustPlayerScore(activePlayerIndex, -price)
-    // incrementActionCount moved to runFrogSelection after effect is done.
+    incrementActionCount(activePlayerIndex, 'frog_of_fate')
+    recordActionUsage(activePlayerIndex, 'frog_of_fate')
+    updateQuestProgress(activePlayerIndex, 'frog_quest', 1)
 
     const isUpgraded = isActionUpgraded('frog_of_fate')
     playFrogStart()
@@ -760,12 +781,13 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     // Award the accumulated bonus and track it
     adjustPlayerScore(activePlayerIndex, goldenIdolBonus)
     incrementPlayerMetric(activePlayerIndex, 'goldenIdolPointsGained', goldenIdolBonus)
+    incrementActionCount(activePlayerIndex, 'golden_idol')
     recordActionUsage(activePlayerIndex, 'golden_idol')
+    updateQuestProgress(activePlayerIndex, 'idol_quest', 1)
 
     const isUpgraded = isActionUpgraded('golden_idol')
     await triggerIdol(tiles, updateTileModifiers, isUpgraded ? 2 : 1)
 
-    incrementActionCount(activePlayerIndex, 'golden_idol')
     resetGoldenIdolBonus()
   }
 
@@ -912,10 +934,10 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
           } ${
             frozenActions.mad_seer ? 'action-frozen' : ''
           } ${
-            isActionExhausted('mad_seer') ? 'action-exhausted' : ''
+            shouldShowExhausted('mad_seer') ? 'action-exhausted' : ''
           } ${
             freezeSelectMode && !frozenActions.mad_seer ? 'action-freeze-target' : ''
-          }`} 
+          }`}
           onClick={handleMadSeerStart}
         >
           {frozenActions.mad_seer && (
@@ -1148,10 +1170,10 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
           } ${
             frozenActions.frog_of_fate ? 'action-frozen' : ''
           } ${
-            isActionExhausted('frog_of_fate') ? 'action-exhausted' : ''
+            shouldShowExhausted('frog_of_fate') ? 'action-exhausted' : ''
           } ${
             freezeSelectMode && !frozenActions.frog_of_fate ? 'action-freeze-target' : ''
-          }`} 
+          }`}
           onClick={handleFrogClick}
         >
           {frozenActions.frog_of_fate && (
@@ -1194,10 +1216,10 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
           } ${
             frozenActions.golden_idol ? 'action-frozen' : ''
           } ${
-            isActionExhausted('golden_idol') ? 'action-exhausted' : ''
+            shouldShowExhausted('golden_idol') ? 'action-exhausted' : ''
           } ${
             freezeSelectMode && !frozenActions.golden_idol ? 'action-freeze-target' : ''
-          }`} 
+          }`}
           onClick={handleIdolClick}
         >
           {frozenActions.golden_idol && (

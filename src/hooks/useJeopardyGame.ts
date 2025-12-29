@@ -736,6 +736,14 @@ export function useJeopardyGame({
     )
 
     applyScoreChange(activePlayerIndex, scoreChange, 'question')
+
+    // Track wisdom quest progress
+    if (correct) {
+      updateQuestProgress(activePlayerIndex, 'wisdom_quest', 1)
+    } else {
+      resetQuestProgress(activePlayerIndex, 'wisdom_quest')
+    }
+
     clearPuppetLock(activePlayerIndex)
 
     // Don't transition to next player if game is over
@@ -1003,6 +1011,27 @@ export function useJeopardyGame({
     [],
   )
 
+  const resetQuestProgress = useCallback(
+    (playerIndex: number, questId: QuestId) => {
+      setPlayers((prev) =>
+        prev.map((player, idx) => {
+          if (idx !== playerIndex) return player
+          const quests =
+            player.quests?.map((quest) => {
+              if (quest.questId !== questId || quest.status !== 'active') return quest
+              return {
+                ...quest,
+                progress: { ...quest.progress, current: 0 },
+              }
+            }) ?? []
+
+          return { ...player, quests }
+        }),
+      )
+    },
+    [],
+  )
+
   const claimQuestReward = useCallback(
     (playerIndex: number, questInstanceId: string): CardDefinition[] | null => {
       const player = playersRef.current[playerIndex]
@@ -1014,8 +1043,73 @@ export function useJeopardyGame({
 
       // Award cards
       if (quest.reward.type === 'cards') {
+        // Check if we should give specific cards
+        if (quest.reward.specificCardId) {
+          const specificCard = CARDS.find((c) => c.id === quest.reward.specificCardId)
+          if (specificCard) {
+            for (let i = 0; i < quest.reward.amount; i++) {
+              rewardedCards.push(specificCard)
+              const cardInstance = createCardInstance(specificCard)
+              setPlayers((prev) =>
+                prev.map((p, idx) => {
+                  if (idx !== playerIndex) return p
+                  return {
+                    ...p,
+                    inventory: [cardInstance, ...p.inventory],
+                  }
+                }),
+              )
+            }
+          }
+        } else {
+          // Draw random cards
+          const drawContext = buildCardDrawContext(playersRef.current, playerIndex)
+          for (let i = 0; i < quest.reward.amount; i++) {
+            const entry = pickCardForPlayer(drawContext)
+            if (entry) {
+              rewardedCards.push(entry.definition)
+              const cardInstance = createCardInstance(entry.definition)
+              setPlayers((prev) =>
+                prev.map((p, idx) => {
+                  if (idx !== playerIndex) return p
+                  return {
+                    ...p,
+                    inventory: [cardInstance, ...p.inventory],
+                  }
+                }),
+              )
+            }
+          }
+        }
+      } else if (quest.reward.type === 'points') {
+        applyScoreChange(playerIndex, quest.reward.amount, 'activeCard')
+      }
+
+      // Award action upgrade if present
+      if (quest.reward.upgradeAction) {
+        setPlayers((prev) =>
+          prev.map((p, idx) => {
+            if (idx !== playerIndex) return p
+            return {
+              ...p,
+              upgradedActions: {
+                ...p.upgradedActions,
+                [quest.reward.upgradeAction!]: true,
+              },
+            }
+          }),
+        )
+      }
+
+      // Award bonus points if present
+      if (quest.reward.bonusPoints && quest.reward.bonusPoints > 0) {
+        applyScoreChange(playerIndex, quest.reward.bonusPoints, 'activeCard')
+      }
+
+      // Award bonus cards if present
+      if (quest.reward.bonusCards && quest.reward.bonusCards > 0) {
         const drawContext = buildCardDrawContext(playersRef.current, playerIndex)
-        for (let i = 0; i < quest.reward.amount; i++) {
+        for (let i = 0; i < quest.reward.bonusCards; i++) {
           const entry = pickCardForPlayer(drawContext)
           if (entry) {
             rewardedCards.push(entry.definition)
@@ -1031,8 +1125,6 @@ export function useJeopardyGame({
             )
           }
         }
-      } else if (quest.reward.type === 'points') {
-        applyScoreChange(playerIndex, quest.reward.amount, 'activeCard')
       }
 
       // Remove quest from player
@@ -1419,6 +1511,7 @@ export function useJeopardyGame({
     consumeReroll,
     grantQuest,
     updateQuestProgress,
+    resetQuestProgress,
     claimQuestReward,
   }
 }
