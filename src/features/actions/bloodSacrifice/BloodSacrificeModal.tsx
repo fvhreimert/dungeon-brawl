@@ -9,10 +9,19 @@ type BloodSacrificeModalProps = {
   onConfirm: (amount: number) => void
   onCancel: () => void
   isUpgraded?: boolean
+  maxSacrifice?: number
+  maxSacrificeUpgraded?: number
 }
 
-export function BloodSacrificeModal({ playerScore, onConfirm, onCancel, isUpgraded = false }: BloodSacrificeModalProps) {
-  const capMaxSacrifice = isUpgraded ? 200 : 100;
+export function BloodSacrificeModal({
+  playerScore,
+  onConfirm,
+  onCancel,
+  isUpgraded = false,
+  maxSacrifice = 100,
+  maxSacrificeUpgraded = 200,
+}: BloodSacrificeModalProps) {
+  const capMaxSacrifice = isUpgraded ? maxSacrificeUpgraded : maxSacrifice;
   // Initial amount to sacrifice. If playerScore is 0, start at 0. Otherwise, start at 1 or playerScore if less than 1.
   const [amount, setAmount] = useState(Math.max(0, Math.min(1, playerScore))); 
 

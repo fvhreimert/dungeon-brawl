@@ -26,7 +26,7 @@ type ScoreboardProps = {
   onInventoryClick: (playerIndex: number) => void
   onSetActivePlayer: (playerIndex: number) => void
   onAdjustScoreClick: (playerIndex: number) => void
-  onQuestClick: (playerIndex: number) => void
+  onQuestClick: (playerIndex: number, questId: string) => void
   isBlackMarketActive?: boolean
 }
 
@@ -65,7 +65,7 @@ export function Scoreboard({
             {(player.quests?.length ?? 0) > 0 && (
               <QuestIndicator
                 quests={player.quests ?? []}
-                onClick={() => onQuestClick(index)}
+                onClick={(questId) => onQuestClick(index, questId)}
               />
             )}
             {playerAlliances.length > 0 && (

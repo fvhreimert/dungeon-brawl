@@ -60,14 +60,22 @@ type ActionUpgradeModalProps = {
   playerUpgrades: PlayerUpgrades
   onUpgrade: (actionId: UpgradeableAction) => void
   onClose: () => void
+  remainingUpgrades?: number
 }
 
 export function ActionUpgradeModal({
   playerUpgrades,
   onUpgrade,
   onClose,
+  remainingUpgrades = 1,
 }: ActionUpgradeModalProps) {
   const allUpgraded = UPGRADE_INFO.every((info) => playerUpgrades[info.id])
+
+  const getSubtitle = () => {
+    if (allUpgraded) return 'All actions have been upgraded!'
+    if (remainingUpgrades > 1) return `Choose ${remainingUpgrades} actions to upgrade`
+    return 'Choose an action to upgrade'
+  }
 
   return (
     <div className="action-upgrade-backdrop" onClick={onClose}>
@@ -78,9 +86,7 @@ export function ActionUpgradeModal({
 
         <div className="action-upgrade-title">Spider's Gift</div>
         <div className="action-upgrade-subtitle">
-          {allUpgraded
-            ? 'All actions have been upgraded!'
-            : 'Choose an action to upgrade'}
+          {getSubtitle()}
         </div>
 
         <div className="upgrade-grid">

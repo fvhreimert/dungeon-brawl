@@ -115,6 +115,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
   const [scoreAdjustPlayerIndex, setScoreAdjustPlayerIndex] = useState<number | null>(null)
   const [spiderFeedingActive, setSpiderFeedingActive] = useState(false)
   const [actionUpgradeActive, setActionUpgradeActive] = useState(false)
+  const [remainingUpgrades, setRemainingUpgrades] = useState(0)
   const [blackMarketData, setBlackMarketData] = useState<{ playerIndex: number; playerName: string; cards: CardDefinition[] } | null>(null)
   const [showTurnIntro, setShowTurnIntro] = useState(false)
   const [introExiting, setIntroExiting] = useState(false)
@@ -253,13 +254,21 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
   const handleSpiderFeedSheep = (sheepInstanceId: string) => {
     removeCardFromInventory(activePlayerIndex, sheepInstanceId)
     setSpiderFeedingActive(false)
+    addRerolls(activePlayerIndex, runtimeConfig.mechanics.spiderWeb.sheepRerollBonus)
+    const upgrades = runtimeConfig.mechanics.spiderWeb.sheepUpgradesGiven
+    setRemainingUpgrades(upgrades)
     setActionUpgradeActive(true)
     incrementPlayerMetric(activePlayerIndex, 'sheepFed')
   }
 
   const handleUpgradeAction = (actionId: UpgradeableAction) => {
     upgradeAction(activePlayerIndex, actionId)
-    setActionUpgradeActive(false)
+    const newRemaining = remainingUpgrades - 1
+    setRemainingUpgrades(newRemaining)
+    if (newRemaining <= 0) {
+      setActionUpgradeActive(false)
+    }
+    // Keep modal open if more upgrades remain
   }
 
   const handleActionFreezeClick = (actionId: ActionId) => {
@@ -310,12 +319,14 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     updateQuestProgress(activePlayerIndex, 'jester_quest', 1)
 
     const isUpgraded = isActionUpgraded('card_jester')
-    const cardsToDraw = isUpgraded ? 2 : 1
+    const cardsToDraw = isUpgraded
+      ? runtimeConfig.mechanics.cardJester.cardsToGiveUpgraded
+      : runtimeConfig.mechanics.cardJester.cardsToGive
     const newCards: CardDefinition[] = []
 
     for (let i = 0; i < cardsToDraw; i++) {
       const drawContext = buildCardDrawContext(players, activePlayerIndex)
-      const entry = pickCardForPlayer(drawContext)
+      const entry = pickCardForPlayer(drawContext, runtimeConfig.mechanics.cardWeights)
       if (entry) {
         const card = entry.definition
         addCardToInventory(card)
@@ -396,19 +407,12 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     setMerchantOffers(null)
   }
 
-  const handleQuestClick = (playerIndex: number) => {
+  const handleQuestClick = (playerIndex: number, questId: string) => {
     const player = players[playerIndex]
-    const quests = player?.quests ?? []
+    const quest = player?.quests?.find((q) => q.id === questId)
 
-    // Show first completed quest, or first active quest
-    const completedQuest = quests.find((q) => q.status === 'completed')
-    const activeQuest = quests.find((q) => q.status === 'active')
-
-    if (completedQuest) {
-      setSelectedQuest(completedQuest)
-      setSelectedQuestPlayerIndex(playerIndex)
-    } else if (activeQuest) {
-      setSelectedQuest(activeQuest)
+    if (quest) {
+      setSelectedQuest(quest)
       setSelectedQuestPlayerIndex(playerIndex)
     }
   }
@@ -622,8 +626,6 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     if (selectedTile || frogSelecting || idolActive || madSeerActive) return
     playBloodSacrificeStart()
     setBloodSacrificeActive(true)
-    incrementActionCount(activePlayerIndex, 'blood_sacrifice')
-    recordActionUsage(activePlayerIndex, 'blood_sacrifice')
   }
 
   const handleBloodSacrificeConfirm = (amount: number) => {
@@ -636,6 +638,8 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     if (bloodSacrificeAmount === null) return
     performBloodSacrifice(bloodSacrificeAmount, targetIndex)
     playBloodSacrificeLand()
+    incrementActionCount(activePlayerIndex, 'blood_sacrifice')
+    recordActionUsage(activePlayerIndex, 'blood_sacrifice')
     setBloodSacrificeTargetSelecting(false)
     setBloodSacrificeAmount(null)
   }
@@ -1274,6 +1278,10 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
           onAccept={handleMadSeerAccept}
           onReject={handleMadSeerReject}
           isUpgraded={isActionUpgraded('mad_seer')}
+          wordsMin={runtimeConfig.mechanics.madSeer.wordsMin}
+          wordsMax={runtimeConfig.mechanics.madSeer.wordsMax}
+          wordsMinUpgraded={runtimeConfig.mechanics.madSeer.wordsMinUpgraded}
+          wordsMaxUpgraded={runtimeConfig.mechanics.madSeer.wordsMaxUpgraded}
         />
       )}
 
@@ -1283,6 +1291,8 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
           onConfirm={handleBloodSacrificeConfirm}
           onCancel={handleBloodSacrificeCancel}
           isUpgraded={isActionUpgraded('blood_sacrifice')}
+          maxSacrifice={runtimeConfig.mechanics.bloodSacrifice.maxSacrifice}
+          maxSacrificeUpgraded={runtimeConfig.mechanics.bloodSacrifice.maxSacrificeUpgraded}
         />
       )}
 
@@ -1443,7 +1453,11 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
         <ActionUpgradeModal
           playerUpgrades={players[activePlayerIndex]?.upgradedActions ?? {}}
           onUpgrade={handleUpgradeAction}
-          onClose={() => setActionUpgradeActive(false)}
+          onClose={() => {
+            setActionUpgradeActive(false)
+            setRemainingUpgrades(0)
+          }}
+          remainingUpgrades={remainingUpgrades}
         />
       )}
 

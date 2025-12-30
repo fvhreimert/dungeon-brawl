@@ -39,7 +39,7 @@ const CARD_CONFIG: Record<string, CardCatalogConfig> = {
   beggar: { baseWeight: 3},
   roulette: { baseWeight: 5, targetSelectMode: 'roulette' },
   shovel: {
-    baseWeight: 8,
+    baseWeight: 2,
     targetSelectMode: 'treasure',
     weightModifiers: [
       (context) => {
@@ -57,7 +57,7 @@ const CARD_CONFIG: Record<string, CardCatalogConfig> = {
     ]
   },
   compass: {
-    baseWeight: 8,
+    baseWeight: 2,
     targetSelectMode: 'treasure',
     weightModifiers: [
       (context) => {
@@ -75,7 +75,7 @@ const CARD_CONFIG: Record<string, CardCatalogConfig> = {
     ]
   },
   treasure_map: {
-    baseWeight: 8,
+    baseWeight: 2,
     targetSelectMode: 'treasure',
     weightModifiers: [
       (context) => {
@@ -96,7 +96,7 @@ const CARD_CONFIG: Record<string, CardCatalogConfig> = {
   coalition: { baseWeight: 3, targetSelectMode: 'coalition' },
   loot_goblin: { baseWeight: 7, targetSelectMode: 'neutral_all' },
   isopod: { baseWeight: 10 },
-  martin: { baseWeight: 4, targetSelectMode: 'none' },
+  martin: { baseWeight: 5, targetSelectMode: 'none' },
   infinite_money_glitch: { baseWeight: 3 },
 }
 
@@ -134,7 +134,10 @@ export function buildCardDrawContext(players: readonly Player[], activePlayerInd
   }
 }
 
-export function pickCardForPlayer(context: CardDrawContext): CardCatalogEntry | null {
+export function pickCardForPlayer(
+  context: CardDrawContext,
+  cardWeights?: Record<string, number>
+): CardCatalogEntry | null {
   const weightedPool = CARD_CATALOG.reduce<
     { entry: CardCatalogEntry; weight: number }[]
   >((acc, entry) => {
@@ -143,7 +146,9 @@ export function pickCardForPlayer(context: CardDrawContext): CardCatalogEntry | 
       (total, modifier) => total + modifier(context),
       0,
     )
-    const weight = Math.max(entry.baseWeight + modifierTotal, 0)
+    // Use custom weight if provided, otherwise use default base weight
+    const baseWeight = cardWeights?.[entry.definition.id] ?? entry.baseWeight
+    const weight = Math.max(baseWeight + modifierTotal, 0)
     if (weight === 0) return acc
     acc.push({ entry, weight })
     return acc

@@ -43,11 +43,16 @@ const getLeaderIndex = (players: Player[]) => {
   })
   return leaderIndex
 }
-const buildMerchantOffers = (players: Player[], ownerPlayerIndex: number, count = 4) => {
+const buildMerchantOffers = (
+  players: Player[],
+  ownerPlayerIndex: number,
+  cardWeights?: Record<string, number>,
+  count = 4
+) => {
   const context = buildCardDrawContext(players, ownerPlayerIndex)
   const choices: CardDefinition[] = []
   for (let i = 0; i < count; i += 1) {
-    const entry = pickCardForPlayer(context)
+    const entry = pickCardForPlayer(context, cardWeights)
     if (!entry) continue
     choices.push(entry.definition)
   }
@@ -58,6 +63,7 @@ export type CardEffectContext = {
   players: Player[]
   ownerPlayerIndex: number
   activePlayerIndex: number
+  cardWeights?: Record<string, number>
   applyScoreChange: (
     targetIndex: number,
     delta: number,
@@ -218,8 +224,8 @@ const CARD_EFFECTS: Record<string, CardEffectDefinition> = {
   },
   traveling_merchant: {
     handlers: {
-      activated: ({ players, ownerPlayerIndex }) => {
-        const offers = buildMerchantOffers(players, ownerPlayerIndex)
+      activated: ({ players, ownerPlayerIndex, cardWeights }) => {
+        const offers = buildMerchantOffers(players, ownerPlayerIndex, cardWeights)
         if (offers.length === 0) return
         return {
           merchantOffers: offers,

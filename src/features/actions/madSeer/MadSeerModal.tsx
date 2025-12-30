@@ -8,6 +8,10 @@ type MadSeerModalProps = {
   onAccept: () => void
   onReject: () => void
   isUpgraded?: boolean
+  wordsMin?: number
+  wordsMax?: number
+  wordsMinUpgraded?: number
+  wordsMaxUpgraded?: number
 }
 
 type FloatingWord = {
@@ -36,7 +40,16 @@ function createSeededRandom(seed: string) {
   }
 }
 
-export function MadSeerModal({ tile, onAccept, onReject, isUpgraded = false }: MadSeerModalProps) {
+export function MadSeerModal({
+  tile,
+  onAccept,
+  onReject,
+  isUpgraded = false,
+  wordsMin = 4,
+  wordsMax = 8,
+  wordsMinUpgraded = 8,
+  wordsMaxUpgraded = 16,
+}: MadSeerModalProps) {
   const floatingWords = useMemo<FloatingWord[]>(() => {
     const random = createSeededRandom(`${tile.id}-${tile.question}`)
     const cleanedWords = tile.question
@@ -45,14 +58,11 @@ export function MadSeerModal({ tile, onAccept, onReject, isUpgraded = false }: M
       .filter(Boolean)
 
     const uniqueWords = Array.from(new Set(cleanedWords))
-    let count = Math.min(
-      uniqueWords.length || cleanedWords.length,
-      Math.max(4, Math.floor(random() * 5) + 4),
-    )
-    
-    if (isUpgraded) {
-      count = Math.min(uniqueWords.length || cleanedWords.length, count * 2)
-    }
+    const minWords = isUpgraded ? wordsMinUpgraded : wordsMin
+    const maxWords = isUpgraded ? wordsMaxUpgraded : wordsMax
+    const range = Math.max(0, maxWords - minWords)
+    const targetCount = minWords + Math.floor(random() * (range + 1))
+    const count = Math.min(uniqueWords.length || cleanedWords.length, targetCount)
 
     const source = uniqueWords.length > 0 ? uniqueWords : cleanedWords
     const shuffled = [...source].sort(() => random() - 0.5)
@@ -72,7 +82,7 @@ export function MadSeerModal({ tile, onAccept, onReject, isUpgraded = false }: M
         direction: random() > 0.5 ? 'reverse' : 'normal',
       }
     })
-  }, [tile.id, tile.question, isUpgraded])
+  }, [tile.id, tile.question, isUpgraded, wordsMin, wordsMax, wordsMinUpgraded, wordsMaxUpgraded])
 
   return (
     <div className="madseer-backdrop" onClick={onReject}>

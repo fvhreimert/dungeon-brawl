@@ -5,34 +5,38 @@ import './QuestIndicator.css'
 
 interface QuestIndicatorProps {
   quests: Quest[]
-  onClick: () => void
+  onClick: (questId: string) => void
 }
 
 export function QuestIndicator({ quests, onClick }: QuestIndicatorProps) {
-  const activeQuests = quests.filter((q) => q.status === 'active')
-  const completedQuests = quests.filter((q) => q.status === 'completed')
-  const totalCount = activeQuests.length + completedQuests.length
+  const visibleQuests = quests.filter((q) => q.status === 'active' || q.status === 'completed')
 
-  if (totalCount === 0) return null
-
-  // Determine which icon to show - completed takes priority
-  const hasCompleted = completedQuests.length > 0
-  const iconSrc = hasCompleted ? questIndicatorCompleteIcon : questIndicatorIcon
+  if (visibleQuests.length === 0) return null
 
   return (
-    <div
-      className={`quest-indicator ${hasCompleted ? 'has-completed' : ''}`}
-      onClick={(e) => {
-        e.stopPropagation()
-        onClick()
-      }}
-    >
-      <img
-        src={iconSrc}
-        alt="Quest"
-        className="quest-indicator-icon"
-      />
-      <span className="quest-indicator-exclamation">!</span>
+    <div className="quest-indicators-container">
+      {visibleQuests.map((quest) => {
+        const isCompleted = quest.status === 'completed'
+        const iconSrc = isCompleted ? questIndicatorCompleteIcon : questIndicatorIcon
+
+        return (
+          <div
+            key={quest.id}
+            className={`quest-indicator ${isCompleted ? 'has-completed' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation()
+              onClick(quest.id)
+            }}
+          >
+            <img
+              src={iconSrc}
+              alt="Quest"
+              className="quest-indicator-icon"
+            />
+            <span className="quest-indicator-exclamation">!</span>
+          </div>
+        )
+      })}
     </div>
   )
 }

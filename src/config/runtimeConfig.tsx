@@ -7,11 +7,9 @@ export type RuntimeGameConfig = {
   gameplay: {
     startingPoints: number
     pointValues: number[]
-    maxScoreForMeter: number
-    subtractPointsOnWrongAnswer: boolean
+    wrongAnswerPenaltyPercent: number
   }
   mechanics: {
-    freeCardsPerTurn: number
     startingRerolls: number
     spiderIsopodRerollBonus: number
     spiderSense: {
@@ -27,13 +25,20 @@ export type RuntimeGameConfig = {
         value: number
       }
     }
-    multipliers: {
-      maxTileMultiplier: number
-    }
     actionPrices: {
       cardJester: number
       madSeer: number
       frogOfFate: number
+    }
+    cardJester: {
+      cardsToGive: number
+      cardsToGiveUpgraded: number
+    }
+    madSeer: {
+      wordsMin: number
+      wordsMax: number
+      wordsMinUpgraded: number
+      wordsMaxUpgraded: number
     }
     actionLimits: {
       cardJester: number
@@ -45,11 +50,22 @@ export type RuntimeGameConfig = {
     }
     goldenIdol: {
       startBonus: number
+      pointsMin: number
+      pointsMax: number
+    }
+    bloodSacrifice: {
+      maxSacrifice: number
+      maxSacrificeUpgraded: number
+    }
+    spiderWeb: {
+      sheepRerollBonus: number
+      sheepUpgradesGiven: number
     }
     blackMarket: {
       enabled: boolean
       cardsToShow: number
     }
+    cardWeights: Record<string, number>
   }
 }
 
@@ -57,11 +73,9 @@ const defaultRuntimeConfig: RuntimeGameConfig = {
   gameplay: {
     startingPoints: 0,
     pointValues: [...gameConfig.gameplay.pointValues],
-    maxScoreForMeter: gameConfig.gameplay.maxScoreForMeter,
-    subtractPointsOnWrongAnswer: false,
+    wrongAnswerPenaltyPercent: 0,
   },
   mechanics: {
-    freeCardsPerTurn: gameConfig.mechanics.freeCardsPerTurn,
     startingRerolls: gameConfig.mechanics.startingRerolls,
     spiderIsopodRerollBonus: gameConfig.mechanics.spiderIsopodRerollBonus,
     spiderSense: {
@@ -77,13 +91,20 @@ const defaultRuntimeConfig: RuntimeGameConfig = {
         value: gameConfig.mechanics.items.cursedCoin.value,
       },
     },
-    multipliers: {
-      maxTileMultiplier: gameConfig.mechanics.multipliers.maxTileMultiplier,
-    },
     actionPrices: {
       cardJester: gameConfig.mechanics.actionPrices.cardJester,
       madSeer: gameConfig.mechanics.actionPrices.madSeer,
       frogOfFate: gameConfig.mechanics.actionPrices.frogOfFate,
+    },
+    cardJester: {
+      cardsToGive: gameConfig.mechanics.cardJester.cardsToGive,
+      cardsToGiveUpgraded: gameConfig.mechanics.cardJester.cardsToGiveUpgraded,
+    },
+    madSeer: {
+      wordsMin: gameConfig.mechanics.madSeer.wordsMin,
+      wordsMax: gameConfig.mechanics.madSeer.wordsMax,
+      wordsMinUpgraded: gameConfig.mechanics.madSeer.wordsMinUpgraded,
+      wordsMaxUpgraded: gameConfig.mechanics.madSeer.wordsMaxUpgraded,
     },
     actionLimits: {
       cardJester: gameConfig.mechanics.actionLimits.cardJester,
@@ -95,11 +116,22 @@ const defaultRuntimeConfig: RuntimeGameConfig = {
     },
     goldenIdol: {
       startBonus: gameConfig.mechanics.goldenIdol.startBonus,
+      pointsMin: gameConfig.mechanics.goldenIdol.pointsMin,
+      pointsMax: gameConfig.mechanics.goldenIdol.pointsMax,
+    },
+    bloodSacrifice: {
+      maxSacrifice: gameConfig.mechanics.bloodSacrifice.maxSacrifice,
+      maxSacrificeUpgraded: gameConfig.mechanics.bloodSacrifice.maxSacrificeUpgraded,
+    },
+    spiderWeb: {
+      sheepRerollBonus: gameConfig.mechanics.spiderWeb.sheepRerollBonus,
+      sheepUpgradesGiven: gameConfig.mechanics.spiderWeb.sheepUpgradesGiven,
     },
     blackMarket: {
       enabled: gameConfig.mechanics.blackMarket.enabled,
       cardsToShow: gameConfig.mechanics.blackMarket.cardsToShow,
     },
+    cardWeights: { ...gameConfig.mechanics.cardWeights },
   },
 }
 
@@ -114,11 +146,9 @@ export function gameplaySettingsToRuntimeConfig(settings: GameplaySettings): Run
         settings.pointTier4,
         settings.pointTier5,
       ],
-      maxScoreForMeter: settings.maxScoreForMeter,
-      subtractPointsOnWrongAnswer: settings.subtractPointsOnWrongAnswer,
+      wrongAnswerPenaltyPercent: settings.wrongAnswerPenaltyPercent,
     },
     mechanics: {
-      freeCardsPerTurn: settings.freeCardsPerTurn,
       startingRerolls: settings.startingRerolls,
       spiderIsopodRerollBonus: settings.spiderIsopodRerollBonus,
       spiderSense: {
@@ -134,13 +164,20 @@ export function gameplaySettingsToRuntimeConfig(settings: GameplaySettings): Run
           value: settings.cursedCoinValue,
         },
       },
-      multipliers: {
-        maxTileMultiplier: settings.maxTileMultiplier,
-      },
       actionPrices: {
         cardJester: settings.cardJesterPrice,
         madSeer: settings.madSeerPrice,
         frogOfFate: settings.frogOfFatePrice,
+      },
+      cardJester: {
+        cardsToGive: settings.cardJesterCards,
+        cardsToGiveUpgraded: settings.cardJesterCardsUpgraded,
+      },
+      madSeer: {
+        wordsMin: settings.madSeerWordsMin,
+        wordsMax: settings.madSeerWordsMax,
+        wordsMinUpgraded: settings.madSeerWordsMinUpgraded,
+        wordsMaxUpgraded: settings.madSeerWordsMaxUpgraded,
       },
       actionLimits: {
         cardJester: settings.cardJesterLimit === -1 ? Infinity : settings.cardJesterLimit,
@@ -152,11 +189,22 @@ export function gameplaySettingsToRuntimeConfig(settings: GameplaySettings): Run
       },
       goldenIdol: {
         startBonus: settings.goldenIdolStartBonus,
+        pointsMin: settings.goldenIdolPointsMin,
+        pointsMax: settings.goldenIdolPointsMax,
+      },
+      bloodSacrifice: {
+        maxSacrifice: settings.bloodSacrificeMax,
+        maxSacrificeUpgraded: settings.bloodSacrificeMaxUpgraded,
+      },
+      spiderWeb: {
+        sheepRerollBonus: settings.sheepRerollBonus,
+        sheepUpgradesGiven: settings.sheepUpgradesGiven,
       },
       blackMarket: {
         enabled: settings.blackMarketEnabled ?? true,
         cardsToShow: settings.blackMarketCardsToShow ?? 3,
       },
+      cardWeights: { ...settings.cardWeights },
     },
   }
 }

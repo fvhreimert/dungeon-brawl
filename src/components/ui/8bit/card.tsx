@@ -70,15 +70,16 @@ const CardImage = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "card-visual-well pixel-card-well-bg w-full h-[55%] flex justify-center items-center relative overflow-hidden border-b-2",
+      "card-visual-well pixel-card-well-bg w-full flex justify-center items-center relative border-b-2",
       className
     )}
+    style={{ aspectRatio: "1 / 1" }}
     {...props}
   >
     <img
       src={src}
       alt={alt}
-      className="w-full h-auto flex-shrink-0"
+      className="w-full h-full object-contain flex-shrink-0"
       style={{ imageRendering: "pixelated" }}
     />
   </div>

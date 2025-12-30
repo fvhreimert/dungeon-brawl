@@ -53,10 +53,14 @@ The game starts with a main menu flow before entering the actual game board.
        - Max tile multiplier
        - **Subtract Points on Wrong** (disabled by default)
      - **Spider Sense**: Bonus per level, max level
+     - **Spider Web**: Rerolls per isopod fed (default: 1), rerolls per sheep fed (default: 3), upgrades per sheep (default: 1)
      - **Alliances**: Duration multiplier
      - **Items**: Cursed Coin duration and value
+     - **Golden Idol**: Points per turn range (min/max), start bonus
+     - **Blood Sacrifice**: Max sacrifice amounts (normal: 100, upgraded: 200)
      - **Action Prices**: Card Jester, Mad Seer, Frog of Fate costs
      - **Action Limits**: Per-turn limits for each action (supports infinity)
+     - **Card Weights**: Base draw weight for all 21 cards (0-20 scale, higher = more common)
 
 ### Quiz Format
 Quizzes are JSON files in `src/data/quizzes/` following this structure:
@@ -105,11 +109,13 @@ Upgraded versions of actions are unlocked via the **Spider Web** mechanic. Playe
 - **Feeding Isopods:**
   - Players can feed **Isopod** cards to the spider.
   - Each isopod increases the **Spider Sense** level.
+  - Each isopod grants bonus rerolls (default: 1, configurable).
   - **Spider Sense:** Grants a **+5% score bonus** per level on all correct answers.
   - The spider grows visually as it is fed (max size at index 8).
 - **Feeding Sheep:**
   - Once the spider reaches max size, players can feed it a **Sheep** card.
-  - This triggers the `ActionUpgradeModal`, allowing the player to choose one action to **permanently upgrade**.
+  - Each sheep grants bonus rerolls (default: 3, configurable).
+  - This triggers the `ActionUpgradeModal`, allowing the player to choose actions to **permanently upgrade** (default: 1 upgrade per sheep, configurable).
   - **Visuals:** An interactive web interface where the spider grows and options to feed appear based on inventory.
 
 ### Mad Seer
@@ -135,10 +141,12 @@ Upgraded versions of actions are unlocked via the **Spider Web** mechanic. Playe
 
 ### Golden Idol
 - **Logic:** `src/features/actions/goldenIdol/`
-- **Mechanic:** Forces a random selection by eliminating choices.
+- **Mechanic:** Forces a random selection by eliminating choices. Accumulates bonus points each turn.
+- **Configuration:** Start bonus (default: 10), points per turn range (default: 5-100).
 - **Standard:**
   - A "crumbling" effect disables most tiles.
   - **1 Survivor** tile remains. Player is forced to select it.
+  - Bonus points are awarded on selection (accumulated over turns).
 - **Upgraded:**
   - **Effect:** Selects **2 distinct survivor tiles** instead of 1. Player can choose either of the survivors.
   - **Visuals:** Uses `golden_idol_upgraded.png`, diamond-blue label text, and a diamond-blue pulsating glow.
@@ -157,10 +165,10 @@ Upgraded versions of actions are unlocked via the **Spider Web** mechanic. Playe
 - **Logic:** `src/features/actions/bloodSacrifice/`
 - **Mechanic:** Allows a player to sacrifice points to damage or affect another player.
 - **Standard:**
-  - Player selects an amount to sacrifice (max **100**).
+  - Player selects an amount to sacrifice (max **100**, configurable).
   - Selects a target player to damage.
 - **Upgraded:**
-  - **Effect:** Maximum sacrifice limit increased to **200** points.
+  - **Effect:** Maximum sacrifice limit increased to **200** points (configurable).
   - **Visuals:** Uses `blood_sacrifice_upgraded.png` and an intense red pulsating glow.
 
 ## Card System & Passive Tracking
@@ -168,7 +176,7 @@ Upgraded versions of actions are unlocked via the **Spider Web** mechanic. Playe
 - The `turnAdvanced` event fires whenever control moves to the next player (that is what we now mean by "per turn"), so countdowns, recurring drains, or passive gains all happen there before the next claimant acts. `calculatePassiveDeltaForPlayer(player, players)` sums every inventory entry's `getPassiveDelta` plus incoming effects from other players' cards (e.g., Beggar stealing from opponents), and the scoreboard consumes that aggregate so the pixel arrow/number always matches the sum of the next passives. `PlayerStats` keeps the detailed totals (gains, question losses, card hits) but no longer stores the badge's value.
 - `useJeopardyGame` seeds stats, exposes `applyScoreChange`, and runs `runCardEffect` so every handler shares the same helpers (`updateCardState`, `transferCardBetweenPlayers`, `removeCardFromInventory`, etc.). Keep new registry behaviors isolated so each lifecycle path stays predictable.
 - Before adding cards, read `docs/card-creation-guide.md` for the current contract (catalog knobs, target selectors, and passive tracking guidance) and `docs/card-framework.md` for the lasting reference on how definition → instance → registry flows together.
-- Card draw tunings and metadata live in `src/config/cardCatalog.ts`; `CARD_CATALOG` mirrors `CARDS` while letting you tweak `baseWeight`, `weightModifiers`, `drawFilter`, and `targetSelectMode` per card before `Card Jester` (and future drawers) hits `pickCardForPlayer`. This config can prime future scalings for weights based on player state, inventory, or score deltas.
+- Card draw tunings and metadata live in `src/config/cardCatalog.ts`; `CARD_CATALOG` mirrors `CARDS` while letting you tweak `baseWeight`, `weightModifiers`, `drawFilter`, and `targetSelectMode` per card before `Card Jester` (and future drawers) hits `pickCardForPlayer`. The `pickCardForPlayer(context, cardWeights?)` function accepts optional custom weights from game settings, allowing per-game weight overrides. This config can prime future scalings for weights based on player state, inventory, or score deltas.
 - **Treasure Set Weight Modifiers:** The treasure set cards (Shovel, Compass, Treasure Map) have dynamic `weightModifiers` that increase draw probability when a player has partial sets:
   - Each treasure card has a base weight of 8.
   - If you have 1 treasure item, the other 2 items get +4 weight each (8→12).

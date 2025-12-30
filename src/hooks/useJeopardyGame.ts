@@ -347,7 +347,7 @@ export function useJeopardyGame({
 
       for (let i = 0; i < numCards; i++) {
         const drawContext = buildCardDrawContext(players, activePlayerIndex)
-        const entry = pickCardForPlayer(drawContext)
+        const entry = pickCardForPlayer(drawContext, runtimeConfig.mechanics.cardWeights)
         if (entry) {
           drawnCards.push(entry.definition)
         }
@@ -551,6 +551,7 @@ export function useJeopardyGame({
               players: playersRef.current,
               ownerPlayerIndex: targetIndex,
               activePlayerIndex,
+              cardWeights: runtimeConfig.mechanics.cardWeights,
               applyScoreChange: applyScoreChangeRef.current,
               updatePlayerStats,
               updateCardState,
@@ -572,6 +573,7 @@ export function useJeopardyGame({
       setPuppetLockForPlayer,
       incrementPlayerMetric,
       recordPointChange,
+      runtimeConfig.mechanics.cardWeights,
     ],
   )
 
@@ -670,7 +672,7 @@ export function useJeopardyGame({
       const drawnCards: CardDefinition[] = []
       for (let i = 0; i < numCards; i++) {
         const drawContext = buildCardDrawContext(players, nextIndex)
-        const entry = pickCardForPlayer(drawContext)
+        const entry = pickCardForPlayer(drawContext, runtimeConfig.mechanics.cardWeights)
         if (entry) {
           drawnCards.push(entry.definition)
         }
@@ -698,11 +700,10 @@ export function useJeopardyGame({
     setSelectedTileId(null)
     setAnswerRevealed(false)
     setGoldenIdolBonus((prev) => {
-      // Distribution: 5-100, peak around 10-30
-      const roll = Math.random()
-      const increment = roll < 0.7
-        ? 5 + Math.floor(Math.random() * 26) // 5-30 (range of 26)
-        : 31 + Math.floor(Math.random() * 70) // 31-100 (range of 70)
+      const min = runtimeConfig.mechanics.goldenIdol.pointsMin
+      const max = runtimeConfig.mechanics.goldenIdol.pointsMax
+      const range = max - min
+      const increment = min + Math.floor(Math.random() * (range + 1))
       return prev + increment
     })
   }
@@ -720,7 +721,8 @@ export function useJeopardyGame({
       const bonusMultiplier = 1 + (spiderSenseLevel * runtimeConfig.mechanics.spiderSense.bonusPerLevel)
       scoreChange = Math.round(effectiveValue * bonusMultiplier)
     } else {
-      scoreChange = runtimeConfig.gameplay.subtractPointsOnWrongAnswer ? -effectiveValue : 0
+      const penaltyPercent = runtimeConfig.gameplay.wrongAnswerPenaltyPercent / 100
+      scoreChange = penaltyPercent > 0 ? -Math.round(effectiveValue * penaltyPercent) : 0
     }
 
     recordStat(correct ? 'correct' : 'wrong', scoreChange)
@@ -807,7 +809,7 @@ export function useJeopardyGame({
       prev.map((tile) => {
         if (tile.id !== tileId || tile.status === 'done') return tile
         const current = tile.multiplier ?? 1
-        const capped = Math.min(current * multiplier, runtimeConfig.mechanics.multipliers.maxTileMultiplier)
+        const capped = Math.min(current * multiplier, gameConfig.mechanics.multipliers.maxTileMultiplier)
         return { ...tile, multiplier: capped }
       }),
     )
@@ -1065,7 +1067,7 @@ export function useJeopardyGame({
           // Draw random cards
           const drawContext = buildCardDrawContext(playersRef.current, playerIndex)
           for (let i = 0; i < quest.reward.amount; i++) {
-            const entry = pickCardForPlayer(drawContext)
+            const entry = pickCardForPlayer(drawContext, runtimeConfig.mechanics.cardWeights)
             if (entry) {
               rewardedCards.push(entry.definition)
               const cardInstance = createCardInstance(entry.definition)
@@ -1110,7 +1112,7 @@ export function useJeopardyGame({
       if (quest.reward.bonusCards && quest.reward.bonusCards > 0) {
         const drawContext = buildCardDrawContext(playersRef.current, playerIndex)
         for (let i = 0; i < quest.reward.bonusCards; i++) {
-          const entry = pickCardForPlayer(drawContext)
+          const entry = pickCardForPlayer(drawContext, runtimeConfig.mechanics.cardWeights)
           if (entry) {
             rewardedCards.push(entry.definition)
             const cardInstance = createCardInstance(entry.definition)
@@ -1140,7 +1142,7 @@ export function useJeopardyGame({
 
       return rewardedCards.length > 0 ? rewardedCards : null
     },
-    [applyScoreChange],
+    [applyScoreChange, runtimeConfig.mechanics.cardWeights],
   )
 
   const addCardToInventory = (card: CardDefinition) => {
@@ -1197,6 +1199,7 @@ export function useJeopardyGame({
         players: playersRef.current,
         ownerPlayerIndex: ownerIndex,
         activePlayerIndex,
+        cardWeights: runtimeConfig.mechanics.cardWeights,
         applyScoreChange: applyScoreChangeRef.current,
         updatePlayerStats,
         updateCardState,
@@ -1224,6 +1227,7 @@ export function useJeopardyGame({
             players: playersRef.current,
             ownerPlayerIndex: playerIndex,
             activePlayerIndex,
+            cardWeights: runtimeConfig.mechanics.cardWeights,
             applyScoreChange: applyScoreChangeRef.current,
             updatePlayerStats,
             updateCardState,
@@ -1242,6 +1246,7 @@ export function useJeopardyGame({
       transferCardBetweenPlayers,
       removeCardFromInventory,
       setPuppetLockForPlayer,
+      runtimeConfig.mechanics.cardWeights,
     ],
   )
 
@@ -1262,6 +1267,7 @@ export function useJeopardyGame({
             players: playersRef.current,
             ownerPlayerIndex: playerIndex,
             activePlayerIndex,
+            cardWeights: runtimeConfig.mechanics.cardWeights,
             applyScoreChange: applyScoreChangeRef.current,
             updatePlayerStats,
             updateCardState,
@@ -1280,6 +1286,7 @@ export function useJeopardyGame({
     transferCardBetweenPlayers,
     removeCardFromInventory,
     setPuppetLockForPlayer,
+    runtimeConfig.mechanics.cardWeights,
   ])
 
   const hasMountedRef = useRef(false)
@@ -1315,7 +1322,7 @@ export function useJeopardyGame({
         const drawnCards: CardDefinition[] = []
         for (let i = 0; i < numCards; i++) {
           const drawContext = buildCardDrawContext(players, playerIndex)
-          const entry = pickCardForPlayer(drawContext)
+          const entry = pickCardForPlayer(drawContext, runtimeConfig.mechanics.cardWeights)
           if (entry) {
             drawnCards.push(entry.definition)
           }
@@ -1345,14 +1352,14 @@ export function useJeopardyGame({
       setAnswerRevealed(false)
       setGoldenIdolBonus((prev) => {
         // Increment Idol bonus on manual turn switch as well
-        const roll = Math.random()
-        const increment = roll < 0.7
-          ? 5 + Math.floor(Math.random() * 26)
-          : 31 + Math.floor(Math.random() * 70)
+        const min = runtimeConfig.mechanics.goldenIdol.pointsMin
+        const max = runtimeConfig.mechanics.goldenIdol.pointsMax
+        const range = max - min
+        const increment = min + Math.floor(Math.random() * (range + 1))
         return prev + increment
       })
     }
-  }, [saveSnapshot, runtimeConfig.mechanics.blackMarket, onBlackMarketStart, players, recordTurnSnapshot])
+  }, [saveSnapshot, runtimeConfig.mechanics.blackMarket, runtimeConfig.mechanics.goldenIdol, runtimeConfig.mechanics.cardWeights, onBlackMarketStart, players, recordTurnSnapshot])
 
   const adjustPlayerScore = useCallback((playerIndex: number, delta: number) => {
     if (playerIndex >= 0 && playerIndex < players.length) {
@@ -1463,9 +1470,9 @@ export function useJeopardyGame({
 
     // Draw a new card
     const drawContext = buildCardDrawContext(playersRef.current, playerIndex)
-    const entry = pickCardForPlayer(drawContext)
+    const entry = pickCardForPlayer(drawContext, runtimeConfig.mechanics.cardWeights)
     return entry?.definition ?? null
-  }, [])
+  }, [runtimeConfig.mechanics.cardWeights])
 
   return {
     tiles,

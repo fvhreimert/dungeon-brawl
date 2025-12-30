@@ -108,19 +108,19 @@ export function InventoryModal({
     clearHover()
   }, [clearHover])
 
-  const inventoryDescriptionResolvers: Record<string, (card: CardInstance) => string> = {
+  const dynamicDescriptionResolvers: Record<string, (card: CardInstance) => string> = {
     soul_burst: (card) => {
       const stored = typeof card.state?.storedDamage === 'number' ? card.state.storedDamage : 0
-      return `Activate to steal *${stored}* pts from a foe.`
+      return `Stored: ${stored} pts`
     },
     cursed_coin: (card) => {
       const turns = typeof card.state?.turnsRemaining === 'number' ? card.state.turnsRemaining : 0
-      return `Loses 50 pts per turn\n*${turns}* turns remaining`
+      return `${turns} turns remaining`
     },
   }
 
-  const getInventoryDescription = (card: CardInstance) =>
-    inventoryDescriptionResolvers[card.id]?.(card) ?? card.inventoryDescription ?? card.description
+  const getCardDescription = (card: CardInstance) =>
+    dynamicDescriptionResolvers[card.id]?.(card) ?? card.description
 
   const stackedCards = useMemo(() => groupCards(player.inventory), [player.inventory])
 
@@ -148,7 +148,7 @@ export function InventoryModal({
     hoveredCard && hoverStyle ? (
       <div className="inventory-hover-card" style={hoverStyle}>
         <div className="hover-title">{hoveredCard.title}</div>
-        <div className="hover-description">{hoveredCard.description}</div>
+        <div className="hover-description">{hoveredCard.detailedDescription}</div>
       </div>
     ) : null
 
@@ -234,7 +234,7 @@ export function InventoryModal({
                         <CardImage src={card.imagePath} alt={card.title} />
                         <CardTitle>{card.title}</CardTitle>
                         <CardDescription>
-                          {getInventoryDescription(card)}
+                          {getCardDescription(card)}
                         </CardDescription>
                       </Card>
                     </div>

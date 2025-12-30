@@ -19,12 +19,14 @@ export const gameConfig = {
   gameplay: {
     categories: ['Arcana', 'Relics', 'Beasts', 'Lore', 'Traps'],
     pointValues: [100, 200, 300, 400, 500],
-    maxScoreForMeter: 2000, // Used to calculate the width of the score bar
   },
   mechanics: {
-    freeCardsPerTurn: -1, // -1 means (player count - 1), or set specific number
     startingRerolls: 10, // Number of card rerolls each player starts with
-    spiderIsopodRerollBonus: 2, // Number of rerolls gained from feeding spider an isopod
+    spiderIsopodRerollBonus: 1, // Number of rerolls gained from feeding spider an isopod
+    spiderWeb: {
+      sheepRerollBonus: 3, // Number of rerolls gained from feeding spider a sheep
+      sheepUpgradesGiven: 1, // Number of action upgrades per sheep fed
+    },
     spiderSense: {
       bonusPerLevel: 0.05,
       maxLevel: 10,
@@ -46,21 +48,59 @@ export const gameConfig = {
       madSeer: 25,
       frogOfFate: 100,
     },
+    cardJester: {
+      cardsToGive: 1,
+      cardsToGiveUpgraded: 2,
+    },
+    madSeer: {
+      wordsMin: 4,
+      wordsMax: 8,
+      wordsMinUpgraded: 8,
+      wordsMaxUpgraded: 16,
+    },
     actionLimits: {
       cardJester: 1,
       madSeer: 1,
       frogOfFate: 1,
       goldenIdol: 1,
-      bloodSacrifice: Infinity,
+      bloodSacrifice: 1,
       web: Infinity,
     },
     goldenIdol: {
       startBonus: 10,
+      pointsMin: 5,
+      pointsMax: 100,
+    },
+    bloodSacrifice: {
+      maxSacrifice: 100,
+      maxSacrificeUpgraded: 200,
     },
     blackMarket: {
       enabled: true, // Set to false to skip black market entirely
       cardsToShow: 3, // Number of cards displayed in the black market (1-5)
     },
+    cardWeights: {
+      niffler: 5,
+      soul_burst: 3,
+      thieving_rat: 7,
+      cursed_coin: 6,
+      tick: 1,
+      spiny_shell: 1,
+      traveling_merchant: 8,
+      sheep: 6,
+      puppet_master: 3,
+      beggar: 3,
+      roulette: 5,
+      shovel: 2,
+      compass: 2,
+      treasure_map: 2,
+      glacial_elemental: 4,
+      coalition: 3,
+      loot_goblin: 7,
+      isopod: 10,
+      martin: 5,
+      infinite_money_glitch: 3,
+    } as Record<string, number>,
   },
   players: defaultPlayers,
   ui: {
@@ -70,7 +110,7 @@ export const gameConfig = {
       wrongButton: "Wrong",
       passButton: "Nobody",
       answerHeader: "THE ANSWER",
-      fallbackQuestion: (category: string, value: number) => 
+      fallbackQuestion: (category: string, value: number) =>
         `Answer the ${category.toLowerCase()} challenge worth ${value} points.`,
       fallbackAnswer: "TBD"
     }
