@@ -127,8 +127,7 @@ export const QUEST_DEFINITIONS: Record<QuestId, QuestDefinition> = {
     reward: {
       type: 'cards',
       amount: 5,
-      description: '5 Free Isopods',
-      specificCardId: 'isopod',
+      description: '5 Free Cards',
     },
     iconPath: spiderIcon,
   },

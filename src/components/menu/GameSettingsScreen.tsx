@@ -210,386 +210,390 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
         <h1 className="game-settings-title">Game Settings</h1>
         
         <div className="settings-content">
-          {/* Points Section */}
-          <div className="settings-section">
-            <h2 className="section-title">Points</h2>
-            <SettingRow
-              label="Starting Points"
-              value={settings.startingPoints}
-              onChange={(val) => updateSetting('startingPoints', val)}
-              min={0}
-              max={5000}
-              step={100}
-            />
-            <SettingRow
-              label="Tier 1 (Row 1)"
-              value={settings.pointTier1}
-              onChange={(val) => updateSetting('pointTier1', val)}
-              min={50}
-              max={1000}
-              step={50}
-            />
-            <SettingRow
-              label="Tier 2 (Row 2)"
-              value={settings.pointTier2}
-              onChange={(val) => updateSetting('pointTier2', val)}
-              min={50}
-              max={1000}
-              step={50}
-            />
-            <SettingRow
-              label="Tier 3 (Row 3)"
-              value={settings.pointTier3}
-              onChange={(val) => updateSetting('pointTier3', val)}
-              min={50}
-              max={1000}
-              step={50}
-            />
-            <SettingRow
-              label="Tier 4 (Row 4)"
-              value={settings.pointTier4}
-              onChange={(val) => updateSetting('pointTier4', val)}
-              min={50}
-              max={1000}
-              step={50}
-            />
-            <SettingRow
-              label="Tier 5 (Row 5)"
-              value={settings.pointTier5}
-              onChange={(val) => updateSetting('pointTier5', val)}
-              min={50}
-              max={1000}
-              step={50}
-            />
-          </div>
-
-          {/* Gameplay Section */}
-          <div className="settings-section">
-            <h2 className="section-title">Gameplay</h2>
-            <SettingRow
-              label="Wrong Answer Penalty"
-              value={settings.wrongAnswerPenaltyPercent}
-              onChange={(val) => updateSetting('wrongAnswerPenaltyPercent', val)}
-              min={0}
-              max={100}
-              step={5}
-              suffix="%"
-            />
-            <SettingRow
-              label="Starting Rerolls"
-              value={settings.startingRerolls}
-              onChange={(val) => updateSetting('startingRerolls', val)}
-              min={0}
-              max={50}
-              step={1}
-            />
-            <SettingToggle
-              label="Enable Black Market"
-              value={settings.blackMarketEnabled}
-              onChange={(val) => updateSetting('blackMarketEnabled', val)}
-            />
-            <SettingRow
-              label="Black Market Cards"
-              value={settings.blackMarketCardsToShow}
-              onChange={(val) => updateSetting('blackMarketCardsToShow', val)}
-              min={1}
-              max={5}
-              step={1}
-            />
-          </div>
-
-          {/* Spider Sense Section */}
-          <div className="settings-section">
-            <h2 className="section-title">Spider Sense</h2>
-            <SettingRow
-              label="Bonus Per Level"
-              value={settings.spiderSenseBonusPerLevel}
-              onChange={(val) => updateSetting('spiderSenseBonusPerLevel', val)}
-              min={1}
-              max={50}
-              step={1}
-              suffix="%"
-            />
-            <SettingRow
-              label="Max Level"
-              value={settings.spiderSenseMaxLevel}
-              onChange={(val) => updateSetting('spiderSenseMaxLevel', val)}
-              min={1}
-              max={20}
-              step={1}
-            />
-          </div>
-
-          {/* Alliances Section */}
-          <div className="settings-section">
-            <h2 className="section-title">Alliances</h2>
-            <SettingRow
-              label="Duration Multiplier"
-              value={settings.allianceBaseDurationMultiplier}
-              onChange={(val) => updateSetting('allianceBaseDurationMultiplier', val)}
-              min={1}
-              max={10}
-              step={1}
-              suffix="x players"
-            />
-          </div>
-
-          {/* Items Section */}
-          <div className="settings-section">
-            <h2 className="section-title">Cursed Coin</h2>
-            <SettingRow
-              label="Duration"
-              value={settings.cursedCoinDurationTurns}
-              onChange={(val) => updateSetting('cursedCoinDurationTurns', val)}
-              min={1}
-              max={30}
-              step={1}
-              suffix=" turns"
-            />
-            <SettingRow
-              label="Value"
-              value={settings.cursedCoinValue}
-              onChange={(val) => updateSetting('cursedCoinValue', val)}
-              min={100}
-              max={2000}
-              step={100}
-            />
-          </div>
-
-          {/* Card Jester Section */}
-          <div className="settings-section">
-            <h2 className="section-title">Card Jester</h2>
-            <SettingRow
-              label="Price"
-              value={settings.cardJesterPrice}
-              onChange={(val) => updateSetting('cardJesterPrice', val)}
-              min={0}
-              max={500}
-              step={25}
-            />
-            <SettingRow
-              label="Cards Given"
-              value={settings.cardJesterCards}
-              onChange={(val) => updateSetting('cardJesterCards', val)}
-              min={1}
-              max={5}
-              step={1}
-            />
-            <SettingRow
-              label="Cards Given (Upgraded)"
-              value={settings.cardJesterCardsUpgraded}
-              onChange={(val) => updateSetting('cardJesterCardsUpgraded', val)}
-              min={1}
-              max={10}
-              step={1}
-            />
-            <SettingRow
-              label="Limit (per turn)"
-              value={settings.cardJesterLimit}
-              onChange={(val) => updateSetting('cardJesterLimit', val)}
-              min={1}
-              max={10}
-              step={1}
-              isInfinity
-            />
-          </div>
-
-          {/* Mad Seer Section */}
-          <div className="settings-section">
-            <h2 className="section-title">Mad Seer</h2>
-            <SettingRow
-              label="Price"
-              value={settings.madSeerPrice}
-              onChange={(val) => updateSetting('madSeerPrice', val)}
-              min={0}
-              max={500}
-              step={25}
-            />
-            <SettingRow
-              label="Words (Min)"
-              value={settings.madSeerWordsMin}
-              onChange={(val) => updateSetting('madSeerWordsMin', val)}
-              min={1}
-              max={20}
-              step={1}
-            />
-            <SettingRow
-              label="Words (Max)"
-              value={settings.madSeerWordsMax}
-              onChange={(val) => updateSetting('madSeerWordsMax', val)}
-              min={1}
-              max={20}
-              step={1}
-            />
-            <SettingRow
-              label="Words Min (Upgraded)"
-              value={settings.madSeerWordsMinUpgraded}
-              onChange={(val) => updateSetting('madSeerWordsMinUpgraded', val)}
-              min={1}
-              max={30}
-              step={1}
-            />
-            <SettingRow
-              label="Words Max (Upgraded)"
-              value={settings.madSeerWordsMaxUpgraded}
-              onChange={(val) => updateSetting('madSeerWordsMaxUpgraded', val)}
-              min={1}
-              max={30}
-              step={1}
-            />
-            <SettingRow
-              label="Limit (per turn)"
-              value={settings.madSeerLimit}
-              onChange={(val) => updateSetting('madSeerLimit', val)}
-              min={1}
-              max={10}
-              step={1}
-              isInfinity
-            />
-          </div>
-
-          {/* Frog of Fate Section */}
-          <div className="settings-section">
-            <h2 className="section-title">Frog of Fate</h2>
-            <SettingRow
-              label="Price"
-              value={settings.frogOfFatePrice}
-              onChange={(val) => updateSetting('frogOfFatePrice', val)}
-              min={0}
-              max={500}
-              step={25}
-            />
-            <SettingRow
-              label="Limit (per turn)"
-              value={settings.frogOfFateLimit}
-              onChange={(val) => updateSetting('frogOfFateLimit', val)}
-              min={1}
-              max={10}
-              step={1}
-              isInfinity
-            />
-          </div>
-
-          {/* Golden Idol Section */}
-          <div className="settings-section">
-            <h2 className="section-title">Golden Idol</h2>
-            <SettingRow
-              label="Start Bonus"
-              value={settings.goldenIdolStartBonus}
-              onChange={(val) => updateSetting('goldenIdolStartBonus', val)}
-              min={0}
-              max={500}
-              step={5}
-            />
-            <SettingRow
-              label="Points Per Turn (Min)"
-              value={settings.goldenIdolPointsMin}
-              onChange={(val) => updateSetting('goldenIdolPointsMin', val)}
-              min={0}
-              max={200}
-              step={5}
-            />
-            <SettingRow
-              label="Points Per Turn (Max)"
-              value={settings.goldenIdolPointsMax}
-              onChange={(val) => updateSetting('goldenIdolPointsMax', val)}
-              min={5}
-              max={500}
-              step={5}
-            />
-            <SettingRow
-              label="Limit (per turn)"
-              value={settings.goldenIdolLimit}
-              onChange={(val) => updateSetting('goldenIdolLimit', val)}
-              min={1}
-              max={10}
-              step={1}
-              isInfinity
-            />
-          </div>
-
-          {/* Blood Sacrifice Section */}
-          <div className="settings-section">
-            <h2 className="section-title">Blood Sacrifice</h2>
-            <SettingRow
-              label="Max Sacrifice"
-              value={settings.bloodSacrificeMax}
-              onChange={(val) => updateSetting('bloodSacrificeMax', val)}
-              min={10}
-              max={500}
-              step={10}
-            />
-            <SettingRow
-              label="Max Sacrifice (Upgraded)"
-              value={settings.bloodSacrificeMaxUpgraded}
-              onChange={(val) => updateSetting('bloodSacrificeMaxUpgraded', val)}
-              min={10}
-              max={1000}
-              step={10}
-            />
-            <SettingRow
-              label="Limit (per turn)"
-              value={settings.bloodSacrificeLimit}
-              onChange={(val) => updateSetting('bloodSacrificeLimit', val)}
-              min={1}
-              max={10}
-              step={1}
-              isInfinity
-            />
-          </div>
-
-          {/* Spider Web Section */}
-          <div className="settings-section">
-            <h2 className="section-title">Spider Web</h2>
-            <SettingRow
-              label="Rerolls Per Isopod"
-              value={settings.spiderIsopodRerollBonus}
-              onChange={(val) => updateSetting('spiderIsopodRerollBonus', val)}
-              min={0}
-              max={10}
-              step={1}
-            />
-            <SettingRow
-              label="Rerolls Per Sheep"
-              value={settings.sheepRerollBonus}
-              onChange={(val) => updateSetting('sheepRerollBonus', val)}
-              min={0}
-              max={10}
-              step={1}
-            />
-            <SettingRow
-              label="Upgrades Per Sheep"
-              value={settings.sheepUpgradesGiven}
-              onChange={(val) => updateSetting('sheepUpgradesGiven', val)}
-              min={1}
-              max={5}
-              step={1}
-            />
-            <SettingRow
-              label="Limit (per turn)"
-              value={settings.webLimit}
-              onChange={(val) => updateSetting('webLimit', val)}
-              min={1}
-              max={10}
-              step={1}
-              isInfinity
-            />
-          </div>
-
-          {/* Card Weights Section */}
-          <div className="settings-section">
-            <h2 className="section-title">Card Weights</h2>
-            {CARDS.map((card) => (
+          <div className="settings-column">
+            {/* Points Section */}
+            <div className="settings-section">
+              <h2 className="section-title">Points</h2>
               <SettingRow
-                key={card.id}
-                label={card.title}
-                value={settings.cardWeights[card.id] ?? 1}
-                onChange={(val) => updateCardWeight(card.id, val)}
+                label="Starting Points"
+                value={settings.startingPoints}
+                onChange={(val) => updateSetting('startingPoints', val)}
                 min={0}
+                max={5000}
+                step={100}
+              />
+              <SettingRow
+                label="Tier 1 (Row 1)"
+                value={settings.pointTier1}
+                onChange={(val) => updateSetting('pointTier1', val)}
+                min={50}
+                max={1000}
+                step={50}
+              />
+              <SettingRow
+                label="Tier 2 (Row 2)"
+                value={settings.pointTier2}
+                onChange={(val) => updateSetting('pointTier2', val)}
+                min={50}
+                max={1000}
+                step={50}
+              />
+              <SettingRow
+                label="Tier 3 (Row 3)"
+                value={settings.pointTier3}
+                onChange={(val) => updateSetting('pointTier3', val)}
+                min={50}
+                max={1000}
+                step={50}
+              />
+              <SettingRow
+                label="Tier 4 (Row 4)"
+                value={settings.pointTier4}
+                onChange={(val) => updateSetting('pointTier4', val)}
+                min={50}
+                max={1000}
+                step={50}
+              />
+              <SettingRow
+                label="Tier 5 (Row 5)"
+                value={settings.pointTier5}
+                onChange={(val) => updateSetting('pointTier5', val)}
+                min={50}
+                max={1000}
+                step={50}
+              />
+            </div>
+
+            {/* Spider Sense Section */}
+            <div className="settings-section">
+              <h2 className="section-title">Spider Sense</h2>
+              <SettingRow
+                label="Bonus Per Level"
+                value={settings.spiderSenseBonusPerLevel}
+                onChange={(val) => updateSetting('spiderSenseBonusPerLevel', val)}
+                min={1}
+                max={50}
+                step={1}
+                suffix="%"
+              />
+              <SettingRow
+                label="Max Level"
+                value={settings.spiderSenseMaxLevel}
+                onChange={(val) => updateSetting('spiderSenseMaxLevel', val)}
+                min={1}
                 max={20}
                 step={1}
               />
-            ))}
+            </div>
+
+            {/* Items Section */}
+            <div className="settings-section">
+              <h2 className="section-title">Cursed Coin</h2>
+              <SettingRow
+                label="Duration"
+                value={settings.cursedCoinDurationTurns}
+                onChange={(val) => updateSetting('cursedCoinDurationTurns', val)}
+                min={1}
+                max={30}
+                step={1}
+                suffix=" turns"
+              />
+              <SettingRow
+                label="Value"
+                value={settings.cursedCoinValue}
+                onChange={(val) => updateSetting('cursedCoinValue', val)}
+                min={100}
+                max={2000}
+                step={100}
+              />
+            </div>
+
+            {/* Mad Seer Section */}
+            <div className="settings-section">
+              <h2 className="section-title">Mad Seer</h2>
+              <SettingRow
+                label="Price"
+                value={settings.madSeerPrice}
+                onChange={(val) => updateSetting('madSeerPrice', val)}
+                min={0}
+                max={500}
+                step={25}
+              />
+              <SettingRow
+                label="Words (Min)"
+                value={settings.madSeerWordsMin}
+                onChange={(val) => updateSetting('madSeerWordsMin', val)}
+                min={1}
+                max={20}
+                step={1}
+              />
+              <SettingRow
+                label="Words (Max)"
+                value={settings.madSeerWordsMax}
+                onChange={(val) => updateSetting('madSeerWordsMax', val)}
+                min={1}
+                max={20}
+                step={1}
+              />
+              <SettingRow
+                label="Words Min (Upgraded)"
+                value={settings.madSeerWordsMinUpgraded}
+                onChange={(val) => updateSetting('madSeerWordsMinUpgraded', val)}
+                min={1}
+                max={30}
+                step={1}
+              />
+              <SettingRow
+                label="Words Max (Upgraded)"
+                value={settings.madSeerWordsMaxUpgraded}
+                onChange={(val) => updateSetting('madSeerWordsMaxUpgraded', val)}
+                min={1}
+                max={30}
+                step={1}
+              />
+              <SettingRow
+                label="Limit (per turn)"
+                value={settings.madSeerLimit}
+                onChange={(val) => updateSetting('madSeerLimit', val)}
+                min={1}
+                max={10}
+                step={1}
+                isInfinity
+              />
+            </div>
+
+            {/* Golden Idol Section */}
+            <div className="settings-section">
+              <h2 className="section-title">Golden Idol</h2>
+              <SettingRow
+                label="Start Bonus"
+                value={settings.goldenIdolStartBonus}
+                onChange={(val) => updateSetting('goldenIdolStartBonus', val)}
+                min={0}
+                max={500}
+                step={5}
+              />
+              <SettingRow
+                label="Points Per Turn (Min)"
+                value={settings.goldenIdolPointsMin}
+                onChange={(val) => updateSetting('goldenIdolPointsMin', val)}
+                min={0}
+                max={200}
+                step={5}
+              />
+              <SettingRow
+                label="Points Per Turn (Max)"
+                value={settings.goldenIdolPointsMax}
+                onChange={(val) => updateSetting('goldenIdolPointsMax', val)}
+                min={5}
+                max={500}
+                step={5}
+              />
+              <SettingRow
+                label="Limit (per turn)"
+                value={settings.goldenIdolLimit}
+                onChange={(val) => updateSetting('goldenIdolLimit', val)}
+                min={1}
+                max={10}
+                step={1}
+                isInfinity
+              />
+            </div>
+          </div>
+
+          <div className="settings-column">
+            {/* Gameplay Section */}
+            <div className="settings-section">
+              <h2 className="section-title">Gameplay</h2>
+              <SettingRow
+                label="Wrong Answer Penalty"
+                value={settings.wrongAnswerPenaltyPercent}
+                onChange={(val) => updateSetting('wrongAnswerPenaltyPercent', val)}
+                min={0}
+                max={100}
+                step={5}
+                suffix="%"
+              />
+              <SettingRow
+                label="Starting Rerolls"
+                value={settings.startingRerolls}
+                onChange={(val) => updateSetting('startingRerolls', val)}
+                min={0}
+                max={50}
+                step={1}
+              />
+              <SettingToggle
+                label="Enable Black Market"
+                value={settings.blackMarketEnabled}
+                onChange={(val) => updateSetting('blackMarketEnabled', val)}
+              />
+              <SettingRow
+                label="Black Market Cards"
+                value={settings.blackMarketCardsToShow}
+                onChange={(val) => updateSetting('blackMarketCardsToShow', val)}
+                min={1}
+                max={5}
+                step={1}
+              />
+            </div>
+
+            {/* Alliances Section */}
+            <div className="settings-section">
+              <h2 className="section-title">Alliances</h2>
+              <SettingRow
+                label="Duration Multiplier"
+                value={settings.allianceBaseDurationMultiplier}
+                onChange={(val) => updateSetting('allianceBaseDurationMultiplier', val)}
+                min={1}
+                max={10}
+                step={1}
+                suffix="x players"
+              />
+            </div>
+
+            {/* Card Jester Section */}
+            <div className="settings-section">
+              <h2 className="section-title">Card Jester</h2>
+              <SettingRow
+                label="Price"
+                value={settings.cardJesterPrice}
+                onChange={(val) => updateSetting('cardJesterPrice', val)}
+                min={0}
+                max={500}
+                step={25}
+              />
+              <SettingRow
+                label="Cards Given"
+                value={settings.cardJesterCards}
+                onChange={(val) => updateSetting('cardJesterCards', val)}
+                min={1}
+                max={5}
+                step={1}
+              />
+              <SettingRow
+                label="Cards Given (Upgraded)"
+                value={settings.cardJesterCardsUpgraded}
+                onChange={(val) => updateSetting('cardJesterCardsUpgraded', val)}
+                min={1}
+                max={10}
+                step={1}
+              />
+              <SettingRow
+                label="Limit (per turn)"
+                value={settings.cardJesterLimit}
+                onChange={(val) => updateSetting('cardJesterLimit', val)}
+                min={1}
+                max={10}
+                step={1}
+                isInfinity
+              />
+            </div>
+
+            {/* Frog of Fate Section */}
+            <div className="settings-section">
+              <h2 className="section-title">Frog of Fate</h2>
+              <SettingRow
+                label="Price"
+                value={settings.frogOfFatePrice}
+                onChange={(val) => updateSetting('frogOfFatePrice', val)}
+                min={0}
+                max={500}
+                step={25}
+              />
+              <SettingRow
+                label="Limit (per turn)"
+                value={settings.frogOfFateLimit}
+                onChange={(val) => updateSetting('frogOfFateLimit', val)}
+                min={1}
+                max={10}
+                step={1}
+                isInfinity
+              />
+            </div>
+
+            {/* Blood Sacrifice Section */}
+            <div className="settings-section">
+              <h2 className="section-title">Blood Sacrifice</h2>
+              <SettingRow
+                label="Max Sacrifice"
+                value={settings.bloodSacrificeMax}
+                onChange={(val) => updateSetting('bloodSacrificeMax', val)}
+                min={10}
+                max={500}
+                step={10}
+              />
+              <SettingRow
+                label="Max Sacrifice (Upgraded)"
+                value={settings.bloodSacrificeMaxUpgraded}
+                onChange={(val) => updateSetting('bloodSacrificeMaxUpgraded', val)}
+                min={10}
+                max={1000}
+                step={10}
+              />
+              <SettingRow
+                label="Limit (per turn)"
+                value={settings.bloodSacrificeLimit}
+                onChange={(val) => updateSetting('bloodSacrificeLimit', val)}
+                min={1}
+                max={10}
+                step={1}
+                isInfinity
+              />
+            </div>
+
+            {/* Spider Web Section */}
+            <div className="settings-section">
+              <h2 className="section-title">Spider Web</h2>
+              <SettingRow
+                label="Rerolls Per Isopod"
+                value={settings.spiderIsopodRerollBonus}
+                onChange={(val) => updateSetting('spiderIsopodRerollBonus', val)}
+                min={0}
+                max={10}
+                step={1}
+              />
+              <SettingRow
+                label="Rerolls Per Sheep"
+                value={settings.sheepRerollBonus}
+                onChange={(val) => updateSetting('sheepRerollBonus', val)}
+                min={0}
+                max={10}
+                step={1}
+              />
+              <SettingRow
+                label="Upgrades Per Sheep"
+                value={settings.sheepUpgradesGiven}
+                onChange={(val) => updateSetting('sheepUpgradesGiven', val)}
+                min={1}
+                max={5}
+                step={1}
+              />
+              <SettingRow
+                label="Limit (per turn)"
+                value={settings.webLimit}
+                onChange={(val) => updateSetting('webLimit', val)}
+                min={1}
+                max={10}
+                step={1}
+                isInfinity
+              />
+            </div>
+
+            {/* Card Weights Section */}
+            <div className="settings-section">
+              <h2 className="section-title">Card Weights</h2>
+              {CARDS.map((card) => (
+                <SettingRow
+                  key={card.id}
+                  label={card.title}
+                  value={settings.cardWeights[card.id] ?? 1}
+                  onChange={(val) => updateCardWeight(card.id, val)}
+                  min={0}
+                  max={20}
+                  step={1}
+                />
+              ))}
+            </div>
           </div>
         </div>
 

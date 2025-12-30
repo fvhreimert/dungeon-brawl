@@ -62,13 +62,22 @@
 }
 
 .settings-content {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
   gap: 20px;
   width: 100%;
   overflow-y: auto;
   padding: 8px 4px;
   max-height: calc(90vh - 200px);
+}
+
+.settings-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0; /* Prevents overflow issues */
 }
 
 .settings-content::-webkit-scrollbar {
@@ -170,7 +179,7 @@
 /* Responsive */
 @media (max-width: 768px) {
   .settings-content {
-    grid-template-columns: 1fr;
+    flex-direction: column;
   }
   
   .game-settings-container {
