@@ -130,6 +130,12 @@ export type Quest = {
 
 export type Alliances = Alliance[]
 
+export type PendingBlackMarket = {
+  playerIndex: number
+  playerName: string
+  cards: CardDefinition[]
+}
+
 export type GameStateSnapshot = {
   tiles: Tile[]
   players: Player[]
@@ -138,6 +144,11 @@ export type GameStateSnapshot = {
   frozenActions?: FrozenActions
   alliances?: Alliances
   goldenIdolBonus?: number
+  // New fields for comprehensive undo
+  turnCounter?: number
+  selectedTileId?: string | null
+  answerRevealed?: boolean
+  pendingBlackMarket?: PendingBlackMarket | null
 }
 
 export type GameStatEntry = {

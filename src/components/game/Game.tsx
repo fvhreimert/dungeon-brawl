@@ -21,7 +21,7 @@ import { Scoreboard } from '@/components/game/Scoreboard'
 import { useJeopardyGame } from '@/hooks/useJeopardyGame'
 import { gameConfig } from '@/config/gameConfig'
 import { useRuntimeConfig } from '@/config/runtimeConfig'
-import type { QAItem, Tile, PlayerConfig, CardInstance, ActionId, UpgradeableAction, Quest } from '@/types/game'
+import type { QAItem, Tile, PlayerConfig, CardInstance, ActionId, UpgradeableAction, Quest, PendingBlackMarket } from '@/types/game'
 import { type CardDefinition } from '@/data/cards'
 
 import cardJesterIcon from '@/assets/images/actions/card_jester.png'
@@ -178,6 +178,41 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     onBlackMarketStart: (playerIndex, playerName, cards) => {
       setBlackMarketData({ playerIndex, playerName, cards })
       setShowTurnIntro(true)
+    },
+    onUndo: (restoredBlackMarket: PendingBlackMarket | null) => {
+      // Handle undo: restore Black Market modal state if there was a pending Black Market
+      if (restoredBlackMarket) {
+        // Check if we're undoing within the same Black Market session (same player)
+        // If so, just update cards without replaying intro animation
+        const isSameBlackMarketSession = blackMarketData &&
+          blackMarketData.playerIndex === restoredBlackMarket.playerIndex
+
+        // Restore the Black Market modal with the saved cards
+        setBlackMarketData({
+          playerIndex: restoredBlackMarket.playerIndex,
+          playerName: restoredBlackMarket.playerName,
+          cards: restoredBlackMarket.cards,
+        })
+
+        // Only show turn intro if this is a different Black Market session
+        // (e.g., undoing back to a previous player's turn)
+        if (!isSameBlackMarketSession) {
+          setShowTurnIntro(true)
+          setIntroExiting(false)
+          setCardsEntering(false)
+        } else {
+          // Same session (undoing a reroll) - ensure modal is visible without intro
+          setShowTurnIntro(false)
+          setIntroExiting(false)
+          setCardsEntering(false)
+        }
+      } else {
+        // No pending Black Market - clear the modal
+        setBlackMarketData(null)
+        setShowTurnIntro(false)
+        setIntroExiting(false)
+        setCardsEntering(false)
+      }
     },
   })
 
@@ -873,10 +908,9 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
       : gameConfig.meta.title
   const isBlackMarketActive = !!blackMarketData
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleBlackMarketReroll = (_cardIndex: number): CardDefinition | null => {
+  const handleBlackMarketReroll = (cardIndex: number, currentCards: CardDefinition[]): CardDefinition | null => {
     if (!blackMarketData) return null
-    const newCard = consumeReroll(blackMarketData.playerIndex)
+    const newCard = consumeReroll(blackMarketData.playerIndex, currentCards, cardIndex)
     return newCard
   }
 

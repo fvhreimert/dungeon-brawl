@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import type { CardDefinition } from '@/data/cards'
 import {
   Card,
@@ -15,7 +15,7 @@ interface BlackMarketModalProps {
   playerName: string
   cards: CardDefinition[]
   rerollsRemaining: number
-  onReroll: (cardIndex: number) => CardDefinition | null
+  onReroll: (cardIndex: number, currentCards: CardDefinition[]) => CardDefinition | null
   onAccept: (cards: CardDefinition[]) => void
   isEntering?: boolean
 }
@@ -31,6 +31,11 @@ export function BlackMarketModal({
   const [pressedReroll, setPressedReroll] = useState<number | null>(null)
   const [rerollingIndex, setRerollingIndex] = useState<number | null>(null)
 
+  // Sync internal state when props change (e.g., during undo)
+  useEffect(() => {
+    setCards(initialCards)
+  }, [initialCards])
+
   const handleReroll = useCallback((index: number) => {
     if (rerollsRemaining <= 0 || rerollingIndex !== null) return
 
@@ -39,7 +44,8 @@ export function BlackMarketModal({
 
     // Swap card at the midpoint of animation (when card is invisible)
     setTimeout(() => {
-      const newCard = onReroll(index)
+      // Pass current cards to onReroll for undo support
+      const newCard = onReroll(index, cards)
       if (newCard) {
         setCards(prev => {
           const updated = [...prev]
@@ -54,7 +60,7 @@ export function BlackMarketModal({
     setTimeout(() => {
       setRerollingIndex(null)
     }, 350)
-  }, [rerollsRemaining, rerollingIndex, onReroll])
+  }, [rerollsRemaining, rerollingIndex, onReroll, cards])
 
   const handleAccept = useCallback(() => {
     onAccept(cards)

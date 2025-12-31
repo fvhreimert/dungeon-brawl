@@ -24,6 +24,7 @@ import type {
   TurnSnapshot,
   Quest,
   QuestId,
+  PendingBlackMarket,
 } from '@/types/game'
 import { CARDS, type CardDefinition } from '@/data/cards'
 import { gameConfig } from '@/config/gameConfig'
@@ -43,6 +44,7 @@ type UseJeopardyGameParams = {
   players: readonly PlayerConfig[]
   questionBank: QAItem[]
   onBlackMarketStart?: (playerIndex: number, playerName: string, cards: CardDefinition[]) => void
+  onUndo?: (restoredBlackMarket: PendingBlackMarket | null) => void
 }
 
 const createEmptyTurnTotals = () => ({
@@ -183,6 +185,7 @@ export function useJeopardyGame({
   players: initialPlayers,
   questionBank,
   onBlackMarketStart,
+  onUndo,
 }: UseJeopardyGameParams) {
   const runtimeConfig = useRuntimeConfig()
   const questionLookup = useMemo(() => {
@@ -239,6 +242,7 @@ export function useJeopardyGame({
     createInitialGameMetrics(initialPlayers.length)
   )
   const turnCountRef = useRef(0)
+  const pendingBlackMarketRef = useRef<PendingBlackMarket | null>(null)
   const activePuppetLockCategory = puppetLocks[activePlayerIndex]?.category ?? null
 
   const selectedTile = selectedTileId
@@ -356,6 +360,12 @@ export function useJeopardyGame({
       if (drawnCards.length > 0) {
         // Show the Black Market modal - cards will be added when player accepts
         const firstPlayerName = players[activePlayerIndex]?.name ?? ''
+        // Store pending Black Market for undo support
+        pendingBlackMarketRef.current = {
+          playerIndex: activePlayerIndex,
+          playerName: firstPlayerName,
+          cards: drawnCards,
+        }
         onBlackMarketStart(activePlayerIndex, firstPlayerName, drawnCards)
       }
     }
@@ -363,6 +373,16 @@ export function useJeopardyGame({
   }, [])
 
   const saveSnapshot = useCallback(() => {
+    // IMPORTANT: Capture pendingBlackMarket IMMEDIATELY (synchronously) before the async setHistory runs
+    // Otherwise, the ref might be modified before the callback executes
+    const capturedPendingBlackMarket = pendingBlackMarketRef.current
+      ? {
+          ...pendingBlackMarketRef.current,
+          cards: [...pendingBlackMarketRef.current.cards], // Deep copy the cards array
+        }
+      : null
+    const capturedTurnCounter = turnCountRef.current
+
     setHistory((prev) => {
       const newHistory = [
         ...prev,
@@ -374,11 +394,16 @@ export function useJeopardyGame({
           frozenActions: { ...frozenActions },
           alliances: [...alliances],
           goldenIdolBonus,
+          // New fields for comprehensive undo
+          turnCounter: capturedTurnCounter,
+          selectedTileId,
+          answerRevealed,
+          pendingBlackMarket: capturedPendingBlackMarket,
         },
       ]
-      return newHistory.slice(-5)
+      return newHistory.slice(-10) // Increased from 5 to 10 for more undo history
     })
-  }, [tiles, players, activePlayerIndex, puppetLocks, frozenActions, alliances, goldenIdolBonus])
+  }, [tiles, players, activePlayerIndex, puppetLocks, frozenActions, alliances, goldenIdolBonus, selectedTileId, answerRevealed])
 
   const updatePlayerStats = useCallback(
     (targetIndex: number, updater: (stats: PlayerStats) => PlayerStats) => {
@@ -681,8 +706,17 @@ export function useJeopardyGame({
       // Call onBlackMarketStart with the next player's info and cards
       const nextPlayerName = players[nextIndex]?.name ?? ''
       if (drawnCards.length > 0) {
+        // Store pending Black Market for undo support
+        pendingBlackMarketRef.current = {
+          playerIndex: nextIndex,
+          playerName: nextPlayerName,
+          cards: drawnCards,
+        }
         onBlackMarketStart(nextIndex, nextPlayerName, drawnCards)
       }
+    } else {
+      // Clear pending Black Market if disabled
+      pendingBlackMarketRef.current = null
     }
 
     setPlayers((prev) =>
@@ -783,6 +817,7 @@ export function useJeopardyGame({
 
     const previousState = history[history.length - 1]
 
+    // Restore core game state
     setTiles(previousState.tiles)
     setPlayers(previousState.players)
     setActivePlayerIndex(previousState.activePlayerIndex)
@@ -791,11 +826,24 @@ export function useJeopardyGame({
     setAlliances(previousState.alliances ?? [])
     setGoldenIdolBonus(previousState.goldenIdolBonus ?? runtimeConfig.mechanics.goldenIdol.startBonus)
 
+    // Restore new comprehensive undo fields
+    if (previousState.turnCounter !== undefined) {
+      turnCountRef.current = previousState.turnCounter
+    }
+    setSelectedTileId(previousState.selectedTileId ?? null)
+    setAnswerRevealed(previousState.answerRevealed ?? false)
+
+    // Restore pending Black Market state
+    const restoredBlackMarket = previousState.pendingBlackMarket ?? null
+    pendingBlackMarketRef.current = restoredBlackMarket
+
     setHistory((prev) => prev.slice(0, -1))
     setGameStats((prev) => prev.slice(0, -1))
 
-    setSelectedTileId(null)
-    setAnswerRevealed(false)
+    // Notify Game.tsx about the undo so it can handle Black Market modal state
+    if (onUndo) {
+      onUndo(restoredBlackMarket)
+    }
   }
 
   const handleCloseDialog = () => {
@@ -1453,11 +1501,28 @@ export function useJeopardyGame({
     if (cards.length > 0) {
       incrementPlayerMetric(activePlayerIndex, 'cardsReceived', cards.length)
     }
+
+    // Clear pending Black Market after cards are accepted
+    pendingBlackMarketRef.current = null
   }, [activePlayerIndex, incrementPlayerMetric])
 
-  const consumeReroll = useCallback((playerIndex: number): CardDefinition | null => {
+  const consumeReroll = useCallback((
+    playerIndex: number,
+    currentCards: CardDefinition[],
+    rerollIndex: number
+  ): CardDefinition | null => {
     const player = playersRef.current[playerIndex]
     if (!player || (player.rerollsRemaining ?? 0) <= 0) return null
+
+    // Save snapshot BEFORE reroll for undo support (captures current cards and reroll count)
+    // Update pendingBlackMarket with current cards before saving
+    const playerName = player.name ?? ''
+    pendingBlackMarketRef.current = {
+      playerIndex,
+      playerName,
+      cards: currentCards,
+    }
+    saveSnapshot()
 
     // Decrease reroll count
     setPlayers((prev) =>
@@ -1471,8 +1536,21 @@ export function useJeopardyGame({
     // Draw a new card
     const drawContext = buildCardDrawContext(playersRef.current, playerIndex)
     const entry = pickCardForPlayer(drawContext, runtimeConfig.mechanics.cardWeights)
-    return entry?.definition ?? null
-  }, [runtimeConfig.mechanics.cardWeights])
+    const newCard = entry?.definition ?? null
+
+    // Update pendingBlackMarket with the NEW cards after reroll
+    if (newCard) {
+      const updatedCards = [...currentCards]
+      updatedCards[rerollIndex] = newCard
+      pendingBlackMarketRef.current = {
+        playerIndex,
+        playerName,
+        cards: updatedCards,
+      }
+    }
+
+    return newCard
+  }, [runtimeConfig.mechanics.cardWeights, saveSnapshot])
 
   return {
     tiles,

@@ -76,7 +76,7 @@ export const CARDS: CardDefinition[] = [
   {
     id: 'soul_burst',
     title: 'Soul Burst',
-    description: 'Stores 25% of damage taken',
+    description: 'Stores 25% of damage taken to unleash on a foe',
     detailedDescription: 'Absorbs 25% of all non-question damage taken. Activate to unleash the stored damage on a foe and heal yourself for the same amount.',
     theme: 'theme-fel',
     imagePath: soulBurstImg,
@@ -85,7 +85,7 @@ export const CARDS: CardDefinition[] = [
   {
     id: 'thieving_rat',
     title: 'Thieving Rat',
-    description: 'Steal a random card',
+    description: 'Steal a random card from a foe',
     detailedDescription: 'The rat scurries into a foe\'s bag and returns with a mystery item. Activate to steal a random card from an opponent. Consumed on use.',
     theme: 'theme-dungeon',
     imagePath: thievingRatImg,
@@ -95,7 +95,7 @@ export const CARDS: CardDefinition[] = [
   {
     id: 'cursed_coin',
     title: 'Cursed Coin',
-    description: '-50 pts per turn',
+    description: '+500 now. -50 pts per turn',
     detailedDescription: 'A coin imbued with dark magic. You received 500 points when acquired, but lose 50 points each turn for 10 turns.',
     theme: 'theme-dark',
     imagePath: cursedCoinImg,
@@ -104,7 +104,7 @@ export const CARDS: CardDefinition[] = [
   {
     id: 'tick',
     title: 'Tick',
-    description: 'Drains 1% of score per turn',
+    description: 'Drains 1% of your score per turn',
     detailedDescription: 'A parasitic creature that latches onto your soul. Each turn it drains 1% of your current points.',
     theme: 'theme-red',
     imagePath: tickImg,
@@ -198,7 +198,7 @@ export const CARDS: CardDefinition[] = [
   {
     id: 'glacial_elemental',
     title: 'Glacial Elemental',
-    description: 'Freeze a tile or action',
+    description: 'Freeze a tile or action until next turn',
     detailedDescription: 'Command the power of ice. Activate to freeze a tile or a dungeon action until your next turn. Frozen targets cannot be used by anyone. Consumed on use.',
     theme: 'theme-blue',
     imagePath: glacialElementalImg,
@@ -208,7 +208,7 @@ export const CARDS: CardDefinition[] = [
   {
     id: 'coalition',
     title: 'Coalition',
-    description: 'Form an alliance',
+    description: 'Form an alliance with another player',
     detailedDescription: 'Forge a temporary alliance with another player. While allied, you cannot target each other with harmful effects. Alliance lasts for several turns. Consumed on use.',
     theme: 'theme-gold',
     imagePath: coalitionImg,
