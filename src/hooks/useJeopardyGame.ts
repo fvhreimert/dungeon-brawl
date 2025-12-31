@@ -1193,16 +1193,17 @@ export function useJeopardyGame({
     [applyScoreChange, runtimeConfig.mechanics.cardWeights],
   )
 
-  const addCardToInventory = (card: CardDefinition) => {
+  const addCardToInventory = (card: CardDefinition, targetPlayerIndex?: number) => {
     saveSnapshot()
+    const playerIndex = targetPlayerIndex ?? activePlayerIndex
     const cardInstance = createCardInstance(card)
     if (cardInstance.id === 'cursed_coin') {
       cardInstance.state = { turnsRemaining: runtimeConfig.mechanics.items.cursedCoin.durationTurns }
-      applyScoreChange(activePlayerIndex, runtimeConfig.mechanics.items.cursedCoin.value, 'passiveItem')
+      applyScoreChange(playerIndex, runtimeConfig.mechanics.items.cursedCoin.value, 'passiveItem')
     }
     setPlayers((prev) =>
       prev.map((player, index) => {
-        if (index !== activePlayerIndex) return player
+        if (index !== playerIndex) return player
         const inventory = [cardInstance, ...player.inventory]
         return {
           ...player,
@@ -1598,5 +1599,6 @@ export function useJeopardyGame({
     updateQuestProgress,
     resetQuestProgress,
     claimQuestReward,
+    updateCardState,
   }
 }

@@ -183,7 +183,7 @@ Upgraded versions of actions are unlocked via the **Spider Web** mechanic. Playe
   - If you have 2 treasure items, the missing one gets +8 weight (8→16).
   - If you have all 3, they all return to base weight 8 (no bonuses).
   - This creates a "combo completion" mechanic that helps players finish their treasure sets.
-- Available `targetSelectMode` values: `'standard'` (blood sacrifice style), `'neutral'` (players with cards only), `'fel'` (green Soul Burst theme), `'puppet'` (Puppet Master flow with category selection), `'roulette'` (self-targeting gambling modal), `'treasure'` (treasure set combination), `'freeze'` (tile/action freeze selection), `'coalition'` (alliance formation), `'none'` (immediate activation, no target needed).
+- Available `targetSelectMode` values: `'standard'` (blood sacrifice style), `'neutral'` (players with cards only), `'fel'` (green Soul Burst theme), `'puppet'` (Puppet Master flow with category selection), `'roulette'` (self-targeting gambling modal), `'treasure'` (treasure set combination), `'freeze'` (tile/action freeze selection), `'coalition'` (alliance formation), `'price_cracker'` (Christmas cracker mini-game with opponent), `'none'` (immediate activation, no target needed).
 
 ## Quest System
 The quest system allows cards to grant players objectives that track progress over time and reward completion.

@@ -1,0 +1,597 @@
+.price-cracker-backdrop {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 50% 40%, rgba(50, 40, 0, 0.7), rgba(10, 5, 0, 0.95));
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  z-index: 80;
+  backdrop-filter: blur(6px);
+}
+
+.price-cracker-dialog {
+  width: min(1100px, 96vw);
+  background: linear-gradient(180deg, #1a1008 0%, #0d0804 100%);
+  border: 4px solid #c9a227;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.9),
+    0 0 0 4px #0a0502,
+    inset 0 0 0 2px #3d2f0b,
+    0 0 40px rgba(201, 162, 39, 0.3);
+  color: #ffe4a0;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 3rem;
+  gap: 1.5rem;
+  image-rendering: pixelated;
+}
+
+/* Grid Texture Overlay */
+.price-cracker-dialog::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(201, 162, 39, 0.03) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(201, 162, 39, 0.02) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.price-cracker-title {
+  font-family: 'ArcadeClassic', sans-serif;
+  font-size: 40px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #ffd700;
+  text-shadow:
+    0 0 15px rgba(255, 215, 0, 0.6),
+    2px 2px 0 #4a3800;
+  z-index: 1;
+  text-align: center;
+}
+
+.price-cracker-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  z-index: 1;
+  position: relative;
+}
+
+/* Prize Display with Card Backs */
+.price-cracker-prizes {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  padding: 1.25rem 2rem;
+  background: rgba(0, 0, 0, 0.5);
+  border: 3px solid #6b4f00;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.prize-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.prize-card-backs {
+  display: flex;
+  align-items: center;
+}
+
+.prize-card-back {
+  width: 56px;
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.6));
+  transition: transform 0.2s ease;
+}
+
+.prize-card-back:hover {
+  transform: translateY(-4px);
+}
+
+.prize-label {
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: 0.75rem;
+  color: #c9a227;
+}
+
+.prize-points-value {
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: 2rem;
+  color: #ffd700;
+  text-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+}
+
+.prize-separator {
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: 1.5rem;
+  color: #888;
+}
+
+/* Main Arena */
+.price-cracker-arena {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 240px;
+  padding: 1.5rem 2rem;
+  position: relative;
+}
+
+/* Players */
+.arena-player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 140px;
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.arena-player.winner {
+  transform: scale(1.15);
+  filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.9));
+}
+
+.arena-portrait {
+  width: 96px;
+  height: 96px;
+  image-rendering: pixelated;
+  border: 4px solid #c9a227;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
+}
+
+.arena-portrait-placeholder {
+  width: 96px;
+  height: 96px;
+  background: linear-gradient(180deg, #333 0%, #222 100%);
+  border: 4px solid #555;
+}
+
+.arena-player-name {
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: 0.75rem;
+  color: #c9a227;
+  text-align: center;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Cracker Zone */
+.cracker-zone {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-height: 200px;
+}
+
+.cracker-image {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.6));
+  transform: translateX(var(--cracker-x, 0));
+  transition: transform 0.08s linear;
+  z-index: 2;
+}
+
+.cracker-image.selecting {
+  animation: cracker-idle 3s ease-in-out infinite;
+}
+
+.cracker-image.pulling {
+  animation: cracker-shake 0.15s ease-in-out infinite;
+}
+
+.cracker-image.exploding {
+  animation: cracker-explode 0.4s ease-out forwards;
+}
+
+@keyframes cracker-idle {
+  0%, 100% {
+    transform: translateX(var(--cracker-x, 0)) rotate(-2deg);
+  }
+  50% {
+    transform: translateX(var(--cracker-x, 0)) rotate(2deg);
+  }
+}
+
+@keyframes cracker-shake {
+  0%, 100% {
+    transform: translateX(var(--cracker-x, 0)) rotate(-2deg) scale(1);
+  }
+  50% {
+    transform: translateX(var(--cracker-x, 0)) rotate(2deg) scale(1.03);
+  }
+}
+
+@keyframes cracker-explode {
+  0% {
+    transform: translateX(var(--cracker-x, 0)) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(var(--cracker-x, 0)) scale(1.6);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(var(--cracker-x, 0)) scale(2.2);
+    opacity: 0;
+  }
+}
+
+/* Confetti */
+.confetti-particle {
+  position: absolute;
+  left: var(--start-x);
+  top: var(--start-y);
+  width: var(--size);
+  height: var(--size);
+  background: var(--color);
+  transform: rotate(var(--rotation));
+  animation: confetti-fly 2s ease-out forwards;
+  animation-delay: var(--delay);
+  opacity: 0;
+  z-index: 10;
+  image-rendering: pixelated;
+}
+
+@keyframes confetti-fly {
+  0% {
+    opacity: 1;
+    transform:
+      translateX(0)
+      translateY(0)
+      rotate(var(--rotation))
+      scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform:
+      translateX(calc(var(--velocity-x) * 50px))
+      translateY(calc(var(--velocity-y) * 60px + 120px))
+      rotate(calc(var(--rotation) + 720deg))
+      scale(0.4);
+  }
+}
+
+/* Opponent Selection - Horizontal Layout */
+.opponent-select-grid {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.opponent-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 3px solid #444;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  min-width: 90px;
+}
+
+.opponent-option:hover {
+  border-color: #c9a227;
+  background: rgba(201, 162, 39, 0.15);
+}
+
+.opponent-option.selected {
+  border-color: #ffd700;
+  background: rgba(255, 215, 0, 0.25);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+}
+
+.opponent-portrait {
+  width: 64px;
+  height: 64px;
+  image-rendering: pixelated;
+  border: 3px solid #666;
+}
+
+.opponent-portrait-placeholder {
+  width: 64px;
+  height: 64px;
+  background: #333;
+  border: 3px solid #555;
+}
+
+.opponent-name {
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: 0.55rem;
+  color: #aaa;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.opponent-option.selected .opponent-name {
+  color: #ffd700;
+}
+
+/* Status Text */
+.price-cracker-subtitle {
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: 0.8rem;
+  color: #c9a227;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.price-cracker-pulling-text {
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: 1.1rem;
+  color: #ffd700;
+  text-align: center;
+  animation: pulse-text 0.4s infinite alternate;
+}
+
+.price-cracker-exploding-text {
+  font-family: 'ArcadeClassic', sans-serif;
+  font-size: 36px;
+  color: #ff6b6b;
+  text-shadow:
+    0 0 25px rgba(255, 107, 107, 0.9),
+    3px 3px 0 #440000;
+  animation: explode-text 0.4s ease-out;
+}
+
+@keyframes pulse-text {
+  0% { opacity: 0.6; transform: scale(1); }
+  100% { opacity: 1; transform: scale(1.05); }
+}
+
+@keyframes explode-text {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.4); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Result Text */
+.price-cracker-result-text {
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: 0.95rem;
+  text-align: center;
+  padding: 1rem;
+  line-height: 1.6;
+}
+
+.price-cracker-result-text.win {
+  color: #50ff50;
+  text-shadow: 0 0 12px rgba(50, 255, 50, 0.6);
+  animation: win-pulse 0.5s infinite alternate;
+}
+
+.price-cracker-result-text.lose {
+  color: #ff8888;
+  text-shadow: 0 0 12px rgba(255, 100, 100, 0.6);
+}
+
+@keyframes win-pulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.03); }
+}
+
+/* Actions */
+.price-cracker-actions {
+  display: flex;
+  gap: 1.25rem;
+  margin-top: 0.75rem;
+}
+
+.price-cracker-btn-pull {
+  background: linear-gradient(180deg, #ffd700 0%, #c9a227 100%) !important;
+  border-color: #8b7500 !important;
+  color: #1a1008 !important;
+  min-width: 140px;
+  font-size: 1rem;
+}
+
+.price-cracker-btn-pull:hover:not(:disabled) {
+  filter: brightness(1.2);
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.7);
+}
+
+.price-cracker-btn-pull:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.price-cracker-btn-cancel {
+  min-width: 120px;
+}
+
+.price-cracker-btn-collect {
+  min-width: 200px;
+  animation: collect-pulse 0.8s infinite alternate;
+}
+
+.price-cracker-btn-collect.win {
+  background: linear-gradient(180deg, #50ff50 0%, #2a8b2a 100%) !important;
+  border-color: #1a5a1a !important;
+  color: #001a00 !important;
+}
+
+.price-cracker-btn-collect.lose {
+  background: linear-gradient(180deg, #885050 0%, #552a2a 100%) !important;
+}
+
+@keyframes collect-pulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.02); }
+}
+
+/* Reveal Phase - Card Jester Style */
+.price-cracker-reveal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: reveal-fade-in 0.3s ease-out;
+}
+
+@keyframes reveal-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.price-cracker-reveal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.price-cracker-reveal-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.price-cracker-reveal-title {
+  font-family: 'ArcadeClassic', sans-serif;
+  font-size: 42px;
+}
+
+.price-cracker-reveal-title.win {
+  color: #50ff50;
+  text-shadow:
+    0 0 20px rgba(50, 255, 50, 0.8),
+    2px 2px 0 #004400;
+}
+
+.price-cracker-reveal-title.lose {
+  color: #ff6b6b;
+  text-shadow:
+    0 0 20px rgba(255, 107, 107, 0.8),
+    2px 2px 0 #440000;
+}
+
+.price-cracker-reveal-points {
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: 1.25rem;
+  color: #ffd700;
+  text-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+}
+
+.price-cracker-reveal-points.opponent {
+  color: #ff8888;
+  text-shadow: 0 0 12px rgba(255, 136, 136, 0.6);
+}
+
+.price-cracker-reveal-cards {
+  display: flex;
+  gap: 32px;
+  align-items: center;
+  justify-content: center;
+  max-width: 95vw;
+}
+
+/* Card wrapper for scaling */
+.price-cracker-card-wrapper {
+  /* Base dimensions matching black market cards */
+  --base-height: calc(5 * 96px + 4 * 12px - 46px); /* 482px */
+  --base-width: calc(var(--base-height) * 0.667); /* ~321px */
+}
+
+/* Full size card item */
+.price-cracker-card-item {
+  --card-height: var(--base-height);
+  --card-width: var(--base-width);
+}
+
+/* Scale defaults to 1 for 1-3 cards */
+.price-cracker-card-wrapper {
+  --scale: 1;
+  transform: scale(var(--scale));
+  transform-origin: center center;
+}
+
+/* Animation on the card inside wrapper (not affecting transform) */
+.price-cracker-card-item {
+  animation: card-pop-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+}
+
+.price-cracker-card-wrapper:nth-child(1) .price-cracker-card-item { animation-delay: 0.1s; }
+.price-cracker-card-wrapper:nth-child(2) .price-cracker-card-item { animation-delay: 0.2s; }
+.price-cracker-card-wrapper:nth-child(3) .price-cracker-card-item { animation-delay: 0.3s; }
+.price-cracker-card-wrapper:nth-child(4) .price-cracker-card-item { animation-delay: 0.4s; }
+.price-cracker-card-wrapper:nth-child(5) .price-cracker-card-item { animation-delay: 0.5s; }
+
+/* 4 cards: scale wrapper and use negative margins to fix layout spacing */
+.price-cracker-reveal-cards[data-card-count="4"] .price-cracker-card-wrapper {
+  --scale: 0.72;
+  margin-left: calc(var(--base-width) * (1 - var(--scale)) / -2);
+  margin-right: calc(var(--base-width) * (1 - var(--scale)) / -2);
+  margin-top: calc(var(--base-height) * (1 - var(--scale)) / -2);
+  margin-bottom: calc(var(--base-height) * (1 - var(--scale)) / -2);
+}
+
+/* 5 cards: scale wrapper and use negative margins to fix layout spacing */
+.price-cracker-reveal-cards[data-card-count="5"] .price-cracker-card-wrapper {
+  --scale: 0.58;
+  margin-left: calc(var(--base-width) * (1 - var(--scale)) / -2);
+  margin-right: calc(var(--base-width) * (1 - var(--scale)) / -2);
+  margin-top: calc(var(--base-height) * (1 - var(--scale)) / -2);
+  margin-bottom: calc(var(--base-height) * (1 - var(--scale)) / -2);
+}
+
+/* Reduced gap for scaled cards */
+.price-cracker-reveal-cards[data-card-count="4"],
+.price-cracker-reveal-cards[data-card-count="5"] {
+  gap: 16px;
+}
+
+@keyframes card-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.price-cracker-reveal-hint {
+  color: rgba(255, 255, 255, 0.5);
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: 0.7rem;
+  animation: hint-pulse 2s infinite;
+}
+
+@keyframes hint-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}

@@ -98,6 +98,7 @@ This section lists every known card in the dungeon and its specific effects.
 | **Glacial Elemental** | Command the power of ice. Activate to **Freeze** a tile (making it unselectable) or a dungeon Action (disabling it) until your next turn. |
 | **Loot Goblin** | A greedy goblin does your dirty work. Activate to **steal 200 points** from a player of your choice. |
 | **Martin** | Martin the quest-giver bestows upon you a sacred **Quest**. Complete the objective for great rewards including cards, gold, and action upgrades. |
+| **Price Cracker** | A festive Christmas cracker filled with mystery prizes! Select an opponent to pull with you. The cracker explodes toward the winner (50/50 chance) who claims **1-5 random cards** and **1-500 bonus points**. |
 | **Puppet Master** | Dark strings bind your enemy's will. Activate to force an opponent to only answer questions from a **Category** of your choice on their next turn. |
 | **Roulette** | Stake up to **500 points** on a 50/50 gamble. Win and you double your stake. Lose and it's gone. |
 | **Soul Burst** | Absorbs **25% of all non-question damage** taken while in your inventory. Activate to unleash the stored damage on a foe and heal yourself for the same amount. |

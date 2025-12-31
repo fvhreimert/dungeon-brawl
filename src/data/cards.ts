@@ -62,6 +62,8 @@ import martinImg from '@/assets/images/cards/images/martin.png'
 import martinFrame from '@/assets/images/cards/frames/martin.png'
 import infiniteMoneyGlitchImg from '@/assets/images/cards/images/infinite_money_glitch.png'
 import infiniteMoneyGlitchFrame from '@/assets/images/cards/frames/infinite_money_glitch.png'
+import priceCrackerImg from '@/assets/images/cards/images/price_cracker.png'
+import priceCrackerFrame from '@/assets/images/cards/frames/price_cracker.png'
 
 export const CARDS: CardDefinition[] = [
   {
@@ -252,5 +254,15 @@ export const CARDS: CardDefinition[] = [
     theme: 'theme-gold',
     imagePath: infiniteMoneyGlitchImg,
     framePath: infiniteMoneyGlitchFrame,
+  },
+  {
+    id: 'price_cracker',
+    title: 'Price Cracker',
+    description: 'Pull a cracker with a foe!',
+    detailedDescription: 'Challenge an opponent to crack open a festive prize cracker! The cracker bounces between you both before exploding. Whoever it lands nearest wins all the prizes inside: 1-5 random cards and 1-500 points! Consumed on use.',
+    theme: 'theme-gold',
+    imagePath: priceCrackerImg,
+    framePath: priceCrackerFrame,
+    consumesOnActivate: true,
   },
 ]

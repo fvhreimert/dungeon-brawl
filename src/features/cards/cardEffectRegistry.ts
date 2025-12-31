@@ -410,6 +410,29 @@ const CARD_EFFECTS: Record<string, CardEffectDefinition> = {
     },
     getPassiveDelta: ({ playerScore }) => calculateMoneyGlitchGain(playerScore),
   },
+  price_cracker: {
+    handlers: {
+      activated: ({ ownerPlayerIndex, metadata, applyScoreChange }) => {
+        // Modal handles the prize generation and winner determination
+        // This handler is called after modal confirms with prizes
+        const winnerIndex = typeof metadata?.winnerIndex === 'number' ? metadata.winnerIndex : ownerPlayerIndex
+        const points = typeof metadata?.points === 'number' ? metadata.points : 0
+        const cards = typeof metadata?.cards === 'number' ? metadata.cards : 0
+
+        if (points > 0) {
+          applyScoreChange(winnerIndex, points, 'activeCard')
+        }
+
+        return {
+          priceCrackerResult: {
+            winnerIndex,
+            points,
+            cards,
+          },
+        }
+      },
+    },
+  },
 }
 
 export function getCardEffectDefinition(cardId: string) {

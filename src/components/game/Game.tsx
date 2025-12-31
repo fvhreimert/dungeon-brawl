@@ -44,6 +44,7 @@ import { StolenCardModal } from '@/features/cards/StolenCardModal'
 import { TravelingMerchantModal } from '@/features/cards/TravelingMerchantModal'
 import { PuppetMasterCategoryModal } from '@/features/cards/PuppetMasterCategoryModal'
 import { RouletteModal } from '@/features/cards/RouletteModal'
+import { PriceCrackerModal } from '@/features/cards/PriceCrackerModal'
 import { TreasureSetModal } from '@/features/cards/TreasureSetModal'
 import { TreasureIslandModal } from '@/features/cards/TreasureIslandModal'
 import { SpiderFeedingModal } from '@/features/actions/web/SpiderFeedingModal'
@@ -108,6 +109,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
   const [puppetTargetIndex, setPuppetTargetIndex] = useState<number | null>(null)
   const [puppetCategorySelecting, setPuppetCategorySelecting] = useState(false)
   const [rouletteActive, setRouletteActive] = useState(false)
+  const [priceCrackerActive, setPriceCrackerActive] = useState(false)
   const [treasureSetActive, setTreasureSetActive] = useState(false)
   const [treasureIslandActive, setTreasureIslandActive] = useState(false)
   const [treasureCardIds, setTreasureCardIds] = useState<string[]>([])
@@ -170,6 +172,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     grantQuest,
     claimQuestReward,
     updateQuestProgress,
+    updateCardState,
   } = useJeopardyGame({
     categories,
     pointValues,
@@ -488,6 +491,11 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
       setRouletteActive(true)
       return
     }
+    if (mode === 'price_cracker') {
+      setCardUsePending(card)
+      setPriceCrackerActive(true)
+      return
+    }
     if (mode === 'treasure') {
       setTreasureSetActive(true)
       return
@@ -516,6 +524,40 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
   const handleRouletteCancel = () => {
     setCardUsePending(null)
     setRouletteActive(false)
+  }
+
+  const handlePriceCrackerConfirm = (winnerIndex: number, prizes: { cards: number; points: number }): CardDefinition[] => {
+    if (!cardUsePending) return []
+
+    // Activate the card with the result metadata
+    const effectResult = activateCard(cardUsePending.instanceId, activePlayerIndex, {
+      winnerIndex,
+      points: prizes.points,
+      cards: prizes.cards,
+    })
+    processCardEffectResult(effectResult)
+
+    // Grant random cards to the winner and collect them for reveal
+    const wonCards: CardDefinition[] = []
+    if (prizes.cards > 0) {
+      const context = buildCardDrawContext(players, winnerIndex)
+      for (let i = 0; i < prizes.cards; i++) {
+        const entry = pickCardForPlayer(context, runtimeConfig.mechanics.cardWeights)
+        if (entry) {
+          addCardToInventory(entry.definition, winnerIndex)
+          wonCards.push(entry.definition)
+        }
+      }
+    }
+
+    // Don't clear cardUsePending yet - modal needs it to stay mounted for reveal phase
+    // Modal will call onCancel when done
+    return wonCards
+  }
+
+  const handlePriceCrackerCancel = () => {
+    setCardUsePending(null)
+    setPriceCrackerActive(false)
   }
 
   const handleCardTargetSelect = (targetIndex: number) => {
@@ -1450,6 +1492,23 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
           playerScore={players[activePlayerIndex]?.score ?? 0}
           onConfirm={handleRouletteConfirm}
           onCancel={handleRouletteCancel}
+        />
+      )}
+
+      {priceCrackerActive && cardUsePending && (
+        <PriceCrackerModal
+          activePlayer={players[activePlayerIndex]}
+          activePlayerIndex={activePlayerIndex}
+          players={players}
+          card={cardUsePending}
+          onUpdatePrizes={(prizes) => {
+            updateCardState(activePlayerIndex, cardUsePending.instanceId, (state) => ({
+              ...state,
+              prizes,
+            }))
+          }}
+          onConfirm={handlePriceCrackerConfirm}
+          onCancel={handlePriceCrackerCancel}
         />
       )}
 

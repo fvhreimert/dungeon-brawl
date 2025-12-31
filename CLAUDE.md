@@ -27,7 +27,7 @@ npm run tauri:build  # Build Tauri desktop app
 ### Key Directories
 - `src/config/` — Game configuration (`gameConfig.ts`), card weights/draw logic (`cardCatalog.ts`), runtime settings
 - `src/hooks/useJeopardyGame.ts` — Core game hook (~1500 lines): turns, scoring, card activation, quests, alliances
-- `src/data/cards.ts` — Card definitions (21 cards with themes, images, effects)
+- `src/data/cards.ts` — Card definitions (22 cards with themes, images, effects)
 - `src/features/cards/cardEffectRegistry.ts` — Card behavior implementations (passive effects, activation handlers)
 - `src/features/actions/` — Dungeon actions (Mad Seer, Frog of Fate, Golden Idol, Card Jester, Blood Sacrifice, Spider Web)
 - `src/components/game/` — Game UI components (GameBoard, Scoreboard, modals)
@@ -42,7 +42,7 @@ npm run tauri:build  # Build Tauri desktop app
 - Draw weights and modifiers per card
 - `baseWeight`: Static weight (1-10, higher = more common)
 - `weightModifiers`: Dynamic functions adjusting weight based on player inventory/state
-- `targetSelectMode`: How the card targets (standard, neutral, fel, puppet, roulette, treasure, freeze, coalition, none)
+- `targetSelectMode`: How the card targets (standard, neutral, fel, puppet, roulette, treasure, freeze, coalition, price_cracker, none)
 - `pickCardForPlayer(context, cardWeights?)`: Weighted random card selection; optional `cardWeights` override from game settings
 
 **Card Effects** (`src/features/cards/cardEffectRegistry.ts`):
@@ -96,3 +96,12 @@ Card addition checklist:
 2. Configure weights/targeting in `src/config/cardCatalog.ts`
 3. Implement effects in `src/features/cards/cardEffectRegistry.ts`
 4. Add images to `src/assets/images/cards/`
+5. Update documentation (see `docs/documentation-update-guide.md`)
+
+## Documentation Updates (End of Session)
+
+When requested or before ending a session, consult `docs/documentation-update-guide.md` to determine which documentation files need updating based on completed work. Key files:
+- `AGENTS.md` — Technical architecture reference
+- `GAME_MANUAL.md` — Player-facing game manual
+- `docs/card-creation-guide.md` — Card implementation guide
+- `docs/quest-system-guide.md` — Quest implementation guide
