@@ -68,6 +68,10 @@ export function BlackMarketModal({
 
   return (
     <section className={`board-shell black-market-shell ${isEntering ? 'black-market-entering' : ''}`}>
+      {/* Reroll counter - upper center */}
+      <div className="black-market-reroll-counter">
+        Rerolls: {rerollsRemaining}
+      </div>
       {/* Placeholder for category row height */}
       <div className="black-market-header-spacer" />
 

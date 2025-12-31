@@ -1,5 +1,22 @@
 /* Black market uses board-shell from GameBoard.css - no additional styles needed */
 
+/* Reroll counter - upper center */
+.black-market-reroll-counter {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  color: #888888;
+  text-shadow:
+    -1px 0 #0a0a0a,
+    1px 0 #0a0a0a,
+    0 -1px #0a0a0a,
+    0 1px #0a0a0a;
+  z-index: 10;
+}
+
 /* Match category-row height exactly */
 .black-market-header-spacer {
   min-height: 52px;

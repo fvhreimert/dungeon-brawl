@@ -293,19 +293,28 @@
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
 }
 
-/* Spider Sense Meter */
-.spider-sense-meter {
+/* Spider Sense and Reroll Row */
+.player-meters-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   margin-top: 8px;
   padding-top: 8px;
   border-top: 1px solid #2a2a2a;
 }
 
+/* Spider Sense Meter */
+.spider-sense-meter {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
 .spider-sense-icon {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   image-rendering: pixelated;
   flex-shrink: 0;
   filter: brightness(0) invert(1);
@@ -316,36 +325,64 @@
   gap: 2px;
   flex: 1;
   background: #0a0a0a;
-  padding: 3px;
-  border: 2px solid #2a2a2a;
+  padding: 2px;
+  border: 1px solid #2a2a2a;
   box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.5);
 }
 
 .spider-sense-tick {
   flex: 1;
-  height: 8px;
+  height: 6px;
   background: #1a1a1a;
   border: 1px solid #252525;
   transition: all 0.2s ease;
 }
 
 .spider-sense-tick.filled {
-  background: linear-gradient(180deg, #6a3a8a 0%, #4a2868 100%);
-  border-color: #7a4a9a;
-  box-shadow: 
-    inset 0 0 2px rgba(150, 100, 180, 0.4),
-    0 0 4px rgba(100, 60, 130, 0.4);
+  background: linear-gradient(180deg, #e0e0e0 0%, #b8b8b8 100%);
+  border-color: #f0f0f0;
+  box-shadow:
+    inset 0 0 2px rgba(255, 255, 255, 0.4),
+    0 0 4px rgba(200, 200, 200, 0.4);
 }
 
 .spider-sense-level {
   font-family: 'Press Start 2P', monospace;
-  font-size: 12px;
-  color: #9a6aba;
-  min-width: 42px;
+  font-size: 10px;
+  color: #d0d0d0;
+  min-width: 36px;
   text-align: right;
   text-shadow:
-    -1px 0 #1a0820,
-    1px 0 #1a0820,
-    0 -1px #1a0820,
-    0 1px #1a0820;
+    -1px 0 #1a1a1a,
+    1px 0 #1a1a1a,
+    0 -1px #1a1a1a,
+    0 1px #1a1a1a;
+}
+
+/* Reroll Counter */
+.reroll-counter {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.reroll-counter-icon {
+  width: 16px;
+  height: 16px;
+  image-rendering: pixelated;
+  filter: brightness(0) saturate(100%) invert(60%) sepia(20%) saturate(800%) hue-rotate(220deg) brightness(100%) contrast(90%);
+}
+
+.reroll-counter-value {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  color: #b090d0;
+  min-width: 12px;
+  text-align: center;
+  text-shadow:
+    -1px 0 #1a1020,
+    1px 0 #1a1020,
+    0 -1px #1a1020,
+    0 1px #1a1020;
 }
