@@ -68,6 +68,7 @@ npm run tauri:build  # Build Tauri desktop app
 - **Golden Idol**: Points per turn range (min/max), start bonus
 - **Blood Sacrifice**: Max sacrifice amounts (normal/upgraded)
 - **Spider Web**: Rerolls per isopod/sheep, upgrades per sheep
+- **Treasure Island**: Value multiplier, curse penalty %, curse increase rate, initial curse chance
 - **Actions**: Uses per turn, limits for Card Jester, Mad Seer, Frog of Fate, etc.
 
 **Flow**: `GameSettingsScreen` (UI) → `GameplaySettings` (state) → `mapToRuntimeConfig()` → `RuntimeGameConfig` (used in game)

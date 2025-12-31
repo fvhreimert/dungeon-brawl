@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Button as RetroButton } from '@/components/ui/8bit/button'
+import { useRuntimeConfig } from '@/config/runtimeConfig'
 import treasureIslandImg from '@/assets/images/ui/treasure_island.png'
 import treasureCrossImg from '@/assets/images/ui/treasure_cross.png'
 import pirateKingsCurseImg from '@/assets/images/ui/pirate_kings_curse.png'
@@ -50,8 +51,6 @@ const TREASURE_ITEMS: TreasureItem[] = [
   { id: 'crown', img: crownImg, name: 'Crown', rarity: 'prismatic', value: 500 },
 ]
 
-const INITIAL_CURSE_CHANCE = 10
-
 type GamePhase = 'ready' | 'digging' | 'treasure' | 'cursed' | 'collecting'
 
 type DugTreasure = TreasureItem
@@ -74,20 +73,33 @@ function playSound(src: string, volume = 0.5) {
 }
 
 export function TreasureIslandModal({ onComplete, onCancel }: TreasureIslandModalProps) {
+  const runtimeConfig = useRuntimeConfig()
+  const { valueMultiplier, cursePenalty, curseIncreaseRate, initialCurse } = runtimeConfig.mechanics.treasureIsland
+
+  // Apply value multiplier to treasures
+  const adjustedTreasures = useMemo(() =>
+    TREASURE_ITEMS.map(t => ({
+      ...t,
+      value: Math.round(t.value * (valueMultiplier / 100))
+    })),
+    [valueMultiplier]
+  )
+
   const [phase, setPhase] = useState<GamePhase>('ready')
   const [dugTreasures, setDugTreasures] = useState<DugTreasure[]>([])
   const [crossPosition, setCrossPosition] = useState(() => generateRandomCrossPosition())
-  const [curseChance, setCurseChance] = useState(INITIAL_CURSE_CHANCE)
+  const [curseChance, setCurseChance] = useState(initialCurse)
   const [lastFoundValue, setLastFoundValue] = useState(0)
   const [throbCount, setThrobCount] = useState(0)
 
   const goldValue = useMemo(() => dugTreasures.reduce((sum, t) => sum + t.value, 0), [dugTreasures])
+  const goldAfterCurse = useMemo(() => Math.round(goldValue * (1 - cursePenalty / 100)), [goldValue, cursePenalty])
 
   // Get available treasures (not yet found)
   const availableTreasures = useMemo(() => {
     const foundIds = new Set(dugTreasures.map((t) => t.id))
-    return TREASURE_ITEMS.filter((t) => !foundIds.has(t.id))
-  }, [dugTreasures])
+    return adjustedTreasures.filter((t) => !foundIds.has(t.id))
+  }, [dugTreasures, adjustedTreasures])
 
   // Check if all treasures found
   const allTreasuresFound = availableTreasures.length === 0
@@ -121,8 +133,8 @@ export function TreasureIslandModal({ onComplete, onCancel }: TreasureIslandModa
       playSound(treasureFoundSound, 0.5)
       setDugTreasures((prev) => [...prev, randomTreasure])
       setLastFoundValue(randomTreasure.value)
-      // Curse increases by (100 - currentCurse) * 0.1
-      setCurseChance((prev) => Math.min(95, prev + (100 - prev) * 0.1))
+      // Curse increases by (100 - currentCurse) * curseIncreaseRate%
+      setCurseChance((prev) => Math.min(95, prev + (100 - prev) * (curseIncreaseRate / 100)))
 
       setPhase('treasure')
 
@@ -132,7 +144,7 @@ export function TreasureIslandModal({ onComplete, onCancel }: TreasureIslandModa
         setPhase('ready')
       }, 800)
     }
-  }, [curseChance, availableTreasures])
+  }, [curseChance, availableTreasures, curseIncreaseRate])
 
   const handleDig = () => {
     if (phase !== 'ready' || allTreasuresFound) return
@@ -171,7 +183,7 @@ export function TreasureIslandModal({ onComplete, onCancel }: TreasureIslandModa
   }
 
   const handleAcceptCurse = () => {
-    onComplete(0)
+    onComplete(goldAfterCurse)
   }
 
   // Show dig cross only if not cursed, not collecting, and treasures remain
@@ -189,6 +201,26 @@ export function TreasureIslandModal({ onComplete, onCancel }: TreasureIslandModa
         <div className="treasure-island-header">
           <div className="treasure-island-title">Treasure Island</div>
           <div className="treasure-island-subtitle">Dig for riches... but beware the curse!</div>
+        </div>
+
+        {/* Treasure Gallery - shows treasures still available to dig */}
+        <div className="treasure-gallery">
+          <div className="gallery-label">Buried Treasures</div>
+          <div className="gallery-items">
+            {availableTreasures.map((treasure) => (
+              <div
+                key={treasure.id}
+                className={`gallery-item rarity-${treasure.rarity}`}
+                title={`${treasure.name} - ${treasure.value} Gold`}
+              >
+                <img src={treasure.img} alt={treasure.name} />
+                <span className="gallery-value">{treasure.value}</span>
+              </div>
+            ))}
+            {availableTreasures.length === 0 && (
+              <div className="gallery-empty">All treasures found!</div>
+            )}
+          </div>
         </div>
 
         {/* Main island area */}
@@ -255,7 +287,9 @@ export function TreasureIslandModal({ onComplete, onCancel }: TreasureIslandModa
             {phase === 'digging' && <span className="status-digging">Digging...</span>}
             {phase === 'treasure' && <span className="status-treasure">Treasure found! +{lastFoundValue} Gold</span>}
             {phase === 'cursed' && (
-              <span className="status-cursed">The Pirate King's Curse! All treasure lost!</span>
+              <span className="status-cursed">
+                The Pirate King's Curse! {cursePenalty === 100 ? 'All treasure lost!' : `Lost ${cursePenalty}% of treasure!`}
+              </span>
             )}
           </div>
         </div>
@@ -264,7 +298,7 @@ export function TreasureIslandModal({ onComplete, onCancel }: TreasureIslandModa
         <div className={`treasure-chest-area ${phase === 'cursed' ? 'cursed' : ''}`}>
           <div className="chest-header">
             <span className="chest-label">Treasure Hoard</span>
-            <span className="chest-gold-value">{phase === 'cursed' ? 0 : goldValue} Gold</span>
+            <span className="chest-gold-value">{phase === 'cursed' ? goldAfterCurse : goldValue} Gold</span>
           </div>
           <div className="chest-contents">
             {dugTreasures.length === 0 ? (
@@ -289,20 +323,43 @@ export function TreasureIslandModal({ onComplete, onCancel }: TreasureIslandModa
               className="dialog-button-8bit curse-accept-btn"
               onClick={handleAcceptCurse}
             >
-              Accept Fate
+              {goldAfterCurse > 0 ? `Accept Fate (${goldAfterCurse} Gold)` : 'Accept Fate'}
             </RetroButton>
           ) : (
-            dugTreasures.length > 0 &&
-            (phase === 'ready' || allTreasuresFound) && (
-              <RetroButton
-                font="retro"
-                variant="default"
-                className="dialog-button-8bit collect-btn"
-                onClick={handleCollect}
-              >
-                Collect {goldValue} Gold
-              </RetroButton>
-            )
+            <>
+              {/* Dig button - alternative to clicking the cross */}
+              {phase === 'ready' && !allTreasuresFound && (
+                <RetroButton
+                  font="retro"
+                  variant="secondary"
+                  className="dialog-button-8bit dig-btn"
+                  onClick={handleDig}
+                >
+                  Dig!
+                </RetroButton>
+              )}
+              {phase === 'digging' && (
+                <RetroButton
+                  font="retro"
+                  variant="secondary"
+                  className="dialog-button-8bit dig-btn"
+                  disabled
+                >
+                  Digging...
+                </RetroButton>
+              )}
+              {/* Collect button */}
+              {dugTreasures.length > 0 && (phase === 'ready' || allTreasuresFound) && (
+                <RetroButton
+                  font="retro"
+                  variant="default"
+                  className="dialog-button-8bit collect-btn"
+                  onClick={handleCollect}
+                >
+                  Collect {goldValue} Gold
+                </RetroButton>
+              )}
+            </>
           )}
         </div>
       </div>

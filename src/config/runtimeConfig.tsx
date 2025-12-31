@@ -65,6 +65,12 @@ export type RuntimeGameConfig = {
       enabled: boolean
       cardsToShow: number
     }
+    treasureIsland: {
+      valueMultiplier: number       // percentage (300 = 3x treasure values)
+      cursePenalty: number          // percentage lost on curse (50 = lose half)
+      curseIncreaseRate: number     // percentage per dig (10 = +10% of remaining)
+      initialCurse: number          // starting curse percentage
+    }
     cardWeights: Record<string, number>
   }
 }
@@ -130,6 +136,12 @@ const defaultRuntimeConfig: RuntimeGameConfig = {
     blackMarket: {
       enabled: gameConfig.mechanics.blackMarket.enabled,
       cardsToShow: gameConfig.mechanics.blackMarket.cardsToShow,
+    },
+    treasureIsland: {
+      valueMultiplier: gameConfig.mechanics.treasureIsland.valueMultiplier,
+      cursePenalty: gameConfig.mechanics.treasureIsland.cursePenalty,
+      curseIncreaseRate: gameConfig.mechanics.treasureIsland.curseIncreaseRate,
+      initialCurse: gameConfig.mechanics.treasureIsland.initialCurse,
     },
     cardWeights: { ...gameConfig.mechanics.cardWeights },
   },
@@ -203,6 +215,12 @@ export function gameplaySettingsToRuntimeConfig(settings: GameplaySettings): Run
       blackMarket: {
         enabled: settings.blackMarketEnabled ?? true,
         cardsToShow: settings.blackMarketCardsToShow ?? 3,
+      },
+      treasureIsland: {
+        valueMultiplier: settings.treasureValueMultiplier,
+        cursePenalty: settings.treasureCursePenalty,
+        curseIncreaseRate: settings.treasureCurseIncreaseRate,
+        initialCurse: settings.treasureInitialCurse,
       },
       cardWeights: { ...settings.cardWeights },
     },

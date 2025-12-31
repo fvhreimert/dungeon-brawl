@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Button as RetroButton } from '@/components/ui/8bit/button'
 import { gameConfig } from '@/config/gameConfig'
 import { CARDS } from '@/data/cards'
@@ -43,6 +43,10 @@ export type GameplaySettings = {
   sheepUpgradesGiven: number
   blackMarketEnabled: boolean
   blackMarketCardsToShow: number
+  treasureValueMultiplier: number
+  treasureCursePenalty: number
+  treasureCurseIncreaseRate: number
+  treasureInitialCurse: number
   cardWeights: Record<string, number>
 }
 
@@ -90,7 +94,74 @@ const DEFAULT_SETTINGS: GameplaySettings = {
   sheepUpgradesGiven: gameConfig.mechanics.spiderWeb.sheepUpgradesGiven,
   blackMarketEnabled: gameConfig.mechanics.blackMarket.enabled,
   blackMarketCardsToShow: gameConfig.mechanics.blackMarket.cardsToShow,
+  treasureValueMultiplier: gameConfig.mechanics.treasureIsland.valueMultiplier,
+  treasureCursePenalty: gameConfig.mechanics.treasureIsland.cursePenalty,
+  treasureCurseIncreaseRate: gameConfig.mechanics.treasureIsland.curseIncreaseRate,
+  treasureInitialCurse: gameConfig.mechanics.treasureIsland.initialCurse,
   cardWeights: { ...gameConfig.mechanics.cardWeights },
+}
+
+// Calculate expected gold from Treasure Island with optimal play
+function calculateTreasureExpectedValue(
+  valueMultiplier: number,
+  cursePenalty: number,
+  curseIncreaseRate: number,
+  initialCurse: number
+): { expectedGold: number; optimalDigs: number; maxPossible: number } {
+  // Base treasure values: 3×50 + 2×100 + 2×150 + 4×300 + 1×500 = 2350
+  const BASE_TOTAL = 2350
+  const TOTAL_ITEMS = 11
+
+  const adjustedTotal = Math.round(BASE_TOTAL * (valueMultiplier / 100))
+  const avgItemValue = adjustedTotal / TOTAL_ITEMS
+
+  let bestEV = 0
+  let bestDigs = 1
+
+  // Find optimal fixed number of digs
+  for (let n = 1; n <= TOTAL_ITEMS; n++) {
+    // Calculate probability of surviving all n digs
+    let surviveAll = 1
+    let curse = initialCurse
+    for (let i = 0; i < n; i++) {
+      surviveAll *= (100 - curse) / 100
+      curse = Math.min(95, curse + (100 - curse) * (curseIncreaseRate / 100))
+    }
+
+    const goldIfSurvive = n * avgItemValue
+
+    // Calculate expected gold from getting cursed at each point
+    let expectedFromCurses = 0
+    let probSurviveSoFar = 1
+    curse = initialCurse
+
+    for (let k = 1; k <= n; k++) {
+      const probCurseOnK = curse / 100
+      const probCursedExactlyAtK = probSurviveSoFar * probCurseOnK
+
+      // Gold from (k-1) successful digs, minus curse penalty
+      const goldBeforeCurse = (k - 1) * avgItemValue
+      const goldKeptAfterCurse = goldBeforeCurse * (1 - cursePenalty / 100)
+
+      expectedFromCurses += probCursedExactlyAtK * goldKeptAfterCurse
+
+      probSurviveSoFar *= (100 - curse) / 100
+      curse = Math.min(95, curse + (100 - curse) * (curseIncreaseRate / 100))
+    }
+
+    const totalEV = surviveAll * goldIfSurvive + expectedFromCurses
+
+    if (totalEV > bestEV) {
+      bestEV = totalEV
+      bestDigs = n
+    }
+  }
+
+  return {
+    expectedGold: Math.round(bestEV),
+    optimalDigs: bestDigs,
+    maxPossible: adjustedTotal
+  }
 }
 
 type SettingRowProps = {
@@ -181,6 +252,19 @@ function SettingRow({ label, value, onChange, min = 0, max = 9999, step = 1, suf
 
 export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenProps) {
   const [settings, setSettings] = useState<GameplaySettings>(DEFAULT_SETTINGS)
+
+  // Calculate expected treasure gold based on current settings
+  const treasureStats = useMemo(() => calculateTreasureExpectedValue(
+    settings.treasureValueMultiplier,
+    settings.treasureCursePenalty,
+    settings.treasureCurseIncreaseRate,
+    settings.treasureInitialCurse
+  ), [
+    settings.treasureValueMultiplier,
+    settings.treasureCursePenalty,
+    settings.treasureCurseIncreaseRate,
+    settings.treasureInitialCurse
+  ])
 
   const updateSetting = <K extends keyof GameplaySettings>(key: K, value: GameplaySettings[K]) => {
     setSettings(prev => ({ ...prev, [key]: value }))
@@ -398,6 +482,59 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 step={1}
                 isInfinity
               />
+            </div>
+
+            {/* Treasure Island Section */}
+            <div className="settings-section">
+              <h2 className="section-title">Treasure Island</h2>
+              <SettingRow
+                label="Value Multiplier"
+                value={settings.treasureValueMultiplier}
+                onChange={(val) => updateSetting('treasureValueMultiplier', val)}
+                min={100}
+                max={1000}
+                step={50}
+                suffix="%"
+              />
+              <SettingRow
+                label="Curse Penalty"
+                value={settings.treasureCursePenalty}
+                onChange={(val) => updateSetting('treasureCursePenalty', val)}
+                min={0}
+                max={100}
+                step={10}
+                suffix="%"
+              />
+              <SettingRow
+                label="Curse Increase Rate"
+                value={settings.treasureCurseIncreaseRate}
+                onChange={(val) => updateSetting('treasureCurseIncreaseRate', val)}
+                min={1}
+                max={50}
+                step={1}
+                suffix="%"
+              />
+              <SettingRow
+                label="Initial Curse Chance"
+                value={settings.treasureInitialCurse}
+                onChange={(val) => updateSetting('treasureInitialCurse', val)}
+                min={0}
+                max={50}
+                step={5}
+                suffix="%"
+              />
+              {/* Expected Value Display */}
+              <div className="treasure-estimate">
+                <div className="estimate-header">Estimated Returns</div>
+                <div className="estimate-row">
+                  <span className="estimate-label">Expected Gold:</span>
+                  <span className="estimate-value gold">~{treasureStats.expectedGold.toLocaleString()}</span>
+                </div>
+                <div className="estimate-row">
+                  <span className="estimate-label">Max Possible:</span>
+                  <span className="estimate-value">{treasureStats.maxPossible.toLocaleString()}</span>
+                </div>
+              </div>
             </div>
           </div>
 

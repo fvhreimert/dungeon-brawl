@@ -58,6 +58,7 @@ The game starts with a main menu flow before entering the actual game board.
      - **Items**: Cursed Coin duration and value
      - **Golden Idol**: Points per turn range (min/max), start bonus
      - **Blood Sacrifice**: Max sacrifice amounts (normal: 100, upgraded: 200)
+     - **Treasure Island**: Value multiplier (default: 300%), curse penalty (default: 50%), curse increase rate (default: 10%), initial curse chance (default: 10%)
      - **Action Prices**: Card Jester, Mad Seer, Frog of Fate costs
      - **Action Limits**: Per-turn limits for each action (supports infinity)
      - **Card Weights**: Base draw weight for all 21 cards (0-20 scale, higher = more common)
@@ -328,16 +329,18 @@ See `docs/quest-system-guide.md` for detailed implementation guidance.
   1. Player activates any treasure set card from inventory (uses `targetSelectMode: 'treasure'`).
   2. `TreasureSetModal` shows collected artifacts; if all three are present, player can "Dig for Treasure".
   3. `TreasureIslandModal` opens with a pirate-themed treasure hunting mini-game.
-  4. Player clicks the red X marker on the island map to dig. Each dig plays 3 "throb" sounds before revealing the result.
-  5. Successful digs yield treasures with rarity-based values:
+  4. Player clicks the red X marker on the island map OR the "Dig!" button to dig. Each dig plays 3 "throb" sounds before revealing the result.
+  5. **Treasure Gallery:** Shows all 11 treasures with their values at the top. Found treasures disappear from the gallery and appear in the player's hoard below.
+  6. Successful digs yield treasures with rarity-based values (base values, multiplied by Value Multiplier setting):
      - **Common (50g):** Ring, Scepter, Scroll - gray glow
      - **Rare (100g):** Gold Coins, Gold Bars - blue glow
      - **Epic (150g):** Vessel, Jewellery - purple glow
      - **Legendary (300g):** Treasure Chests - golden orange animated glow
      - **Prismatic (500g):** Crown - rainbow cycling effect
-  6. Each treasure can only be found once. Curse risk starts at 10% and increases by `(100 - current) * 0.1` per dig.
-  7. If the Pirate King's Curse is triggered, all collected treasure is lost (items gray out).
-  8. Player can collect earned gold at any time or continue digging for more (risk vs reward).
+  7. Each treasure can only be found once. Curse risk starts at Initial Curse % and increases by `(100 - current) * curseIncreaseRate` per dig.
+  8. If the Pirate King's Curse is triggered, player loses Curse Penalty % of collected treasure (default 50%, configurable 0-100%).
+  9. Player can collect earned gold at any time or continue digging for more (risk vs reward).
+- **Settings:** Value Multiplier, Curse Penalty %, Curse Increase Rate, Initial Curse Chance (configured in Game Settings, shows expected gold estimate).
 - **Assets:** Treasure images in `src/assets/images/ui/treasure/`, sounds in `src/assets/sounds/cards/treasure_set/`.
 
 ## Inventory & Tooltip UX

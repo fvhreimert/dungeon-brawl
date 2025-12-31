@@ -176,20 +176,64 @@
   flex: 1.5;
 }
 
+/* Treasure Island Estimate */
+.treasure-estimate {
+  margin-top: 8px;
+  padding: 12px;
+  background: linear-gradient(180deg, rgba(139, 105, 20, 0.15) 0%, rgba(90, 64, 16, 0.2) 100%);
+  border: 2px solid #5a4010;
+}
+
+.estimate-header {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: #c9a227;
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #5a4010;
+}
+
+.estimate-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.estimate-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  color: #a08040;
+}
+
+.estimate-value {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  color: #f4d675;
+}
+
+.estimate-value.gold {
+  color: #ffd700;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+  font-size: 11px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .settings-content {
     flex-direction: column;
   }
-  
+
   .game-settings-container {
     padding: 16px;
   }
-  
+
   .setting-label {
     font-size: 7px;
   }
-  
+
   .setting-value {
     font-size: 9px;
     min-width: 50px;

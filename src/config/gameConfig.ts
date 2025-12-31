@@ -79,6 +79,12 @@ export const gameConfig = {
       enabled: true, // Set to false to skip black market entirely
       cardsToShow: 3, // Number of cards displayed in the black market (1-5)
     },
+    treasureIsland: {
+      valueMultiplier: 300,    // 300% = 3x treasure values
+      cursePenalty: 50,        // Lose 50% of gold on curse (not 100%)
+      curseIncreaseRate: 10,   // Curse increases by 10% of remaining per dig
+      initialCurse: 10,        // Start with 10% curse chance
+    },
     cardWeights: {
       niffler: 5,
       soul_burst: 3,
