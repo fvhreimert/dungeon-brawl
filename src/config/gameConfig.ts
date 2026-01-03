@@ -18,7 +18,7 @@ export const gameConfig = {
   },
   gameplay: {
     categories: ['Arcana', 'Relics', 'Beasts', 'Lore', 'Traps'],
-    pointValues: [100, 200, 300, 400, 500],
+    pointValues: [200, 400, 600, 800, 1000],
   },
   mechanics: {
     startingRerolls: 10, // Number of card rerolls each player starts with

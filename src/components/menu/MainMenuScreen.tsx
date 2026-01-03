@@ -5,11 +5,14 @@ import { getAvailableQuizzes, loadQuiz, quizToQAItems, getQuizCategories } from 
 import { ALL_PORTRAITS } from '@/utils/portraits'
 import { generateQuizCategories, type CategoryInput } from '@/services/geminiService'
 import { GameSettingsScreen, type GameplaySettings } from './GameSettingsScreen'
+import { QuizBuilderScreen } from './QuizBuilderScreen'
+import { useQuizStorage } from '@/hooks/useQuizStorage'
 import type { Quiz, QuizFile } from '@/types/quiz'
+import { createCustomQuiz, type CustomQuiz, type CustomQuizMeta } from '@/types/customQuiz'
 import type { PlayerConfig, QAItem } from '@/types/game'
 import './MainMenuScreen.css'
 
-type MenuState = 'main' | 'quiz-select' | 'generate-quiz' | 'generating' | 'player-setup' | 'game-settings'
+type MenuState = 'main' | 'quiz-select' | 'generate-quiz' | 'generating' | 'create-quiz' | 'player-setup' | 'game-settings'
 
 const GEMINI_API_KEY = 'AIzaSyAEzBRKviKLj4TmZJA05qZxZ1I0UB4LL6E'
 
@@ -45,7 +48,9 @@ export function MainMenuScreen({ onStartGame }: MainMenuScreenProps) {
   )
   const [portraitPickerIndex, setPortraitPickerIndex] = useState<number | null>(null)
   const [isGeneratedQuiz, setIsGeneratedQuiz] = useState(false)
-  
+  const [isCustomQuiz, setIsCustomQuiz] = useState(false)
+  const [editingCustomQuiz, setEditingCustomQuiz] = useState<CustomQuiz | undefined>(undefined)
+
   // Generate quiz state
   const [categoryCount, setCategoryCount] = useState(5)
   const [categoryInputs, setCategoryInputs] = useState<CategoryInput[]>(() =>
@@ -54,6 +59,9 @@ export function MainMenuScreen({ onStartGame }: MainMenuScreenProps) {
   const [quizName, setQuizName] = useState('')
   const [generationProgress, setGenerationProgress] = useState({ completed: 0, total: 0 })
   const [generationError, setGenerationError] = useState<string | null>(null)
+
+  // Custom quiz storage
+  const { quizzes: customQuizzes, loadQuiz: loadCustomQuiz } = useQuizStorage()
 
   const quizFiles = getAvailableQuizzes()
 
@@ -140,6 +148,51 @@ export function MainMenuScreen({ onStartGame }: MainMenuScreenProps) {
   const handleBackFromGenerate = () => {
     setMenuState('main')
     setGenerationError(null)
+  }
+
+  const handleCreateQuiz = () => {
+    setEditingCustomQuiz(undefined)
+    setMenuState('create-quiz')
+  }
+
+  const handleCustomQuizSaveAndPlay = (quiz: CustomQuiz) => {
+    setSelectedQuiz(quiz)
+    setIsCustomQuiz(true)
+    setIsGeneratedQuiz(false)
+    setMenuState('player-setup')
+  }
+
+  const handleBackFromCreateQuiz = () => {
+    setEditingCustomQuiz(undefined)
+    setMenuState('main')
+  }
+
+  const handleCustomQuizSelect = async (quizMeta: CustomQuizMeta) => {
+    const quiz = await loadCustomQuiz(quizMeta.id)
+    if (quiz) {
+      setSelectedQuiz(quiz)
+      setIsCustomQuiz(true)
+      setIsGeneratedQuiz(false)
+      setMenuState('player-setup')
+    }
+  }
+
+  const handleEditCustomQuiz = async (quizMeta: CustomQuizMeta) => {
+    const quiz = await loadCustomQuiz(quizMeta.id)
+    if (quiz) {
+      setEditingCustomQuiz(quiz)
+      setMenuState('create-quiz')
+    }
+  }
+
+  const handleEditBuiltInQuiz = (quizFile: QuizFile) => {
+    const quiz = loadQuiz(quizFile.fileName)
+    if (quiz) {
+      // Convert built-in quiz to a custom quiz for editing
+      const customQuiz = createCustomQuiz(quiz.displayName, quiz.categories)
+      setEditingCustomQuiz(customQuiz)
+      setMenuState('create-quiz')
+    }
   }
 
   const handlePlayerCountChange = (delta: number) => {
@@ -237,10 +290,18 @@ export function MainMenuScreen({ onStartGame }: MainMenuScreenProps) {
               <div className="main-menu-buttons">
                 <RetroButton
                   font="retro"
-                  className="menu-button"
+                  className="menu-button menu-button-primary"
                   onClick={handleQuizFromFile}
                 >
                   Quiz from File
+                </RetroButton>
+                <RetroButton
+                  font="retro"
+                  className="menu-button"
+                  variant="secondary"
+                  onClick={handleCreateQuiz}
+                >
+                  Create Quiz
                 </RetroButton>
                 <RetroButton
                   font="retro"
@@ -260,16 +321,50 @@ export function MainMenuScreen({ onStartGame }: MainMenuScreenProps) {
             <h1 className="main-menu-title-standalone">Select Quiz</h1>
             <div className="quiz-select-content">
               <div className="quiz-list">
+                {/* Built-in quizzes */}
                 {quizFiles.map((quiz) => (
-                  <RetroButton
-                    key={quiz.fileName}
-                    font="retro"
-                    variant="secondary"
-                    className="quiz-item"
-                    onClick={() => handleQuizSelect(quiz)}
-                  >
-                    {quiz.displayName}
-                  </RetroButton>
+                  <div key={quiz.fileName} className="quiz-item-row">
+                    <RetroButton
+                      font="retro"
+                      variant="secondary"
+                      className="quiz-item quiz-item-custom"
+                      onClick={() => handleQuizSelect(quiz)}
+                    >
+                      {quiz.displayName}
+                    </RetroButton>
+                    <RetroButton
+                      font="retro"
+                      variant="secondary"
+                      className="quiz-item-edit"
+                      onClick={() => handleEditBuiltInQuiz(quiz)}
+                    >
+                      Edit
+                    </RetroButton>
+                  </div>
+                ))}
+                {/* Custom quizzes */}
+                {customQuizzes.length > 0 && (
+                  <div className="quiz-list-divider">Custom Quizzes</div>
+                )}
+                {customQuizzes.map((quiz) => (
+                  <div key={quiz.id} className="quiz-item-row">
+                    <RetroButton
+                      font="retro"
+                      variant="secondary"
+                      className="quiz-item quiz-item-custom"
+                      onClick={() => handleCustomQuizSelect(quiz)}
+                    >
+                      {quiz.displayName}
+                    </RetroButton>
+                    <RetroButton
+                      font="retro"
+                      variant="secondary"
+                      className="quiz-item-edit"
+                      onClick={() => handleEditCustomQuiz(quiz)}
+                    >
+                      Edit
+                    </RetroButton>
+                  </div>
                 ))}
               </div>
               <RetroButton
@@ -393,6 +488,7 @@ export function MainMenuScreen({ onStartGame }: MainMenuScreenProps) {
           </div>
         )}
 
+
         {menuState === 'player-setup' && (
           <>
             <h1 className="main-menu-title-standalone">Player Setup</h1>
@@ -454,13 +550,13 @@ export function MainMenuScreen({ onStartGame }: MainMenuScreenProps) {
                   font="retro"
                   variant="secondary"
                   className="back-button"
-                  onClick={isGeneratedQuiz ? handleBackToMain : handleBackToQuizSelect}
+                  onClick={isGeneratedQuiz || isCustomQuiz ? handleBackToMain : handleBackToQuizSelect}
                 >
                   Back
                 </RetroButton>
                 <RetroButton
                   font="retro"
-                  className="start-game-btn"
+                  className="start-game-btn menu-button-primary"
                   onClick={handleProceedToSettings}
                 >
                   Next
@@ -508,6 +604,15 @@ export function MainMenuScreen({ onStartGame }: MainMenuScreenProps) {
         <GameSettingsScreen
           onBack={handleBackFromSettings}
           onStartGame={handleStartGame}
+        />
+      )}
+
+      {/* Quiz Builder Screen - rendered as full screen overlay */}
+      {menuState === 'create-quiz' && (
+        <QuizBuilderScreen
+          existingQuiz={editingCustomQuiz}
+          onSaveAndPlay={handleCustomQuizSaveAndPlay}
+          onBack={handleBackFromCreateQuiz}
         />
       )}
     </div>

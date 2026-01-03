@@ -67,7 +67,7 @@ export function getQuizCategories(quiz: Quiz): string[] {
 /**
  * Infer point values based on the maximum number of questions in any category.
  */
-export function inferPointValues(quiz: Quiz, baseValues: number[] = [100, 200, 300, 400, 500]): number[] {
+export function inferPointValues(quiz: Quiz, baseValues: number[] = [200, 400, 600, 800, 1000]): number[] {
   const maxQuestions = Math.max(...quiz.categories.map((c) => c.questions.length))
   if (maxQuestions <= baseValues.length) {
     return baseValues.slice(0, maxQuestions)
@@ -75,7 +75,7 @@ export function inferPointValues(quiz: Quiz, baseValues: number[] = [100, 200, 3
   // Extend base values for quizzes with more questions
   const extended = [...baseValues]
   for (let i = baseValues.length; i < maxQuestions; i++) {
-    extended.push(baseValues[baseValues.length - 1] + (i - baseValues.length + 1) * 100)
+    extended.push(baseValues[baseValues.length - 1] + (i - baseValues.length + 1) * 200)
   }
   return extended
 }

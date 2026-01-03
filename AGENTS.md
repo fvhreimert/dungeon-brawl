@@ -3,14 +3,15 @@
 ## Project Structure & Module Organization
 - `src/`: React + TypeScript source. Entry is `src/main.tsx`; root layout in `src/App.tsx` with styles in `src/App.css` and global tokens in `src/index.css`.
 - `src/config/`: Centralized configuration (`gameConfig.ts`) for gameplay settings, UI labels, default players (including portraits).
-- `src/components/menu/`: Main menu components (`MainMenuScreen`) for game setup flow before entering the game.
+- `src/components/menu/`: Main menu components (`MainMenuScreen`, `QuizBuilderScreen`, `QuestionEditModal`) for game setup flow before entering the game.
+- `src/services/`: Service layer including `quizStorageService.ts` for custom quiz persistence (localStorage/Tauri filesystem).
 - `src/components/game/`: Feature components (`Game`, `GameBoard`, `Scoreboard`, `QuestionDialog`, `InventoryModal`, `PlayerSelectModal`, `ScoreAdjustModal`, `BlackMarketModal`) that render the Jeopardy flow. Each component has its own CSS file.
 - `src/features/`: Complex feature logic and components, organized by domain.
   - `features/actions/`: Contains logic for Dungeon Actions (Mad Seer, Frog of Fate, Golden Idol, Card Jester, Blood Sacrifice).
   - `features/quests/`: Quest system UI components (QuestIndicator, QuestModal) with pixel-art styling.
 - `src/components/ui/`: UI primitives, including 8bit components in `ui/8bit/` (buttons, badges, cards).
-- `src/hooks/`: Custom logic like `useJeopardyGame` for turn state, scoring, history (undo), and statistics. Also `useGlobalClickSound` for UI click feedback.
-- `src/types/`: Shared TypeScript types (e.g., `game.ts`, `quiz.ts`).
+- `src/hooks/`: Custom logic like `useJeopardyGame` for turn state, scoring, history (undo), and statistics. Also `useGlobalClickSound` for UI click feedback and `useQuizStorage` for custom quiz CRUD operations.
+- `src/types/`: Shared TypeScript types (e.g., `game.ts`, `quiz.ts`, `customQuiz.ts` for user-created quizzes).
 - `src/data/`: Game content such as `questions.json`.
   - `src/data/quizzes/`: Quiz JSON files following the template format. Each quiz has a `displayName` and array of `categories` with questions.
 - `src/utils/`: Utility functions for quiz loading (`quizLoader.ts`) and portrait management (`portraits.ts`).
@@ -27,26 +28,37 @@ The game starts with a main menu flow before entering the actual game board.
 ### Menu Flow
 1. **Main Menu** (`src/components/menu/MainMenuScreen.tsx`)
    - Displays "DUNGEON BRAWL" title with the November font
-   - Options: "Quiz from File" (active), "Generate Quiz" (active, grid-based layout for categories/descriptions)
+   - Options: "Quiz from File" (primary green button), "Create Quiz", "Generate Quiz"
    - Dark overlay on the dungeon background texture
+   - Three-color button scheme: Green (primary CTAs), Gray (secondary), Red (back/cancel)
 
 2. **Quiz Selection**
-   - Lists all available quizzes from `src/data/quizzes/`
-   - Quizzes are loaded via `src/utils/quizLoader.ts` which statically imports all quiz JSON files
-   - Each quiz displays its `displayName` property
+   - Lists all available quizzes from `src/data/quizzes/` and custom quizzes from storage
+   - Built-in quizzes loaded via `src/utils/quizLoader.ts` which statically imports all quiz JSON files
+   - Custom quizzes loaded from localStorage (web) or Tauri filesystem (desktop)
+   - Each quiz displays its `displayName` property with an "Edit" button
+   - Editing a built-in quiz creates a custom copy
 
-3. **Player Setup**
+3. **Create Quiz** (`src/components/menu/QuizBuilderScreen.tsx`)
+   - Full-screen grid-based quiz editor matching the game board style
+   - Configure 1-10 categories and 1-10 questions per category
+   - Click tiles to open question/answer edit modal
+   - Point values displayed on tiles (200, 400, 600... up to 2000)
+   - Actions: Save, Save & Play, Export JSON, Back
+   - Custom quizzes stored via `src/services/quizStorageService.ts`
+
+4. **Player Setup**
    - Configure number of players (2-8)
    - Each player can set a custom name
    - Each player can select a portrait from 40 available options
    - Used portraits are grayed out (can't be selected by multiple players)
    - Portrait picker modal shows all portraits in a grid
 
-4. **Game Settings** (`src/components/menu/GameSettingsScreen.tsx`)
+5. **Game Settings** (`src/components/menu/GameSettingsScreen.tsx`)
    - Configurable gameplay options before starting a game
    - Settings are converted to `RuntimeGameConfig` via `src/config/runtimeConfig.tsx`
    - Key settings include:
-     - **Points**: Starting points, tier values (100-500 default), score meter max
+     - **Points**: Starting points, tier values (200-1000 default), score meter max
      - **Gameplay**:
        - **Free Cards Per Turn**: Number of cards each player receives at turn start (0-10 or ∞ for player count - 1)
        - **Starting Rerolls**: Number of card rerolls each player starts with (default: 10, configured in `gameConfig.ts`)
@@ -80,7 +92,7 @@ Quizzes are JSON files in `src/data/quizzes/` following this structure:
   ]
 }
 ```
-- Point values are inferred based on question index (100, 200, 300, 400, 500 by default)
+- Point values are inferred based on question index (200, 400, 600, 800, 1000 by default)
 - The game board dynamically adjusts columns based on number of categories
 
 ### Adding New Quizzes

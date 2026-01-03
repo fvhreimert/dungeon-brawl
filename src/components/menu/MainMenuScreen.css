@@ -89,6 +89,24 @@
   padding: 16px 24px !important;
 }
 
+/* Primary action button - green for main CTAs */
+.menu-button-primary {
+  background: linear-gradient(180deg, #2a4a2a 0%, #1a3a1a 100%) !important;
+  border: 2px solid #4a7a4a !important;
+  color: #8effb9 !important;
+  box-shadow: 0 4px 0 #0a1a0a !important;
+}
+
+.menu-button-primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, #3a5a3a 0%, #2a4a2a 100%) !important;
+  border-color: #8effb9 !important;
+}
+
+.menu-button-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 /* Quiz Select */
 .quiz-select-card {
   max-height: 80vh;
@@ -118,6 +136,34 @@
   justify-content: center !important;
   padding: 16px 24px !important;
   font-size: 10px !important;
+}
+
+.quiz-list-divider {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  color: #ffb347;
+  text-transform: uppercase;
+  text-align: center;
+  padding: 12px 0 4px;
+  margin-top: 8px;
+  border-top: 2px dashed #333333;
+}
+
+.quiz-item-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.quiz-item-custom {
+  flex: 1;
+}
+
+.quiz-item-edit {
+  width: auto !important;
+  min-width: 70px;
+  padding: 16px 12px !important;
+  font-size: 9px !important;
 }
 
 .back-button {

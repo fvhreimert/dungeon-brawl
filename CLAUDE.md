@@ -20,13 +20,21 @@ npm run tauri:build  # Build Tauri desktop app
 
 ### Core Flow
 1. `App.tsx` → Menu or Game state
-2. `MainMenuScreen` → Quiz selection → Player setup → Game settings
+2. `MainMenuScreen` → Quiz selection (built-in or custom) / Create Quiz / Generate Quiz → Player setup → Game settings
 3. `Game.tsx` → Main game orchestration (board, scoreboard, modals, actions)
 4. `useJeopardyGame` hook → All game state, turn logic, card effects, scoring
 
+### Custom Quiz System
+- **Create/Edit:** `QuizBuilderScreen` provides a grid-based editor for custom quizzes
+- **Storage:** `quizStorageService.ts` abstracts localStorage (web) and Tauri filesystem (desktop)
+- **Types:** `customQuiz.ts` extends base Quiz with id, timestamps, isCustom flag
+- **Hook:** `useQuizStorage` provides React interface for quiz CRUD operations
+
 ### Key Directories
 - `src/config/` — Game configuration (`gameConfig.ts`), card weights/draw logic (`cardCatalog.ts`), runtime settings
+- `src/services/` — Service layer (`quizStorageService.ts` for custom quiz persistence)
 - `src/hooks/useJeopardyGame.ts` — Core game hook (~1500 lines): turns, scoring, card activation, quests, alliances
+- `src/hooks/useQuizStorage.ts` — Custom quiz storage hook (CRUD operations)
 - `src/data/cards.ts` — Card definitions (22 cards with themes, images, effects)
 - `src/features/cards/cardEffectRegistry.ts` — Card behavior implementations (passive effects, activation handlers)
 - `src/features/actions/` — Dungeon actions (Mad Seer, Frog of Fate, Golden Idol, Card Jester, Blood Sacrifice, Spider Web)
