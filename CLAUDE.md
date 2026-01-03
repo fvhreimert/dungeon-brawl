@@ -19,9 +19,9 @@ npm run tauri:build  # Build Tauri desktop app
 **Dungeon Brawl** is a retro pixel-art Jeopardy-style quiz game with strategic card-collecting mechanics. Built with React 19 + TypeScript + Vite, with a Tauri desktop wrapper.
 
 ### Core Flow
-1. `App.tsx` → Menu or Game state
-2. `MainMenuScreen` → Quiz selection (built-in or custom) / Create Quiz / Generate Quiz → Player setup → Game settings
-3. `Game.tsx` → Main game orchestration (board, scoreboard, modals, actions)
+1. `App.tsx` → Menu or Game state (handles save/resume orchestration)
+2. `MainMenuScreen` → Quiz selection / Create Quiz / Generate Quiz / Resume Game → Player setup → Game settings
+3. `Game.tsx` → Main game orchestration (board, scoreboard, modals, actions, auto-save after each turn)
 4. `useJeopardyGame` hook → All game state, turn logic, card effects, scoring
 
 ### Custom Quiz System
@@ -32,7 +32,7 @@ npm run tauri:build  # Build Tauri desktop app
 
 ### Key Directories
 - `src/config/` — Game configuration (`gameConfig.ts`), card weights/draw logic (`cardCatalog.ts`), runtime settings
-- `src/services/` — Service layer (`quizStorageService.ts` for custom quiz persistence)
+- `src/services/` — Service layer (`quizStorageService.ts` for quiz persistence, `gameStateStorageService.ts` for game save/resume)
 - `src/hooks/useJeopardyGame.ts` — Core game hook (~1500 lines): turns, scoring, card activation, quests, alliances
 - `src/hooks/useQuizStorage.ts` — Custom quiz storage hook (CRUD operations)
 - `src/data/cards.ts` — Card definitions (22 cards with themes, images, effects)

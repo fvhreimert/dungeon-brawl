@@ -25,6 +25,7 @@ import type {
   Quest,
   QuestId,
   PendingBlackMarket,
+  ResumedGameState,
 } from '@/types/game'
 import { CARDS, type CardDefinition } from '@/data/cards'
 import { gameConfig } from '@/config/gameConfig'
@@ -45,6 +46,8 @@ type UseJeopardyGameParams = {
   questionBank: QAItem[]
   onBlackMarketStart?: (playerIndex: number, playerName: string, cards: CardDefinition[]) => void
   onUndo?: (restoredBlackMarket: PendingBlackMarket | null) => void
+  onTurnEnd?: (state: ResumedGameState) => void
+  resumedState?: ResumedGameState
 }
 
 const createEmptyTurnTotals = () => ({
@@ -186,6 +189,8 @@ export function useJeopardyGame({
   questionBank,
   onBlackMarketStart,
   onUndo,
+  onTurnEnd,
+  resumedState,
 }: UseJeopardyGameParams) {
   const runtimeConfig = useRuntimeConfig()
   const questionLookup = useMemo(() => {
@@ -218,9 +223,10 @@ export function useJeopardyGame({
     [categories, pointValues, questionLookup],
   )
 
-  const [tiles, setTiles] = useState<Tile[]>(generatedTiles)
+  // Initialize state from resumedState if provided, otherwise use defaults
+  const [tiles, setTiles] = useState<Tile[]>(resumedState?.tiles ?? generatedTiles)
   const [players, setPlayers] = useState<Player[]>(
-    initialPlayers.map((player) => buildPlayerWithStats(player, runtimeConfig.mechanics.startingRerolls)),
+    resumedState?.players ?? initialPlayers.map((player) => buildPlayerWithStats(player, runtimeConfig.mechanics.startingRerolls)),
   )
   const playersRef = useRef<Player[]>(players)
   useEffect(() => {
@@ -229,19 +235,19 @@ export function useJeopardyGame({
   const applyScoreChangeRef = useRef<
     (targetIndex: number, delta: number, reason?: ScoreChangeReason) => void
   >(() => {})
-  const [activePlayerIndex, setActivePlayerIndex] = useState(0)
+  const [activePlayerIndex, setActivePlayerIndex] = useState(resumedState?.activePlayerIndex ?? 0)
   const [selectedTileId, setSelectedTileId] = useState<string | null>(null)
   const [answerRevealed, setAnswerRevealed] = useState(false)
-  const [history, setHistory] = useState<GameStateSnapshot[]>([])
-  const [gameStats, setGameStats] = useState<GameStatEntry[]>([])
-  const [puppetLocks, setPuppetLocks] = useState<Record<number, PuppetLock>>({})
-  const [frozenActions, setFrozenActions] = useState<FrozenActions>({})
-  const [alliances, setAlliances] = useState<Alliances>([])
-  const [goldenIdolBonus, setGoldenIdolBonus] = useState<number>(runtimeConfig.mechanics.goldenIdol.startBonus)
-  const [gameMetrics, setGameMetrics] = useState<GameMetrics>(() =>
-    createInitialGameMetrics(initialPlayers.length)
+  const [history, setHistory] = useState<GameStateSnapshot[]>(resumedState?.history ?? [])
+  const [gameStats, setGameStats] = useState<GameStatEntry[]>(resumedState?.gameStats ?? [])
+  const [puppetLocks, setPuppetLocks] = useState<Record<number, PuppetLock>>(resumedState?.puppetLocks ?? {})
+  const [frozenActions, setFrozenActions] = useState<FrozenActions>(resumedState?.frozenActions ?? {})
+  const [alliances, setAlliances] = useState<Alliances>(resumedState?.alliances ?? [])
+  const [goldenIdolBonus, setGoldenIdolBonus] = useState<number>(resumedState?.goldenIdolBonus ?? runtimeConfig.mechanics.goldenIdol.startBonus)
+  const [gameMetrics, setGameMetrics] = useState<GameMetrics>(
+    resumedState?.gameMetrics ?? createInitialGameMetrics(initialPlayers.length)
   )
-  const turnCountRef = useRef(0)
+  const turnCountRef = useRef(resumedState?.turnCount ?? 0)
   const pendingBlackMarketRef = useRef<PendingBlackMarket | null>(null)
   const activePuppetLockCategory = puppetLocks[activePlayerIndex]?.category ?? null
 
@@ -336,10 +342,23 @@ export function useJeopardyGame({
   )
 
   // Draw cards for the first player at the start of the game (Black Market)
+  // If resuming with pending black market, restore it instead of drawing new cards
   const hasDrawnFirstTurnCardsRef = useRef(false)
   useEffect(() => {
     if (hasDrawnFirstTurnCardsRef.current || !onBlackMarketStart) return
     hasDrawnFirstTurnCardsRef.current = true
+
+    // If resuming with a pending Black Market, restore it with the same cards
+    if (resumedState?.pendingBlackMarket) {
+      const { playerIndex, playerName, cards } = resumedState.pendingBlackMarket
+      pendingBlackMarketRef.current = {
+        playerIndex,
+        playerName,
+        cards: [...cards], // Copy the cards array
+      }
+      onBlackMarketStart(playerIndex, playerName, cards)
+      return
+    }
 
     const blackMarketConfig = runtimeConfig.mechanics.blackMarket
     if (!blackMarketConfig?.enabled) return
@@ -1507,6 +1526,34 @@ export function useJeopardyGame({
     pendingBlackMarketRef.current = null
   }, [activePlayerIndex, incrementPlayerMetric])
 
+  // Get serializable state for saving
+  const getSerializableState = useCallback((): ResumedGameState => {
+    return {
+      tiles,
+      players,
+      activePlayerIndex,
+      puppetLocks,
+      frozenActions,
+      alliances,
+      goldenIdolBonus,
+      gameMetrics,
+      gameStats,
+      history,
+      turnCount: turnCountRef.current,
+      pendingBlackMarket: pendingBlackMarketRef.current,
+    }
+  }, [tiles, players, activePlayerIndex, puppetLocks, frozenActions, alliances, goldenIdolBonus, gameMetrics, gameStats, history])
+
+  // Track turn changes for auto-save
+  const prevTurnCountRef = useRef(turnCountRef.current)
+  useEffect(() => {
+    const currentTurnCount = turnCountRef.current
+    if (currentTurnCount > prevTurnCountRef.current && onTurnEnd) {
+      prevTurnCountRef.current = currentTurnCount
+      onTurnEnd(getSerializableState())
+    }
+  }, [activePlayerIndex, onTurnEnd, getSerializableState])
+
   const consumeReroll = useCallback((
     playerIndex: number,
     currentCards: CardDefinition[],
@@ -1600,5 +1647,6 @@ export function useJeopardyGame({
     resetQuestProgress,
     claimQuestReward,
     updateCardState,
+    getSerializableState,
   }
 }

@@ -28,9 +28,10 @@ The game starts with a main menu flow before entering the actual game board.
 ### Menu Flow
 1. **Main Menu** (`src/components/menu/MainMenuScreen.tsx`)
    - Displays "DUNGEON BRAWL" title with the November font
-   - Options: "Quiz from File" (primary green button), "Create Quiz", "Generate Quiz"
+   - Options: "Quiz from File", "Create Quiz", "Generate Quiz", "Resume Game"
+   - All buttons use gray secondary styling
+   - "Resume Game" is disabled when no saved game exists
    - Dark overlay on the dungeon background texture
-   - Three-color button scheme: Green (primary CTAs), Gray (secondary), Red (back/cancel)
 
 2. **Quiz Selection**
    - Lists all available quizzes from `src/data/quizzes/` and custom quizzes from storage
@@ -291,6 +292,26 @@ See `docs/quest-system-guide.md` for detailed implementation guidance.
   - `onBlackMarketStart` callback in `useJeopardyGame` triggers the modal.
   - Modal reuses `board-shell` class from `GameBoard.css` to maintain exact sizing.
   - Scoreboard receives `isBlackMarketActive` prop to style active player name red.
+
+## Game Save/Resume System
+The game automatically saves state after each turn, allowing recovery from crashes or accidental closures.
+
+### Storage
+- **Service:** `src/services/gameStateStorageService.ts` (localStorage for web, Tauri filesystem for desktop)
+- **Hook:** `src/hooks/useGameSave.ts` provides `hasSavedGame`, `saveGame`, `loadSavedGame`, `clearSave`
+- **Types:** `SavedGameState`, `SavedGameSettings`, `ResumedGameState` in `src/types/game.ts`
+
+### Save Behavior
+- **Auto-save:** Game state is saved after each turn ends (when `activePlayerIndex` changes)
+- **Saved data includes:** tiles, players, activePlayerIndex, puppetLocks, frozenActions, alliances, goldenIdolBonus, gameMetrics, gameStats, history, turnCount, pendingBlackMarket
+- **Pending Black Market:** If the save happens while the Black Market modal is open, the offered cards are preserved
+
+### Resume Behavior
+- **Resume button:** Always visible in main menu, disabled when no save exists
+- **On resume:** Save is loaded but NOT deleted immediately
+- **Save replacement:** The save file is overwritten when the next turn ends
+- **Black Market restoration:** If resuming with pending Black Market, the same cards are offered again
+- **Save cleared:** Only when the game ends normally (all tiles completed)
 
 ### Coalition (Alliance Mechanic)
 - **Card:** `coalition` in `src/data/cards.ts`

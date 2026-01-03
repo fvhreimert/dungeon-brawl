@@ -7,9 +7,10 @@ import { generateQuizCategories, type CategoryInput } from '@/services/geminiSer
 import { GameSettingsScreen, type GameplaySettings } from './GameSettingsScreen'
 import { QuizBuilderScreen } from './QuizBuilderScreen'
 import { useQuizStorage } from '@/hooks/useQuizStorage'
+import { useGameSave } from '@/hooks/useGameSave'
 import type { Quiz, QuizFile } from '@/types/quiz'
 import { createCustomQuiz, type CustomQuiz, type CustomQuizMeta } from '@/types/customQuiz'
-import type { PlayerConfig, QAItem } from '@/types/game'
+import type { PlayerConfig, QAItem, SavedGameState } from '@/types/game'
 import './MainMenuScreen.css'
 
 type MenuState = 'main' | 'quiz-select' | 'generate-quiz' | 'generating' | 'create-quiz' | 'player-setup' | 'game-settings'
@@ -27,6 +28,7 @@ export type GameSettings = {
 
 type MainMenuScreenProps = {
   onStartGame: (settings: GameSettings) => void
+  onResumeGame: (savedState: SavedGameState) => void
 }
 
 type PlayerSetupData = {
@@ -36,8 +38,9 @@ type PlayerSetupData = {
 
 const DEFAULT_PLAYER_NAMES = ['Player 1', 'Player 2', 'Player 3', 'Player 4']
 
-export function MainMenuScreen({ onStartGame }: MainMenuScreenProps) {
+export function MainMenuScreen({ onStartGame, onResumeGame }: MainMenuScreenProps) {
   const [menuState, setMenuState] = useState<MenuState>('main')
+  const { hasSavedGame, loadSavedGame } = useGameSave()
   const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null)
   const [playerCount, setPlayerCount] = useState(4)
   const [playerSetups, setPlayerSetups] = useState<PlayerSetupData[]>(() =>
@@ -64,6 +67,13 @@ export function MainMenuScreen({ onStartGame }: MainMenuScreenProps) {
   const { quizzes: customQuizzes, loadQuiz: loadCustomQuiz } = useQuizStorage()
 
   const quizFiles = getAvailableQuizzes()
+
+  const handleResumeGame = async () => {
+    const savedState = await loadSavedGame()
+    if (savedState) {
+      onResumeGame(savedState)
+    }
+  }
 
   const handleQuizFromFile = () => {
     setMenuState('quiz-select')
@@ -290,7 +300,8 @@ export function MainMenuScreen({ onStartGame }: MainMenuScreenProps) {
               <div className="main-menu-buttons">
                 <RetroButton
                   font="retro"
-                  className="menu-button menu-button-primary"
+                  className="menu-button"
+                  variant="secondary"
                   onClick={handleQuizFromFile}
                 >
                   Quiz from File
@@ -310,6 +321,15 @@ export function MainMenuScreen({ onStartGame }: MainMenuScreenProps) {
                   onClick={handleGenerateQuiz}
                 >
                   Generate Quiz
+                </RetroButton>
+                <RetroButton
+                  font="retro"
+                  className="menu-button"
+                  variant="secondary"
+                  onClick={handleResumeGame}
+                  disabled={!hasSavedGame}
+                >
+                  Resume Game
                 </RetroButton>
               </div>
             </div>

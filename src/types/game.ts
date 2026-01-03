@@ -219,3 +219,39 @@ export type GameMetrics = {
   gameStartTime: number
   totalTurns: number
 }
+
+// Saved game state for resume functionality
+export type SavedGameSettings = {
+  quizDisplayName: string
+  quizCategories: { name: string; questions: { q: string; a: string }[] }[]
+  categories: string[]
+  pointValues: number[]
+  questionBank: QAItem[]
+  players: PlayerConfig[]
+  gameplaySettings: Record<string, unknown>
+}
+
+export type SavedGameState = {
+  // Initial game settings (needed to restart the game)
+  gameSettings: SavedGameSettings
+  // Current game state
+  gameState: {
+    tiles: Tile[]
+    players: Player[]
+    activePlayerIndex: number
+    puppetLocks: Record<number, PuppetLock>
+    frozenActions: FrozenActions
+    alliances: Alliances
+    goldenIdolBonus: number
+    gameMetrics: GameMetrics
+    gameStats: GameStatEntry[]
+    history: GameStateSnapshot[]
+    turnCount: number
+    pendingBlackMarket: PendingBlackMarket | null
+  }
+  // Metadata
+  savedAt: number
+}
+
+// Type for resuming game in useJeopardyGame hook
+export type ResumedGameState = SavedGameState['gameState']

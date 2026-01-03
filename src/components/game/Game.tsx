@@ -21,7 +21,7 @@ import { Scoreboard } from '@/components/game/Scoreboard'
 import { useJeopardyGame } from '@/hooks/useJeopardyGame'
 import { gameConfig } from '@/config/gameConfig'
 import { useRuntimeConfig } from '@/config/runtimeConfig'
-import type { QAItem, Tile, PlayerConfig, CardInstance, ActionId, UpgradeableAction, Quest, PendingBlackMarket } from '@/types/game'
+import type { QAItem, Tile, PlayerConfig, CardInstance, ActionId, UpgradeableAction, Quest, PendingBlackMarket, ResumedGameState } from '@/types/game'
 import { type CardDefinition } from '@/data/cards'
 
 import cardJesterIcon from '@/assets/images/actions/card_jester.png'
@@ -83,9 +83,12 @@ export type GameProps = {
   pointValues: number[]
   players: PlayerConfig[]
   questionBank: QAItem[]
+  resumedState?: ResumedGameState
+  onTurnEnd?: (state: ResumedGameState) => void
+  onGameEnd?: () => void
 }
 
-export function Game({ categories, pointValues, players: initialPlayers, questionBank }: GameProps) {
+export function Game({ categories, pointValues, players: initialPlayers, questionBank, resumedState, onTurnEnd, onGameEnd }: GameProps) {
   const runtimeConfig = useRuntimeConfig()
   const [spiderIndex, setSpiderIndex] = useState(1)
   const [isFullscreen, setIsFullscreen] = useState(false)
@@ -176,8 +179,10 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
   } = useJeopardyGame({
     categories,
     pointValues,
-    players: initialPlayers,
+    players: resumedState?.players ?? initialPlayers,
     questionBank,
+    resumedState,
+    onTurnEnd,
     onBlackMarketStart: (playerIndex, playerName, cards) => {
       setBlackMarketData({ playerIndex, playerName, cards })
       setShowTurnIntro(true)
@@ -741,13 +746,17 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
       if (gameEndTime === null) {
         setGameEndTime(Date.now())
       }
+      // Clear saved game when game ends normally
+      if (onGameEnd) {
+        onGameEnd()
+      }
       // Small delay to let the last question animation complete
       const timer = setTimeout(() => {
         setShowGameOver(true)
       }, 1500)
       return () => clearTimeout(timer)
     }
-  }, [isGameOver, showGameOver, showStats, gameEndTime])
+  }, [isGameOver, showGameOver, showStats, gameEndTime, onGameEnd])
 
   const handleViewStats = () => {
     setShowGameOver(false)
