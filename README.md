@@ -8,7 +8,6 @@
   <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react" alt="React 19"/>
   <img src="https://img.shields.io/badge/TypeScript-5.6-3178C6?style=flat-square&logo=typescript" alt="TypeScript"/>
   <img src="https://img.shields.io/badge/Vite-6.0-646CFF?style=flat-square&logo=vite" alt="Vite"/>
-  <img src="https://img.shields.io/badge/Tauri-2.0-FFC131?style=flat-square&logo=tauri" alt="Tauri"/>
 </p>
 
 ---
@@ -172,16 +171,6 @@ npm run build
 npm run preview
 ```
 
-### Desktop App (Tauri)
-
-```bash
-# Development
-npm run tauri:dev
-
-# Build executable
-npm run tauri:build
-```
-
 ---
 
 ## Tech Stack
@@ -189,7 +178,6 @@ npm run tauri:build
 - **Frontend**: React 19 + TypeScript
 - **Styling**: Tailwind CSS + Custom pixel art CSS
 - **Build Tool**: Vite 6
-- **Desktop**: Tauri 2.0
 - **AI Generation**: Google Gemini API
 - **Fonts**: Press Start 2P, November, Arcade Classic
 

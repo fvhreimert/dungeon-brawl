@@ -5,6 +5,9 @@ GAME_MANUAL.md
 docs/
 API/
 
+# Tauri desktop app (local dev only)
+src-tauri/
+
 # Claude Code local settings
 .claude/
 
