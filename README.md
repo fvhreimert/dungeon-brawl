@@ -31,7 +31,7 @@ Perfect for game nights, parties, or any gathering where you want knowledge *and
 ### Jeopardy-Style Quiz Board
 - Select questions from a grid of categories and point values
 - Correct answers earn points, wrong answers deduct them
-- Hidden multipliers (x2, x3) on random tiles for high-risk, high-reward gameplay
+- Use Frog of Fate to add multipliers to tiles for high-risk, high-reward gameplay
 
 ### 22 Unique Cards
 Collect and play cards with powerful effects:
