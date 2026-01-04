@@ -66,24 +66,32 @@ Card.displayName = "Card";
 const CardImage = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & { src: string; alt?: string }
->(({ className, src, alt, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "card-visual-well pixel-card-well-bg w-full flex justify-center items-center relative border-b-2",
-      className
-    )}
-    style={{ aspectRatio: "1 / 1" }}
-    {...props}
-  >
-    <img
-      src={src}
-      alt={alt}
-      className="w-full h-full object-contain flex-shrink-0"
-      style={{ imageRendering: "pixelated" }}
-    />
-  </div>
-));
+>(({ className, src, alt, ...props }, ref) => {
+  const [isLoaded, setIsLoaded] = React.useState(false);
+
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "card-visual-well pixel-card-well-bg w-full flex justify-center items-center relative border-b-2",
+        className
+      )}
+      style={{ aspectRatio: "1 / 1" }}
+      {...props}
+    >
+      <img
+        src={src}
+        alt={alt}
+        className={cn(
+          "w-full h-full object-contain flex-shrink-0 transition-opacity duration-300",
+          isLoaded ? "opacity-100" : "opacity-0"
+        )}
+        style={{ imageRendering: "pixelated" }}
+        onLoad={() => setIsLoaded(true)}
+      />
+    </div>
+  );
+});
 CardImage.displayName = "CardImage";
 
 const CardTitle = React.forwardRef<

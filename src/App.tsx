@@ -8,11 +8,13 @@ import { RuntimeConfigProvider, gameplaySettingsToRuntimeConfig, type RuntimeGam
 import { useGameSave } from '@/hooks/useGameSave'
 import type { SavedGameState, ResumedGameState } from '@/types/game'
 import type { GameplaySettings } from '@/components/menu/GameSettingsScreen'
+import { useAssetPreloader } from '@/hooks/useAssetPreloader'
 
 type AppState = 'menu' | 'game'
 
 function App() {
   useGlobalClickSound()
+  useAssetPreloader() // Preload assets in background
   const { saveGame, clearSave } = useGameSave()
 
   const [appState, setAppState] = useState<AppState>('menu')
