@@ -773,7 +773,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     window.location.reload()
   }
 
-  const runFrogSelection = async (count: number = 1) => {
+  const runFrogSelection = async (count: number = 1, multiplier: number = 2) => {
     const openTiles = getOpenTiles()
     if (openTiles.length === 0) return
 
@@ -829,7 +829,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     // Apply multiplier to each landed tile
     // If multiple frogs land on same tile, applyTileMultiplier is called multiple times
     finalTileIds.forEach(id => {
-      applyTileMultiplier(id, 2)
+      applyTileMultiplier(id, multiplier)
     })
     
     playLand()
@@ -858,8 +858,15 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     updateQuestProgress(activePlayerIndex, 'frog_quest', 1)
 
     const isUpgraded = isActionUpgraded('frog_of_fate')
+    const frogCount = isUpgraded
+      ? runtimeConfig.mechanics.frogOfFate.frogsUpgraded
+      : runtimeConfig.mechanics.frogOfFate.frogs
+    const multiplier = isUpgraded
+      ? runtimeConfig.mechanics.frogOfFate.multiplierUpgraded
+      : runtimeConfig.mechanics.frogOfFate.multiplier
+
     playFrogStart()
-    runFrogSelection(isUpgraded ? 2 : 1)
+    runFrogSelection(frogCount, multiplier)
   }
 
   const handleIdolClick = async () => {
@@ -876,7 +883,11 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     updateQuestProgress(activePlayerIndex, 'idol_quest', 1)
 
     const isUpgraded = isActionUpgraded('golden_idol')
-    await triggerIdol(tiles, updateTileModifiers, isUpgraded ? 2 : 1)
+    const survivorCount = isUpgraded
+      ? runtimeConfig.mechanics.goldenIdol.survivorsUpgraded
+      : runtimeConfig.mechanics.goldenIdol.survivors
+
+    await triggerIdol(tiles, updateTileModifiers, survivorCount)
 
     resetGoldenIdolBonus()
   }

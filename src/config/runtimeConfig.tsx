@@ -40,6 +40,12 @@ export type RuntimeGameConfig = {
       wordsMinUpgraded: number
       wordsMaxUpgraded: number
     }
+    frogOfFate: {
+      frogs: number
+      frogsUpgraded: number
+      multiplier: number
+      multiplierUpgraded: number
+    }
     actionLimits: {
       cardJester: number
       madSeer: number
@@ -52,6 +58,8 @@ export type RuntimeGameConfig = {
       startBonus: number
       pointsMin: number
       pointsMax: number
+      survivors: number
+      survivorsUpgraded: number
     }
     bloodSacrifice: {
       maxSacrifice: number
@@ -112,6 +120,12 @@ const defaultRuntimeConfig: RuntimeGameConfig = {
       wordsMinUpgraded: gameConfig.mechanics.madSeer.wordsMinUpgraded,
       wordsMaxUpgraded: gameConfig.mechanics.madSeer.wordsMaxUpgraded,
     },
+    frogOfFate: {
+      frogs: gameConfig.mechanics.frogOfFate.frogs,
+      frogsUpgraded: gameConfig.mechanics.frogOfFate.frogsUpgraded,
+      multiplier: gameConfig.mechanics.frogOfFate.multiplier,
+      multiplierUpgraded: gameConfig.mechanics.frogOfFate.multiplierUpgraded,
+    },
     actionLimits: {
       cardJester: gameConfig.mechanics.actionLimits.cardJester,
       madSeer: gameConfig.mechanics.actionLimits.madSeer,
@@ -124,6 +138,8 @@ const defaultRuntimeConfig: RuntimeGameConfig = {
       startBonus: gameConfig.mechanics.goldenIdol.startBonus,
       pointsMin: gameConfig.mechanics.goldenIdol.pointsMin,
       pointsMax: gameConfig.mechanics.goldenIdol.pointsMax,
+      survivors: gameConfig.mechanics.goldenIdol.survivors,
+      survivorsUpgraded: gameConfig.mechanics.goldenIdol.survivorsUpgraded,
     },
     bloodSacrifice: {
       maxSacrifice: gameConfig.mechanics.bloodSacrifice.maxSacrifice,
@@ -191,6 +207,12 @@ export function gameplaySettingsToRuntimeConfig(settings: GameplaySettings): Run
         wordsMinUpgraded: settings.madSeerWordsMinUpgraded,
         wordsMaxUpgraded: settings.madSeerWordsMaxUpgraded,
       },
+      frogOfFate: {
+        frogs: settings.frogOfFateFrogs,
+        frogsUpgraded: settings.frogOfFateFrogsUpgraded,
+        multiplier: settings.frogOfFateMultiplier,
+        multiplierUpgraded: settings.frogOfFateMultiplierUpgraded,
+      },
       actionLimits: {
         cardJester: settings.cardJesterLimit === -1 ? Infinity : settings.cardJesterLimit,
         madSeer: settings.madSeerLimit === -1 ? Infinity : settings.madSeerLimit,
@@ -203,6 +225,8 @@ export function gameplaySettingsToRuntimeConfig(settings: GameplaySettings): Run
         startBonus: settings.goldenIdolStartBonus,
         pointsMin: settings.goldenIdolPointsMin,
         pointsMax: settings.goldenIdolPointsMax,
+        survivors: settings.goldenIdolSurvivors,
+        survivorsUpgraded: settings.goldenIdolSurvivorsUpgraded,
       },
       bloodSacrifice: {
         maxSacrifice: settings.bloodSacrificeMax,

@@ -73,8 +73,9 @@ npm run tauri:build  # Build Tauri desktop app
 **Configurable Mechanics**:
 - **Card Weights**: Base draw weight for all 21 cards (0-20 scale)
 - **Black Market**: Cards shown per turn, enabled/disabled
-- **Golden Idol**: Points per turn range (min/max), start bonus
+- **Golden Idol**: Points per turn range (min/max), start bonus, survivor count
 - **Blood Sacrifice**: Max sacrifice amounts (normal/upgraded)
+- **Frog of Fate**: Blessings (frog count), Multiplier values
 - **Spider Web**: Rerolls per isopod/sheep, upgrades per sheep
 - **Treasure Island**: Value multiplier, curse penalty %, curse increase rate, initial curse chance
 - **Actions**: Uses per turn, limits for Card Jester, Mad Seer, Frog of Fate, etc.

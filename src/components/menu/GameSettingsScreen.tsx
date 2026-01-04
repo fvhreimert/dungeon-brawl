@@ -28,6 +28,10 @@ export type GameplaySettings = {
   madSeerWordsMinUpgraded: number
   madSeerWordsMaxUpgraded: number
   frogOfFatePrice: number
+  frogOfFateFrogs: number
+  frogOfFateFrogsUpgraded: number
+  frogOfFateMultiplier: number
+  frogOfFateMultiplierUpgraded: number
   cardJesterLimit: number
   madSeerLimit: number
   frogOfFateLimit: number
@@ -35,6 +39,8 @@ export type GameplaySettings = {
   goldenIdolStartBonus: number
   goldenIdolPointsMin: number
   goldenIdolPointsMax: number
+  goldenIdolSurvivors: number
+  goldenIdolSurvivorsUpgraded: number
   bloodSacrificeLimit: number
   bloodSacrificeMax: number
   bloodSacrificeMaxUpgraded: number
@@ -79,6 +85,10 @@ const DEFAULT_SETTINGS: GameplaySettings = {
   madSeerWordsMinUpgraded: gameConfig.mechanics.madSeer.wordsMinUpgraded,
   madSeerWordsMaxUpgraded: gameConfig.mechanics.madSeer.wordsMaxUpgraded,
   frogOfFatePrice: gameConfig.mechanics.actionPrices.frogOfFate,
+  frogOfFateFrogs: gameConfig.mechanics.frogOfFate.frogs,
+  frogOfFateFrogsUpgraded: gameConfig.mechanics.frogOfFate.frogsUpgraded,
+  frogOfFateMultiplier: gameConfig.mechanics.frogOfFate.multiplier,
+  frogOfFateMultiplierUpgraded: gameConfig.mechanics.frogOfFate.multiplierUpgraded,
   cardJesterLimit: gameConfig.mechanics.actionLimits.cardJester,
   madSeerLimit: gameConfig.mechanics.actionLimits.madSeer,
   frogOfFateLimit: gameConfig.mechanics.actionLimits.frogOfFate,
@@ -86,6 +96,8 @@ const DEFAULT_SETTINGS: GameplaySettings = {
   goldenIdolStartBonus: gameConfig.mechanics.goldenIdol.startBonus,
   goldenIdolPointsMin: gameConfig.mechanics.goldenIdol.pointsMin,
   goldenIdolPointsMax: gameConfig.mechanics.goldenIdol.pointsMax,
+  goldenIdolSurvivors: gameConfig.mechanics.goldenIdol.survivors,
+  goldenIdolSurvivorsUpgraded: gameConfig.mechanics.goldenIdol.survivorsUpgraded,
   bloodSacrificeLimit: gameConfig.mechanics.actionLimits.bloodSacrifice === Infinity ? -1 : gameConfig.mechanics.actionLimits.bloodSacrifice,
   bloodSacrificeMax: gameConfig.mechanics.bloodSacrifice.maxSacrifice,
   bloodSacrificeMaxUpgraded: gameConfig.mechanics.bloodSacrifice.maxSacrificeUpgraded,
@@ -173,6 +185,7 @@ type SettingRowProps = {
   step?: number
   suffix?: string
   isInfinity?: boolean
+  options?: number[] // Added optional options array
 }
 
 type SettingToggleProps = {
@@ -199,11 +212,16 @@ function SettingToggle({ label, value, onChange }: SettingToggleProps) {
   )
 }
 
-function SettingRow({ label, value, onChange, min = 0, max = 9999, step = 1, suffix = '', isInfinity = false }: SettingRowProps) {
+function SettingRow({ label, value, onChange, min = 0, max = 9999, step = 1, suffix = '', isInfinity = false, options }: SettingRowProps) {
   const displayValue = isInfinity && value === -1 ? '∞' : value.toString()
   
   const handleDecrease = () => {
-    if (isInfinity && value === -1) {
+    if (options) {
+      const currentIndex = options.indexOf(value)
+      if (currentIndex > 0) {
+        onChange(options[currentIndex - 1])
+      }
+    } else if (isInfinity && value === -1) {
       onChange(max)
     } else if (value - step >= min) {
       onChange(value - step)
@@ -211,7 +229,12 @@ function SettingRow({ label, value, onChange, min = 0, max = 9999, step = 1, suf
   }
   
   const handleIncrease = () => {
-    if (isInfinity && value === max) {
+    if (options) {
+      const currentIndex = options.indexOf(value)
+      if (currentIndex < options.length - 1) {
+        onChange(options[currentIndex + 1])
+      }
+    } else if (isInfinity && value === max) {
       onChange(-1)
     } else if (value + step <= max) {
       onChange(value + step)
@@ -229,7 +252,7 @@ function SettingRow({ label, value, onChange, min = 0, max = 9999, step = 1, suf
           variant="secondary"
           className="setting-btn"
           onClick={handleDecrease}
-          disabled={!isInfinity && value <= min}
+          disabled={options ? options.indexOf(value) <= 0 : (!isInfinity && value <= min)}
         >
           -
         </RetroButton>
@@ -241,7 +264,7 @@ function SettingRow({ label, value, onChange, min = 0, max = 9999, step = 1, suf
           variant="secondary"
           className="setting-btn"
           onClick={handleIncrease}
-          disabled={!isInfinity && value >= max}
+          disabled={options ? options.indexOf(value) >= options.length - 1 : (!isInfinity && value >= max)}
         >
           +
         </RetroButton>
@@ -252,6 +275,8 @@ function SettingRow({ label, value, onChange, min = 0, max = 9999, step = 1, suf
 
 export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenProps) {
   const [settings, setSettings] = useState<GameplaySettings>(DEFAULT_SETTINGS)
+
+  const FROG_MULTIPLIER_OPTIONS = [2, 4, 8, 16, 32, 64, 128]
 
   // Calculate expected treasure gold based on current settings
   const treasureStats = useMemo(() => calculateTreasureExpectedValue(
@@ -303,7 +328,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.startingPoints}
                 onChange={(val) => updateSetting('startingPoints', val)}
                 min={0}
-                max={5000}
+                max={99999}
                 step={100}
               />
               <SettingRow
@@ -311,7 +336,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.pointTier1}
                 onChange={(val) => updateSetting('pointTier1', val)}
                 min={50}
-                max={1000}
+                max={99999}
                 step={50}
               />
               <SettingRow
@@ -319,7 +344,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.pointTier2}
                 onChange={(val) => updateSetting('pointTier2', val)}
                 min={50}
-                max={1000}
+                max={99999}
                 step={50}
               />
               <SettingRow
@@ -327,7 +352,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.pointTier3}
                 onChange={(val) => updateSetting('pointTier3', val)}
                 min={50}
-                max={1000}
+                max={99999}
                 step={50}
               />
               <SettingRow
@@ -335,7 +360,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.pointTier4}
                 onChange={(val) => updateSetting('pointTier4', val)}
                 min={50}
-                max={1000}
+                max={99999}
                 step={50}
               />
               <SettingRow
@@ -343,7 +368,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.pointTier5}
                 onChange={(val) => updateSetting('pointTier5', val)}
                 min={50}
-                max={1000}
+                max={99999}
                 step={50}
               />
             </div>
@@ -356,7 +381,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.spiderSenseBonusPerLevel}
                 onChange={(val) => updateSetting('spiderSenseBonusPerLevel', val)}
                 min={1}
-                max={50}
+                max={1000}
                 step={1}
                 suffix="%"
               />
@@ -365,7 +390,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.spiderSenseMaxLevel}
                 onChange={(val) => updateSetting('spiderSenseMaxLevel', val)}
                 min={1}
-                max={20}
+                max={100}
                 step={1}
               />
             </div>
@@ -378,7 +403,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.cursedCoinDurationTurns}
                 onChange={(val) => updateSetting('cursedCoinDurationTurns', val)}
                 min={1}
-                max={30}
+                max={100}
                 step={1}
                 suffix=" turns"
               />
@@ -387,7 +412,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.cursedCoinValue}
                 onChange={(val) => updateSetting('cursedCoinValue', val)}
                 min={100}
-                max={2000}
+                max={99999}
                 step={100}
               />
             </div>
@@ -400,7 +425,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.madSeerPrice}
                 onChange={(val) => updateSetting('madSeerPrice', val)}
                 min={0}
-                max={500}
+                max={9999}
                 step={25}
               />
               <SettingRow
@@ -408,7 +433,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.madSeerWordsMin}
                 onChange={(val) => updateSetting('madSeerWordsMin', val)}
                 min={1}
-                max={20}
+                max={100}
                 step={1}
               />
               <SettingRow
@@ -416,7 +441,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.madSeerWordsMax}
                 onChange={(val) => updateSetting('madSeerWordsMax', val)}
                 min={1}
-                max={20}
+                max={100}
                 step={1}
               />
               <SettingRow
@@ -424,7 +449,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.madSeerWordsMinUpgraded}
                 onChange={(val) => updateSetting('madSeerWordsMinUpgraded', val)}
                 min={1}
-                max={30}
+                max={100}
                 step={1}
               />
               <SettingRow
@@ -432,7 +457,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.madSeerWordsMaxUpgraded}
                 onChange={(val) => updateSetting('madSeerWordsMaxUpgraded', val)}
                 min={1}
-                max={30}
+                max={100}
                 step={1}
               />
               <SettingRow
@@ -440,7 +465,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.madSeerLimit}
                 onChange={(val) => updateSetting('madSeerLimit', val)}
                 min={1}
-                max={10}
+                max={999}
                 step={1}
                 isInfinity
               />
@@ -454,7 +479,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.goldenIdolStartBonus}
                 onChange={(val) => updateSetting('goldenIdolStartBonus', val)}
                 min={0}
-                max={500}
+                max={99999}
                 step={5}
               />
               <SettingRow
@@ -462,7 +487,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.goldenIdolPointsMin}
                 onChange={(val) => updateSetting('goldenIdolPointsMin', val)}
                 min={0}
-                max={200}
+                max={99999}
                 step={5}
               />
               <SettingRow
@@ -470,15 +495,31 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.goldenIdolPointsMax}
                 onChange={(val) => updateSetting('goldenIdolPointsMax', val)}
                 min={5}
-                max={500}
+                max={99999}
                 step={5}
+              />
+              <SettingRow
+                label="Survivors"
+                value={settings.goldenIdolSurvivors}
+                onChange={(val) => updateSetting('goldenIdolSurvivors', val)}
+                min={1}
+                max={20}
+                step={1}
+              />
+              <SettingRow
+                label="Survivors (Upgraded)"
+                value={settings.goldenIdolSurvivorsUpgraded}
+                onChange={(val) => updateSetting('goldenIdolSurvivorsUpgraded', val)}
+                min={1}
+                max={20}
+                step={1}
               />
               <SettingRow
                 label="Limit (per turn)"
                 value={settings.goldenIdolLimit}
                 onChange={(val) => updateSetting('goldenIdolLimit', val)}
                 min={1}
-                max={10}
+                max={999}
                 step={1}
                 isInfinity
               />
@@ -492,7 +533,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.treasureValueMultiplier}
                 onChange={(val) => updateSetting('treasureValueMultiplier', val)}
                 min={100}
-                max={1000}
+                max={10000}
                 step={50}
                 suffix="%"
               />
@@ -556,7 +597,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.startingRerolls}
                 onChange={(val) => updateSetting('startingRerolls', val)}
                 min={0}
-                max={50}
+                max={999}
                 step={1}
               />
               <SettingToggle
@@ -582,7 +623,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.allianceBaseDurationMultiplier}
                 onChange={(val) => updateSetting('allianceBaseDurationMultiplier', val)}
                 min={1}
-                max={10}
+                max={100}
                 step={1}
                 suffix="x players"
               />
@@ -596,7 +637,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.cardJesterPrice}
                 onChange={(val) => updateSetting('cardJesterPrice', val)}
                 min={0}
-                max={500}
+                max={9999}
                 step={25}
               />
               <SettingRow
@@ -604,7 +645,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.cardJesterCards}
                 onChange={(val) => updateSetting('cardJesterCards', val)}
                 min={1}
-                max={5}
+                max={50}
                 step={1}
               />
               <SettingRow
@@ -612,7 +653,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.cardJesterCardsUpgraded}
                 onChange={(val) => updateSetting('cardJesterCardsUpgraded', val)}
                 min={1}
-                max={10}
+                max={50}
                 step={1}
               />
               <SettingRow
@@ -620,7 +661,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.cardJesterLimit}
                 onChange={(val) => updateSetting('cardJesterLimit', val)}
                 min={1}
-                max={10}
+                max={999}
                 step={1}
                 isInfinity
               />
@@ -634,15 +675,45 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.frogOfFatePrice}
                 onChange={(val) => updateSetting('frogOfFatePrice', val)}
                 min={0}
-                max={500}
+                max={9999}
                 step={25}
+              />
+              <SettingRow
+                label="Blessings"
+                value={settings.frogOfFateFrogs}
+                onChange={(val) => updateSetting('frogOfFateFrogs', val)}
+                min={1}
+                max={20}
+                step={1}
+              />
+              <SettingRow
+                label="Blessings (Upgraded)"
+                value={settings.frogOfFateFrogsUpgraded}
+                onChange={(val) => updateSetting('frogOfFateFrogsUpgraded', val)}
+                min={1}
+                max={20}
+                step={1}
+              />
+              <SettingRow
+                label="Multiplier"
+                value={settings.frogOfFateMultiplier}
+                onChange={(val) => updateSetting('frogOfFateMultiplier', val)}
+                options={FROG_MULTIPLIER_OPTIONS}
+                suffix="x"
+              />
+              <SettingRow
+                label="Multiplier (Upgraded)"
+                value={settings.frogOfFateMultiplierUpgraded}
+                onChange={(val) => updateSetting('frogOfFateMultiplierUpgraded', val)}
+                options={FROG_MULTIPLIER_OPTIONS}
+                suffix="x"
               />
               <SettingRow
                 label="Limit (per turn)"
                 value={settings.frogOfFateLimit}
                 onChange={(val) => updateSetting('frogOfFateLimit', val)}
                 min={1}
-                max={10}
+                max={999}
                 step={1}
                 isInfinity
               />
@@ -656,7 +727,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.bloodSacrificeMax}
                 onChange={(val) => updateSetting('bloodSacrificeMax', val)}
                 min={10}
-                max={500}
+                max={9999}
                 step={10}
               />
               <SettingRow
@@ -664,7 +735,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.bloodSacrificeMaxUpgraded}
                 onChange={(val) => updateSetting('bloodSacrificeMaxUpgraded', val)}
                 min={10}
-                max={1000}
+                max={9999}
                 step={10}
               />
               <SettingRow
@@ -672,7 +743,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.bloodSacrificeLimit}
                 onChange={(val) => updateSetting('bloodSacrificeLimit', val)}
                 min={1}
-                max={10}
+                max={999}
                 step={1}
                 isInfinity
               />
@@ -686,7 +757,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.spiderIsopodRerollBonus}
                 onChange={(val) => updateSetting('spiderIsopodRerollBonus', val)}
                 min={0}
-                max={10}
+                max={999}
                 step={1}
               />
               <SettingRow
@@ -694,7 +765,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.sheepRerollBonus}
                 onChange={(val) => updateSetting('sheepRerollBonus', val)}
                 min={0}
-                max={10}
+                max={999}
                 step={1}
               />
               <SettingRow
@@ -702,7 +773,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.sheepUpgradesGiven}
                 onChange={(val) => updateSetting('sheepUpgradesGiven', val)}
                 min={1}
-                max={5}
+                max={50}
                 step={1}
               />
               <SettingRow
@@ -710,7 +781,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 value={settings.webLimit}
                 onChange={(val) => updateSetting('webLimit', val)}
                 min={1}
-                max={10}
+                max={999}
                 step={1}
                 isInfinity
               />
@@ -726,7 +797,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                   value={settings.cardWeights[card.id] ?? 1}
                   onChange={(val) => updateCardWeight(card.id, val)}
                   min={0}
-                  max={20}
+                  max={999}
                   step={1}
                 />
               ))}

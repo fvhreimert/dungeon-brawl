@@ -1,5 +1,7 @@
+import { useMemo } from 'react'
 import { Button as RetroButton } from '@/components/ui/8bit/button'
 import type { UpgradeableAction, PlayerUpgrades } from '@/types/game'
+import { useRuntimeConfig } from '@/config/runtimeConfig'
 import crossIcon from '@/assets/images/ui/cross.png'
 
 import madSeerUpgraded from '@/assets/images/actions/mad_seer_upraded.png'
@@ -18,44 +20,6 @@ type ActionUpgradeInfo = {
   description: string
 }
 
-const UPGRADE_INFO: ActionUpgradeInfo[] = [
-  {
-    id: 'mad_seer',
-    name: 'Mad Seer',
-    upgradedName: 'Madder Seer',
-    image: madSeerUpgraded,
-    description: 'Reveals double the words in the vision, making questions easier to identify.',
-  },
-  {
-    id: 'card_jester',
-    name: 'Card Jester',
-    upgradedName: 'Cards Jester',
-    image: cardJesterUpgraded,
-    description: 'Draw 2 cards instead of 1 when using the Card Jester.',
-  },
-  {
-    id: 'blood_sacrifice',
-    name: 'Blood Sacrifice',
-    upgradedName: 'Blood Sacrifices',
-    image: bloodSacrificeUpgraded,
-    description: 'Maximum sacrifice increased to 200 points (from 100).',
-  },
-  {
-    id: 'frog_of_fate',
-    name: 'Frog of Fate',
-    upgradedName: 'Frog of Fates',
-    image: frogOfFateUpgraded,
-    description: 'Two frogs are deployed, applying 2x multipliers to 2 tiles.',
-  },
-  {
-    id: 'golden_idol',
-    name: 'Golden Idol',
-    upgradedName: 'Diamond Idol',
-    image: goldenIdolUpgraded,
-    description: 'Two survivor tiles remain instead of one, giving you a choice.',
-  },
-]
-
 type ActionUpgradeModalProps = {
   playerUpgrades: PlayerUpgrades
   onUpgrade: (actionId: UpgradeableAction) => void
@@ -69,7 +33,47 @@ export function ActionUpgradeModal({
   onClose,
   remainingUpgrades = 1,
 }: ActionUpgradeModalProps) {
-  const allUpgraded = UPGRADE_INFO.every((info) => playerUpgrades[info.id])
+  const runtimeConfig = useRuntimeConfig()
+
+  const upgradeInfo = useMemo<ActionUpgradeInfo[]>(() => [
+    {
+      id: 'mad_seer',
+      name: 'Mad Seer',
+      upgradedName: 'Madder Seer',
+      image: madSeerUpgraded,
+      description: `Reveals ${runtimeConfig.mechanics.madSeer.wordsMinUpgraded}-${runtimeConfig.mechanics.madSeer.wordsMaxUpgraded} words in the vision (instead of ${runtimeConfig.mechanics.madSeer.wordsMin}-${runtimeConfig.mechanics.madSeer.wordsMax}), making questions easier to identify.`,
+    },
+    {
+      id: 'card_jester',
+      name: 'Card Jester',
+      upgradedName: 'Cards Jester',
+      image: cardJesterUpgraded,
+      description: `Draw ${runtimeConfig.mechanics.cardJester.cardsToGiveUpgraded} cards instead of ${runtimeConfig.mechanics.cardJester.cardsToGive} when using the Card Jester.`,
+    },
+    {
+      id: 'blood_sacrifice',
+      name: 'Blood Sacrifice',
+      upgradedName: 'Blood Sacrifices',
+      image: bloodSacrificeUpgraded,
+      description: `Maximum sacrifice increased to ${runtimeConfig.mechanics.bloodSacrifice.maxSacrificeUpgraded} points (from ${runtimeConfig.mechanics.bloodSacrifice.maxSacrifice}).`,
+    },
+    {
+      id: 'frog_of_fate',
+      name: 'Frog of Fate',
+      upgradedName: 'Frog of Fates',
+      image: frogOfFateUpgraded,
+      description: `${runtimeConfig.mechanics.frogOfFate.frogsUpgraded} frogs are deployed (instead of ${runtimeConfig.mechanics.frogOfFate.frogs}), applying ${runtimeConfig.mechanics.frogOfFate.multiplierUpgraded}x multipliers.`,
+    },
+    {
+      id: 'golden_idol',
+      name: 'Golden Idol',
+      upgradedName: 'Diamond Idol',
+      image: goldenIdolUpgraded,
+      description: `${runtimeConfig.mechanics.goldenIdol.survivorsUpgraded} survivor tiles remain instead of ${runtimeConfig.mechanics.goldenIdol.survivors}, giving you a choice.`,
+    },
+  ], [runtimeConfig])
+
+  const allUpgraded = upgradeInfo.every((info) => playerUpgrades[info.id])
 
   const getSubtitle = () => {
     if (allUpgraded) return 'All actions have been upgraded!'
@@ -90,7 +94,7 @@ export function ActionUpgradeModal({
         </div>
 
         <div className="upgrade-grid">
-          {UPGRADE_INFO.map((info) => {
+          {upgradeInfo.map((info) => {
             const isUpgraded = playerUpgrades[info.id] ?? false
             return (
               <div

@@ -21,8 +21,8 @@ export const gameConfig = {
     pointValues: [200, 400, 600, 800, 1000],
   },
   mechanics: {
-    startingRerolls: 10, // Number of card rerolls each player starts with
-    spiderIsopodRerollBonus: 1, // Number of rerolls gained from feeding spider an isopod
+    startingRerolls: 5, // Number of card rerolls each player starts with
+    spiderIsopodRerollBonus: 3, // Number of rerolls gained from feeding spider an isopod
     spiderWeb: {
       sheepRerollBonus: 3, // Number of rerolls gained from feeding spider a sheep
       sheepUpgradesGiven: 1, // Number of action upgrades per sheep fed
@@ -41,22 +41,28 @@ export const gameConfig = {
       }
     },
     multipliers: {
-      maxTileMultiplier: 128,
+      maxTileMultiplier: 65536,
     },
     actionPrices: {
-      cardJester: 100,
-      madSeer: 25,
-      frogOfFate: 100,
+      cardJester: 125,
+      madSeer: 50,
+      frogOfFate: 150,
     },
     cardJester: {
       cardsToGive: 1,
       cardsToGiveUpgraded: 2,
     },
     madSeer: {
-      wordsMin: 4,
+      wordsMin: 1,
       wordsMax: 8,
       wordsMinUpgraded: 8,
       wordsMaxUpgraded: 16,
+    },
+    frogOfFate: {
+      frogs: 1,
+      frogsUpgraded: 2,
+      multiplier: 2,
+      multiplierUpgraded: 2,
     },
     actionLimits: {
       cardJester: 1,
@@ -67,13 +73,15 @@ export const gameConfig = {
       web: Infinity,
     },
     goldenIdol: {
-      startBonus: 10,
-      pointsMin: 5,
+      startBonus: 30,
+      pointsMin: 25,
       pointsMax: 100,
+      survivors: 1,
+      survivorsUpgraded: 2,
     },
     bloodSacrifice: {
-      maxSacrifice: 100,
-      maxSacrificeUpgraded: 200,
+      maxSacrifice: 200,
+      maxSacrificeUpgraded: 400,
     },
     blackMarket: {
       enabled: true, // Set to false to skip black market entirely

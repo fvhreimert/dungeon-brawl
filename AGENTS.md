@@ -69,11 +69,12 @@ The game starts with a main menu flow before entering the actual game board.
      - **Spider Web**: Rerolls per isopod fed (default: 1), rerolls per sheep fed (default: 3), upgrades per sheep (default: 1)
      - **Alliances**: Duration multiplier
      - **Items**: Cursed Coin duration and value
-     - **Golden Idol**: Points per turn range (min/max), start bonus
+     - **Golden Idol**: Points per turn range (min/max), start bonus, survivor count (standard/upgraded)
      - **Blood Sacrifice**: Max sacrifice amounts (normal: 100, upgraded: 200)
      - **Treasure Island**: Value multiplier (default: 300%), curse penalty (default: 50%), curse increase rate (default: 10%), initial curse chance (default: 10%)
      - **Action Prices**: Card Jester, Mad Seer, Frog of Fate costs
      - **Action Limits**: Per-turn limits for each action (supports infinity)
+     - **Frog of Fate**: Blessings (frog count) and Multiplier values (standard/upgraded)
      - **Card Weights**: Base draw weight for all 21 cards (0-20 scale, higher = more common)
 
 ### Quiz Format
@@ -148,21 +149,21 @@ Upgraded versions of actions are unlocked via the **Spider Web** mechanic. Playe
 - **Mechanic:** Adds a multiplier to random tiles.
 - **Standard:**
   - Frog hops across random open tiles and lands on one.
-  - Applies a **2x Multiplier** to the landed tile.
+  - Applies a **Multiplier** (default: 2x, configurable) to the landed tile.
 - **Upgraded:**
-  - **Effect:** Two frogs are deployed simultaneously, selecting **2 unique tiles**. If both land on the same tile (rare but possible logic), multipliers stack.
+  - **Effect:** Deploys **multiple frogs** (default: 2, configurable) simultaneously, selecting unique tiles. Multipliers stack if they land on the same tile.
   - **Visuals:** Uses `frog_of_fate_upgraded.png`, orange label text, and a orange pulsating glow.
 
 ### Golden Idol
 - **Logic:** `src/features/actions/goldenIdol/`
 - **Mechanic:** Forces a random selection by eliminating choices. Accumulates bonus points each turn.
-- **Configuration:** Start bonus (default: 10), points per turn range (default: 5-100).
+- **Configuration:** Start bonus (default: 10), points per turn range (default: 5-100), survivor count (default: 1/2).
 - **Standard:**
   - A "crumbling" effect disables most tiles.
-  - **1 Survivor** tile remains. Player is forced to select it.
+  - **Survivor** tiles remain (default: 1, configurable). Player is forced to select one.
   - Bonus points are awarded on selection (accumulated over turns).
 - **Upgraded:**
-  - **Effect:** Selects **2 distinct survivor tiles** instead of 1. Player can choose either of the survivors.
+  - **Effect:** Selects **more survivor tiles** (default: 2, configurable) instead of 1. Player can choose either of the survivors.
   - **Visuals:** Uses `golden_idol_upgraded.png`, diamond-blue label text, and a diamond-blue pulsating glow.
 
 ### Card Jester
