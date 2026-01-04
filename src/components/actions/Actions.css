@@ -242,7 +242,7 @@
   position: absolute;
   top: -5px; /* Adjust as needed */
   right: 10px; /* Adjust as needed */
-  z-index: 30;
+  z-index: 25;
   width: 30px; /* Fixed width */
   height: 30px; /* Fixed height */
   display: flex;
