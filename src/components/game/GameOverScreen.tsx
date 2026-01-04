@@ -20,11 +20,6 @@ export function GameOverScreen({ players, onViewStats, onPlayAgain }: GameOverSc
     }))
   }, [players])
 
-  const winner = useMemo(() => {
-    const sorted = [...players].sort((a, b) => b.score - a.score)
-    return sorted[0]
-  }, [players])
-
   return (
     <div className="game-over-screen">
       <div className="game-over-backdrop" />
