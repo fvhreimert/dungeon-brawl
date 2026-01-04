@@ -10,7 +10,7 @@ type StatsScreenProps = {
   onBack: () => void
 }
 
-const PLAYER_COLORS = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3']
+const PLAYER_COLORS = ['#FF6B6B', '#54A0FF', '#FFE66D', '#2ECC71']
 
 const ACTION_LABELS: Record<ActionId, string> = {
   card_jester: 'Card Jester',

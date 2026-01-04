@@ -291,7 +291,7 @@
   padding: 0.75rem;
   background: rgba(0, 0, 0, 0.4);
   border: 3px solid #444;
-  cursor: pointer;
+  cursor: url('/images/ui/cursor.png'), auto !important;
   transition: all 0.15s ease;
   min-width: 90px;
 }

@@ -66,7 +66,7 @@
   height: 32px;
   background: rgba(0, 0, 0, 0.4);
   border: 2px solid #4a3060;
-  cursor: pointer;
+  cursor: url('/images/ui/cursor.png'), auto !important;
   display: flex;
   align-items: center;
   justify-content: center;

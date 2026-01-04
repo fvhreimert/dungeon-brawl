@@ -128,13 +128,12 @@ export function Scoreboard({
                     e.stopPropagation()
                     onInventoryClick(index)
                   }}
-                  title="View Inventory"
                 >
                   <img src={inventoryIcon} alt="Inventory" />
                 </button>
               </div>
               <div className="player-meters-row">
-                <div className="spider-sense-meter" title="Spider Sense: Gain bonus points on correct answers. Feed isopods to the spider to increase.">
+                <div className="spider-sense-meter">
                   <img
                     src={spiderSenseIcon}
                     alt="Spider Sense"
@@ -152,7 +151,7 @@ export function Scoreboard({
                     +{(player.spiderSenseLevel ?? 0) * 5}%
                   </span>
                 </div>
-                <div className="reroll-counter" title="Rerolls remaining">
+                <div className="reroll-counter">
                   <img
                     src={rerollIcon}
                     alt="Rerolls"

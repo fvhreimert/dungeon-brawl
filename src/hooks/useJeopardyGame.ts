@@ -804,6 +804,9 @@ export function useJeopardyGame({
     // Don't transition to next player if game is over
     if (!isLastQuestion) {
       prepareNextPlayer()
+    } else {
+      setSelectedTileId(null)
+      setAnswerRevealed(false)
     }
   }
 
@@ -828,6 +831,9 @@ export function useJeopardyGame({
     // Don't transition to next player if game is over
     if (!isLastQuestion) {
       prepareNextPlayer()
+    } else {
+      setSelectedTileId(null)
+      setAnswerRevealed(false)
     }
   }
 

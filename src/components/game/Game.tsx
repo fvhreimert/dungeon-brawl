@@ -753,7 +753,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
       // Small delay to let the last question animation complete
       const timer = setTimeout(() => {
         setShowGameOver(true)
-      }, 1500)
+      }, 500)
       return () => clearTimeout(timer)
     }
   }, [isGameOver, showGameOver, showStats, gameEndTime, onGameEnd])

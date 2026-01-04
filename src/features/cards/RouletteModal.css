@@ -199,7 +199,7 @@
   background: #1a1008;
   outline: none;
   border: 2px solid #6b4f00;
-  cursor: pointer;
+  cursor: url('/images/ui/cursor.png'), auto !important;
   image-rendering: pixelated;
 }
 
@@ -209,7 +209,7 @@
   width: 28px;
   height: 28px;
   background: linear-gradient(135deg, #ffd700 0%, #c9a227 50%, #8b7500 100%);
-  cursor: pointer;
+  cursor: url('/images/ui/cursor.png'), auto !important;
   border: 3px solid #4a3800;
   box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
   transition: transform 0.1s ease, box-shadow 0.1s ease;
@@ -224,7 +224,7 @@
   width: 28px;
   height: 28px;
   background: linear-gradient(135deg, #ffd700 0%, #c9a227 50%, #8b7500 100%);
-  cursor: pointer;
+  cursor: url('/images/ui/cursor.png'), auto !important;
   border: 3px solid #4a3800;
   box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 }

@@ -120,7 +120,8 @@
   outline: none;
   border: 3px solid #550000;
   box-shadow: inset 0 0 10px #000;
-  cursor: pointer;
+  cursor: url('/images/ui/cursor.png'), auto !important;
+  border-radius: 0; /* Ensure square corners */
 }
 
 .bloody-slider::-webkit-slider-thumb {
@@ -130,9 +131,10 @@
   height: 32px;
   background: #ff0000;
   border: 3px solid #8b0000;
-  cursor: pointer;
+  cursor: url('/images/ui/cursor.png'), auto !important;
   box-shadow: 0 0 15px #ff0000;
   image-rendering: pixelated;
+  border-radius: 0; /* Ensure square corners */
 }
 
 .bloody-slider::-moz-range-thumb {
@@ -140,8 +142,9 @@
   height: 32px;
   background: #ff0000;
   border: 3px solid #8b0000;
-  cursor: pointer;
+  cursor: url('/images/ui/cursor.png'), auto !important;
   box-shadow: 0 0 15px #ff0000;
+  border-radius: 0; /* Ensure square corners */
 }
 
 /* Actions */

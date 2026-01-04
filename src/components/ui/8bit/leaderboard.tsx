@@ -41,7 +41,7 @@ export interface LeaderboardProps extends React.ComponentProps<"div"> {
 }
 
 const playerItemVariants = cva(
-  "flex items-center justify-between p-3 rounded-lg transition-all duration-200",
+  "flex items-center justify-between p-3 transition-all duration-200",
   {
     variants: {
       rank: {
@@ -169,7 +169,7 @@ export function Leaderboard({
                 >
                   <div className="flex items-center gap-3">
                     {showAvatar && (
-                      <Avatar variant="pixel" font="retro" className="size-10">
+                      <Avatar variant="retro" font="retro" className="size-10">
                         {player.avatar && (
                           <AvatarImage src={player.avatar} alt={player.name} />
                         )}
