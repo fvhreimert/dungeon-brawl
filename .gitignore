@@ -1,6 +1,9 @@
-# API Keys
-API/gemini_key.txt
-*.key
+# Development docs (not for public repo)
+AGENTS.md
+CLAUDE.md
+GAME_MANUAL.md
+docs/
+API/
 
 # Claude Code local settings
 .claude/
