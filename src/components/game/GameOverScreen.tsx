@@ -30,14 +30,6 @@ export function GameOverScreen({ players, onViewStats, onPlayAgain }: GameOverSc
       <div className="game-over-backdrop" />
 
       <div className="game-over-content">
-        <div className="game-over-header">
-          <div className="winner-announcement">
-            <span className="winner-name">{winner?.name}</span>
-            <span className="winner-label">WINS!</span>
-          </div>
-          <div className="winner-score">{winner?.score.toLocaleString()} points</div>
-        </div>
-
         <Leaderboard
           players={leaderboardPlayers}
           title="FINAL STANDINGS"

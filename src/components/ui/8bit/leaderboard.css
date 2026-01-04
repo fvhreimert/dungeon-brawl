@@ -1,0 +1,193 @@
+.pixel-leaderboard-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-family: 'Press Start 2P', monospace;
+  image-rendering: pixelated;
+  box-sizing: border-box;
+  /* Removed overflow: hidden to allow crown to pop out if needed, 
+     but added padding top to container to ensure space within parent */
+  padding-top: 10px;
+}
+
+.pixel-leaderboard-header {
+  text-align: center;
+  margin-bottom: 20px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.pixel-congrats-text {
+  color: #ffd700;
+  font-size: 12px; /* Increased */
+  margin-bottom: 8px;
+  text-shadow: 2px 2px 0 #000;
+  letter-spacing: 1px;
+}
+
+.pixel-winner-card {
+  background: linear-gradient(180deg, #2a2315 0%, #1a1508 100%);
+  border: 4px solid #ffd700;
+  box-shadow: 
+    0 0 0 4px #000,
+    0 10px 20px rgba(0,0,0,0.5);
+  padding: 24px; /* Increased */
+  display: flex;
+  align-items: center;
+  gap: 20px; /* Increased */
+  position: relative;
+  margin-bottom: 28px;
+  margin-top: 24px; /* Increased to make room for crown */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Crown Icon */
+.pixel-winner-card::after {
+  content: '';
+  position: absolute;
+  top: -28px; /* Moved further up */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px; /* Bigger */
+  height: 24px; /* Bigger */
+  background-color: #ffd700;
+  clip-path: polygon(0% 100%, 0% 20%, 25% 60%, 50% 0%, 75% 60%, 100% 20%, 100% 100%);
+  box-shadow: 0 2px 0 #000; 
+  animation: bounce 1s infinite alternate;
+  z-index: 10;
+}
+
+.pixel-rank-badge {
+  background: #333;
+  color: #fff;
+  width: 28px; /* Increased */
+  height: 28px; /* Increased */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #000;
+  box-shadow: inset 0 2px 0 rgba(255,255,255,0.2);
+  font-size: 12px; /* Increased */
+  flex-shrink: 0;
+}
+
+.pixel-rank-badge.rank-1 {
+  background: #ffd700;
+  color: #000;
+  border-color: #b8860b;
+}
+
+.pixel-rank-badge.rank-2 {
+  background: #c0c0c0; /* Silver */
+  color: #000;
+  border-color: #808080;
+}
+
+.pixel-rank-badge.rank-3 {
+  background: #cd7f32; /* Bronze */
+  color: #000;
+  border-color: #8b4513;
+}
+
+.pixel-player-row {
+  display: flex;
+  align-items: center;
+  background: #1a1a1a;
+  border: 2px solid #333;
+  padding: 10px 14px; /* Increased */
+  gap: 14px;
+  position: relative;
+  transition: transform 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.pixel-player-row:hover {
+  transform: translateX(4px);
+  background: #222;
+  border-color: #555;
+}
+
+.pixel-player-row.is-current {
+  border-color: #4A90D9;
+  background: #1a202c;
+}
+
+.pixel-player-row.is-current::before {
+  content: 'YOU';
+  position: absolute;
+  right: 8px;
+  top: -9px;
+  background: #4A90D9;
+  color: white;
+  font-size: 9px; /* Increased */
+  padding: 2px 4px;
+  border: 2px solid #000;
+  z-index: 10;
+}
+
+.pixel-avatar {
+  width: 44px; /* Increased */
+  height: 44px; /* Increased */
+  border: 2px solid #000;
+  background: #000;
+  image-rendering: pixelated;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.pixel-winner-avatar {
+  width: 72px; /* Increased */
+  height: 72px; /* Increased */
+  border: 3px solid #ffd700;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+.pixel-player-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.pixel-player-name {
+  color: #fff;
+  font-size: 12px; /* Increased */
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pixel-winner-name {
+  color: #ffd700;
+  font-size: 18px; /* Increased */
+  text-shadow: 2px 2px 0 #000;
+}
+
+.pixel-player-score {
+  color: #aaa;
+  font-size: 12px; /* Increased */
+}
+
+.pixel-winner-score {
+  color: #fff;
+  font-size: 14px; /* Increased */
+  background: rgba(0,0,0,0.5);
+  padding: 6px 10px;
+  display: inline-block;
+  align-self: flex-start;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes bounce {
+  0% { transform: translateX(-50%) translateY(0); }
+  100% { transform: translateX(-50%) translateY(-4px); }
+}
