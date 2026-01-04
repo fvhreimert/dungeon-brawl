@@ -98,19 +98,24 @@ Special abilities available during your turn:
 
 | Action | Effect |
 |--------|--------|
-| **Card Jester** | Pay 200 pts to buy a random card |
-| **Mad Seer** | Pay 100 pts to peek at a hidden tile |
-| **Blood Sacrifice** | Lose 100 pts to gain a card |
-| **Frog of Fate** | 50/50 gamble: win or lose 100 pts |
-| **Golden Idol** | Claim a shared pot that grows each turn |
-| **The Spider** | Feed items to gain multipliers and rerolls |
+| **Card Jester** | Pay points to draw a random card |
+| **Mad Seer** | Pay points to preview a tile's question before selecting it |
+| **Blood Sacrifice** | Sacrifice your points to deal damage to another player |
+| **Frog of Fate** | Summon a frog that hops across tiles and adds a multiplier where it lands |
+| **Golden Idol** | Forces selection from limited survivor tiles, awards accumulated bonus points |
+| **The Spider** | Feed Isopods for Spider Sense bonus (+5% per level), feed Sheep for action upgrades |
 
 ### Quest System
 Complete objectives from the quest-giver Martin to unlock permanent upgrades:
-- Sacrifice health to upgrade Blood Sacrifice
-- Use the Mad Seer 5 times for free reveals
-- Answer 3 questions correctly for gold and cards
-- And more...
+
+| Quest | Objective | Reward |
+|-------|-----------|--------|
+| Blood Quest | Sacrifice 300 HP | 3 cards + Blood Sacrifice upgrade |
+| Seer Quest | Use Mad Seer 5 times | 125 gold + Mad Seer upgrade |
+| Jester's Quest | Buy 3 cards from Card Jester | 200 gold + Card Jester upgrade |
+| Frog's Quest | Use Frog of Fate 3 times | 3 cards + Frog of Fate upgrade |
+| Idol's Quest | Use Golden Idol 3 times | 3 cards + Golden Idol upgrade |
+| Wisdom Quest | 3 correct answers in a row | 300 gold + 3 cards |
 
 ### AI Quiz Generation
 Generate custom quizzes instantly using Google's Gemini AI:
