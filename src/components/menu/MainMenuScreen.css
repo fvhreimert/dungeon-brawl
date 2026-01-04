@@ -13,6 +13,7 @@
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   position: relative;
+  overflow: hidden;
 }
 
 /* Extra dark overlay */
@@ -38,6 +39,10 @@
 
 .main-menu-container:has(.generate-quiz-content) {
   max-width: 1200px;
+}
+
+.main-menu-container:has(.quiz-select-content) {
+  max-width: 550px;
 }
 
 /* Big title above menu - single line */
@@ -120,11 +125,17 @@
   width: 100%;
 }
 
+.import-quiz-btn {
+  width: 100%;
+  font-size: 10px !important;
+  padding: 14px 20px !important;
+}
+
 .quiz-list {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  max-height: 60vh;
+  gap: 16px;
+  max-height: 55vh;
   overflow-y: auto;
   padding: 8px 4px;
   width: 100%;
@@ -134,7 +145,7 @@
   width: 100%;
   text-align: center !important;
   justify-content: center !important;
-  padding: 16px 24px !important;
+  padding: 14px 16px !important;
   font-size: 10px !important;
 }
 
@@ -161,9 +172,24 @@
 
 .quiz-item-edit {
   width: auto !important;
-  min-width: 70px;
-  padding: 16px 12px !important;
+  min-width: 55px;
+  padding: 14px 10px !important;
   font-size: 9px !important;
+  flex-shrink: 0;
+}
+
+.quiz-select-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.quiz-select-actions .import-quiz-btn,
+.quiz-select-actions .back-button {
+  width: 100%;
+  margin-top: 0;
 }
 
 .back-button {

@@ -3,6 +3,7 @@ import type {
   CustomQuizMeta,
   StoredQuizIndex,
 } from '@/types/customQuiz'
+import { createCustomQuiz } from '@/types/customQuiz'
 
 const STORAGE_KEY_PREFIX = 'dungeon_brawl_custom_quiz_'
 const INDEX_KEY = 'dungeon_brawl_quiz_index'
@@ -17,6 +18,7 @@ export interface QuizStorageService {
   saveQuiz(quiz: CustomQuiz): Promise<void>
   deleteQuiz(id: string): Promise<void>
   exportQuiz(quiz: CustomQuiz): void
+  importQuiz(file: File): Promise<CustomQuiz>
 }
 
 /**
@@ -120,6 +122,34 @@ class WebQuizStorage implements QuizStorageService {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
+  }
+
+  async importQuiz(file: File): Promise<CustomQuiz> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = async (e) => {
+        try {
+          const content = e.target?.result as string
+          const data = JSON.parse(content)
+
+          if (!data.displayName || !Array.isArray(data.categories)) {
+            throw new Error('Invalid quiz file format')
+          }
+
+          // Create a new custom quiz with fresh ID
+          const quiz = createCustomQuiz(data.displayName, data.categories)
+
+          // Save to storage
+          await this.saveQuiz(quiz)
+
+          resolve(quiz)
+        } catch (error) {
+          reject(error instanceof Error ? error : new Error('Failed to parse quiz file'))
+        }
+      }
+      reader.onerror = () => reject(new Error('Failed to read file'))
+      reader.readAsText(file)
+    })
   }
 }
 
@@ -274,6 +304,31 @@ class TauriQuizStorage implements QuizStorageService {
   exportQuiz(quiz: CustomQuiz): void {
     // Use same web download for export (works in Tauri too)
     this.webFallback.exportQuiz(quiz)
+  }
+
+  async importQuiz(file: File): Promise<CustomQuiz> {
+    // Use web fallback for file reading, but save with Tauri storage
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = async (e) => {
+        try {
+          const content = e.target?.result as string
+          const data = JSON.parse(content)
+
+          if (!data.displayName || !Array.isArray(data.categories)) {
+            throw new Error('Invalid quiz file format')
+          }
+
+          const quiz = createCustomQuiz(data.displayName, data.categories)
+          await this.saveQuiz(quiz)
+          resolve(quiz)
+        } catch (error) {
+          reject(error instanceof Error ? error : new Error('Failed to parse quiz file'))
+        }
+      }
+      reader.onerror = () => reject(new Error('Failed to read file'))
+      reader.readAsText(file)
+    })
   }
 }
 

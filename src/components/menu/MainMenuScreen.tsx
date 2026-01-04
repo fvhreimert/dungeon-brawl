@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Button as RetroButton } from '@/components/ui/8bit/button'
 import { Spinner } from '@/components/ui/8bit/spinner'
 import { getAvailableQuizzes, loadQuiz, quizToQAItems, getQuizCategories } from '@/utils/quizLoader'
@@ -6,6 +6,7 @@ import { ALL_PORTRAITS } from '@/utils/portraits'
 import { generateQuizCategories, type CategoryInput } from '@/services/geminiService'
 import { GameSettingsScreen, type GameplaySettings } from './GameSettingsScreen'
 import { QuizBuilderScreen } from './QuizBuilderScreen'
+import { ApiKeyModal } from './ApiKeyModal'
 import { useQuizStorage } from '@/hooks/useQuizStorage'
 import { useGameSave } from '@/hooks/useGameSave'
 import type { Quiz, QuizFile } from '@/types/quiz'
@@ -13,9 +14,7 @@ import { createCustomQuiz, type CustomQuiz, type CustomQuizMeta } from '@/types/
 import type { PlayerConfig, QAItem, SavedGameState } from '@/types/game'
 import './MainMenuScreen.css'
 
-type MenuState = 'main' | 'quiz-select' | 'generate-quiz' | 'generating' | 'create-quiz' | 'player-setup' | 'game-settings'
-
-const GEMINI_API_KEY = 'AIzaSyAEzBRKviKLj4TmZJA05qZxZ1I0UB4LL6E'
+type MenuState = 'main' | 'quiz-select' | 'api-key' | 'generate-quiz' | 'generating' | 'create-quiz' | 'player-setup' | 'game-settings'
 
 export type GameSettings = {
   quiz: Quiz
@@ -55,6 +54,7 @@ export function MainMenuScreen({ onStartGame, onResumeGame }: MainMenuScreenProp
   const [editingCustomQuiz, setEditingCustomQuiz] = useState<CustomQuiz | undefined>(undefined)
 
   // Generate quiz state
+  const [verifiedApiKey, setVerifiedApiKey] = useState<string | null>(null)
   const [categoryCount, setCategoryCount] = useState(5)
   const [categoryInputs, setCategoryInputs] = useState<CategoryInput[]>(() =>
     Array.from({ length: 5 }, () => ({ name: '', description: '' }))
@@ -64,9 +64,41 @@ export function MainMenuScreen({ onStartGame, onResumeGame }: MainMenuScreenProp
   const [generationError, setGenerationError] = useState<string | null>(null)
 
   // Custom quiz storage
-  const { quizzes: customQuizzes, loadQuiz: loadCustomQuiz } = useQuizStorage()
+  const {
+    quizzes: customQuizzes,
+    loadQuiz: loadCustomQuiz,
+    saveQuiz: saveCustomQuiz,
+    exportQuiz,
+    importQuiz,
+  } = useQuizStorage()
 
   const quizFiles = getAvailableQuizzes()
+
+  // File input ref for importing quizzes
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click()
+  }
+
+  const handleFileImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const quiz = await importQuiz(file)
+    if (quiz) {
+      // Successfully imported - list will auto-refresh
+    }
+    // Reset input so same file can be selected again
+    e.target.value = ''
+  }
+
+  const handleExportQuiz = async (quizMeta: CustomQuizMeta) => {
+    const quiz = await loadCustomQuiz(quizMeta.id)
+    if (quiz) {
+      exportQuiz(quiz)
+    }
+  }
 
   const handleResumeGame = async () => {
     const savedState = await loadSavedGame()
@@ -98,8 +130,17 @@ export function MainMenuScreen({ onStartGame, onResumeGame }: MainMenuScreenProp
   }
 
   const handleGenerateQuiz = () => {
-    setMenuState('generate-quiz')
+    setMenuState('api-key')
     setGenerationError(null)
+  }
+
+  const handleApiKeyVerified = (apiKey: string) => {
+    setVerifiedApiKey(apiKey)
+    setMenuState('generate-quiz')
+  }
+
+  const handleApiKeyCancel = () => {
+    setMenuState('main')
   }
 
   const handleCategoryCountChange = (delta: number) => {
@@ -129,24 +170,33 @@ export function MainMenuScreen({ onStartGame, onResumeGame }: MainMenuScreenProp
       return
     }
 
+    if (!verifiedApiKey) {
+      setGenerationError('API key not verified')
+      setMenuState('api-key')
+      return
+    }
+
     setMenuState('generating')
     setGenerationProgress({ completed: 0, total: validCategories.length })
     setGenerationError(null)
 
     try {
       const generatedCategories = await generateQuizCategories(
-        GEMINI_API_KEY,
+        verifiedApiKey,
         validCategories,
         (completed, total) => setGenerationProgress({ completed, total })
       )
 
-      const generatedQuiz: Quiz = {
-        displayName: quizName || 'Generated Quiz',
-        categories: generatedCategories,
-      }
+      // Create and save as custom quiz
+      const customQuiz = createCustomQuiz(
+        quizName || 'Generated Quiz',
+        generatedCategories
+      )
+      await saveCustomQuiz(customQuiz)
 
-      setSelectedQuiz(generatedQuiz)
+      setSelectedQuiz(customQuiz)
       setIsGeneratedQuiz(true)
+      setIsCustomQuiz(true)
       setMenuState('player-setup')
     } catch (error) {
       console.error('Quiz generation failed:', error)
@@ -336,10 +386,26 @@ export function MainMenuScreen({ onStartGame, onResumeGame }: MainMenuScreenProp
           </>
         )}
 
+        {menuState === 'api-key' && (
+          <ApiKeyModal
+            onVerified={handleApiKeyVerified}
+            onCancel={handleApiKeyCancel}
+          />
+        )}
+
         {menuState === 'quiz-select' && (
           <>
             <h1 className="main-menu-title-standalone">Select Quiz</h1>
             <div className="quiz-select-content">
+              {/* Hidden file input for importing */}
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileImport}
+                accept=".json"
+                style={{ display: 'none' }}
+              />
+
               <div className="quiz-list">
                 {/* Built-in quizzes */}
                 {quizFiles.map((quiz) => (
@@ -380,6 +446,14 @@ export function MainMenuScreen({ onStartGame, onResumeGame }: MainMenuScreenProp
                       font="retro"
                       variant="secondary"
                       className="quiz-item-edit"
+                      onClick={() => handleExportQuiz(quiz)}
+                    >
+                      Save
+                    </RetroButton>
+                    <RetroButton
+                      font="retro"
+                      variant="secondary"
+                      className="quiz-item-edit"
                       onClick={() => handleEditCustomQuiz(quiz)}
                     >
                       Edit
@@ -387,14 +461,24 @@ export function MainMenuScreen({ onStartGame, onResumeGame }: MainMenuScreenProp
                   </div>
                 ))}
               </div>
-              <RetroButton
-                font="retro"
-                variant="destructive"
-                className="back-button"
-                onClick={handleBackToMain}
-              >
-                Back
-              </RetroButton>
+              <div className="quiz-select-actions">
+                <RetroButton
+                  font="retro"
+                  variant="secondary"
+                  className="import-quiz-btn"
+                  onClick={handleImportClick}
+                >
+                  Load from File
+                </RetroButton>
+                <RetroButton
+                  font="retro"
+                  variant="destructive"
+                  className="back-button"
+                  onClick={handleBackToMain}
+                >
+                  Back
+                </RetroButton>
+              </div>
             </div>
           </>
         )}

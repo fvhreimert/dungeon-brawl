@@ -1,6 +1,48 @@
 import type { QuizCategory } from '@/types/quiz'
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'
+const STORAGE_KEY = 'dungeon_brawl_gemini_key'
+
+export function getSavedApiKey(): string | null {
+  return localStorage.getItem(STORAGE_KEY)
+}
+
+export function saveApiKey(key: string): void {
+  localStorage.setItem(STORAGE_KEY, key)
+}
+
+export function clearApiKey(): void {
+  localStorage.removeItem(STORAGE_KEY)
+}
+
+export async function verifyApiKey(apiKey: string): Promise<{ valid: boolean; error?: string }> {
+  try {
+    const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [{ text: 'Say hi' }],
+          },
+        ],
+      }),
+    })
+
+    if (!response.ok) {
+      if (response.status === 400 || response.status === 403) {
+        return { valid: false, error: 'Invalid API key' }
+      }
+      return { valid: false, error: `API error: ${response.status}` }
+    }
+
+    return { valid: true }
+  } catch (error) {
+    return { valid: false, error: 'Network error - could not reach API' }
+  }
+}
 
 const CATEGORY_PROMPT_TEMPLATE = `Du er en ekspert i at udforme quizspørgsmål. Generér præcis 5 quizspørgsmål inden for kategorien: [Category].
 Følg eventuelle særlige instruktioner: [Instructions].

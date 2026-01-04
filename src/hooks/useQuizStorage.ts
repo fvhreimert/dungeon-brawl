@@ -19,6 +19,8 @@ export interface UseQuizStorageReturn {
   deleteQuiz: (id: string) => Promise<boolean>
   /** Export a quiz as JSON download */
   exportQuiz: (quiz: CustomQuiz) => void
+  /** Import a quiz from a JSON file */
+  importQuiz: (file: File) => Promise<CustomQuiz | null>
 }
 
 /**
@@ -110,6 +112,23 @@ export function useQuizStorage(): UseQuizStorageReturn {
     [storage]
   )
 
+  const importQuiz = useCallback(
+    async (file: File): Promise<CustomQuiz | null> => {
+      try {
+        setError(null)
+        const quiz = await storage.importQuiz(file)
+        await refresh()
+        return quiz
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Failed to import quiz'
+        setError(message)
+        console.error('Failed to import quiz:', err)
+        return null
+      }
+    },
+    [storage, refresh]
+  )
+
   // Load quiz list on mount
   useEffect(() => {
     const load = async () => {
@@ -129,5 +148,6 @@ export function useQuizStorage(): UseQuizStorageReturn {
     saveQuiz,
     deleteQuiz,
     exportQuiz,
+    importQuiz,
   }
 }

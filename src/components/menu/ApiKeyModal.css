@@ -1,0 +1,131 @@
+.api-key-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.api-key-modal-dialog {
+  background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+  border: 4px solid #333;
+  box-shadow:
+    0 8px 0 #000,
+    inset 0 0 0 2px #222;
+  padding: 32px;
+  max-width: 500px;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.api-key-modal-title {
+  font-family: 'November', 'Press Start 2P', monospace;
+  font-size: 24px;
+  color: #ffb347;
+  text-align: center;
+  text-shadow: 0 3px 0 #000;
+  margin: 0;
+}
+
+.api-key-modal-description {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  color: #888;
+  text-align: center;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.api-key-input-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.api-key-input {
+  flex: 1;
+  background: linear-gradient(180deg, #222 0%, #1a1a1a 100%);
+  border: 3px solid #444;
+  color: #fff;
+  padding: 14px 16px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  outline: none;
+  transition: border-color 0.2s;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.api-key-input:focus {
+  border-color: #666;
+}
+
+.api-key-input::placeholder {
+  color: #555;
+}
+
+.api-key-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.paste-btn {
+  min-width: 90px;
+  font-size: 9px !important;
+  padding: 14px 16px !important;
+}
+
+.api-key-error {
+  color: #ff6b6b;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px;
+  text-align: center;
+  padding: 12px;
+  background: rgba(255, 107, 107, 0.1);
+  border: 2px solid #ff6b6b;
+}
+
+.api-key-modal-actions {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.api-key-cancel-btn,
+.api-key-verify-btn {
+  flex: 1;
+  font-size: 10px !important;
+  padding: 14px 20px !important;
+}
+
+.api-key-verify-btn {
+  background: linear-gradient(180deg, #2a4a2a 0%, #1a3a1a 100%) !important;
+  border: 2px solid #4a7a4a !important;
+  color: #8effb9 !important;
+  box-shadow: 0 4px 0 #0a1a0a !important;
+}
+
+.api-key-verify-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, #3a5a3a 0%, #2a4a2a 100%) !important;
+  border-color: #8effb9 !important;
+}
+
+.api-key-verify-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.verify-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.verify-spinner {
+  width: 16px !important;
+  height: 16px !important;
+}
