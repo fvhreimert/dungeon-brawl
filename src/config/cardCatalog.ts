@@ -24,81 +24,85 @@ export type CardDrawContext = {
   opponents: readonly Player[]
   scoreDelta: number
   inventoryIds: Set<string>
+  treasureSetBonus?: number
 }
 
 const CARD_CONFIG: Record<string, CardCatalogConfig> = {
-  niffler: { baseWeight: 5 },
-  soul_burst: { baseWeight: 3, targetSelectMode: 'fel' },
-  thieving_rat: { baseWeight: 7, targetSelectMode: 'neutral' },
-  cursed_coin: { baseWeight: 6 },
-  tick: { baseWeight: 1},
-  spiny_shell: { baseWeight: 1, targetSelectMode: 'none' },
-  traveling_merchant: { baseWeight: 8, targetSelectMode: 'none' },
-  sheep: { baseWeight: 6},
-  puppet_master: { baseWeight: 3, targetSelectMode: 'puppet' },
-  beggar: { baseWeight: 3},
-  roulette: { baseWeight: 5, targetSelectMode: 'roulette' },
+  niffler: { baseWeight: 50 },
+  soul_burst: { baseWeight: 30, targetSelectMode: 'fel' },
+  thieving_rat: { baseWeight: 70, targetSelectMode: 'neutral' },
+  cursed_coin: { baseWeight: 60 },
+  tick: { baseWeight: 10 },
+  spiny_shell: { baseWeight: 10, targetSelectMode: 'none' },
+  traveling_merchant: { baseWeight: 80, targetSelectMode: 'none' },
+  sheep: { baseWeight: 60 },
+  puppet_master: { baseWeight: 30, targetSelectMode: 'puppet' },
+  beggar: { baseWeight: 30 },
+  roulette: { baseWeight: 50, targetSelectMode: 'roulette' },
   shovel: {
-    baseWeight: 2,
+    baseWeight: 20,
     targetSelectMode: 'treasure',
     weightModifiers: [
       (context) => {
-        // If already have all 3, no bonus (card will stay at weight 8)
+        // If already have all 3, no bonus
         const hasAll = context.inventoryIds.has('shovel') &&
                        context.inventoryIds.has('compass') &&
                        context.inventoryIds.has('treasure_map')
         if (hasAll) return 0
 
-        let bonus = 0
-        if (context.inventoryIds.has('compass')) bonus += 4
-        if (context.inventoryIds.has('treasure_map')) bonus += 4
-        return bonus
+        const bonus = context.treasureSetBonus ?? 40
+        let total = 0
+        if (context.inventoryIds.has('compass')) total += bonus
+        if (context.inventoryIds.has('treasure_map')) total += bonus
+        return total
       }
     ]
   },
   compass: {
-    baseWeight: 2,
+    baseWeight: 20,
     targetSelectMode: 'treasure',
     weightModifiers: [
       (context) => {
-        // If already have all 3, no bonus (card will stay at weight 8)
+        // If already have all 3, no bonus
         const hasAll = context.inventoryIds.has('shovel') &&
                        context.inventoryIds.has('compass') &&
                        context.inventoryIds.has('treasure_map')
         if (hasAll) return 0
 
-        let bonus = 0
-        if (context.inventoryIds.has('shovel')) bonus += 4
-        if (context.inventoryIds.has('treasure_map')) bonus += 4
-        return bonus
+        const bonus = context.treasureSetBonus ?? 40
+        let total = 0
+        if (context.inventoryIds.has('shovel')) total += bonus
+        if (context.inventoryIds.has('treasure_map')) total += bonus
+        return total
       }
     ]
   },
   treasure_map: {
-    baseWeight: 2,
+    baseWeight: 20,
     targetSelectMode: 'treasure',
     weightModifiers: [
       (context) => {
-        // If already have all 3, no bonus (card will stay at weight 8)
+        // If already have all 3, no bonus
         const hasAll = context.inventoryIds.has('shovel') &&
                        context.inventoryIds.has('compass') &&
                        context.inventoryIds.has('treasure_map')
         if (hasAll) return 0
 
-        let bonus = 0
-        if (context.inventoryIds.has('shovel')) bonus += 4
-        if (context.inventoryIds.has('compass')) bonus += 4
-        return bonus
+        const bonus = context.treasureSetBonus ?? 40
+        let total = 0
+        if (context.inventoryIds.has('shovel')) total += bonus
+        if (context.inventoryIds.has('compass')) total += bonus
+        return total
       }
     ]
   },
-  glacial_elemental: { baseWeight: 4, targetSelectMode: 'freeze' },
-  coalition: { baseWeight: 3, targetSelectMode: 'coalition' },
-  loot_goblin: { baseWeight: 7, targetSelectMode: 'neutral_all' },
-  isopod: { baseWeight: 10 },
-  martin: { baseWeight: 5, targetSelectMode: 'none' },
-  infinite_money_glitch: { baseWeight: 3 },
-  price_cracker: { baseWeight: 4, targetSelectMode: 'price_cracker' },
+  glacial_elemental: { baseWeight: 40, targetSelectMode: 'freeze' },
+  coalition: { baseWeight: 30, targetSelectMode: 'coalition' },
+  loot_goblin: { baseWeight: 70, targetSelectMode: 'neutral_all' },
+  isopod: { baseWeight: 100 },
+  martin: { baseWeight: 50, targetSelectMode: 'none' },
+  infinite_money_glitch: { baseWeight: 30 },
+  price_cracker: { baseWeight: 40, targetSelectMode: 'price_cracker' },
 }
 
 export const CARD_CATALOG: CardCatalogEntry[] = CARDS.map((definition) => {
@@ -116,7 +120,11 @@ export function getCardCatalogEntry(cardId: string): CardCatalogEntry | undefine
   return CARD_CATALOG.find((entry) => entry.definition.id === cardId)
 }
 
-export function buildCardDrawContext(players: readonly Player[], activePlayerIndex: number): CardDrawContext {
+export function buildCardDrawContext(
+  players: readonly Player[],
+  activePlayerIndex: number,
+  options?: { treasureSetBonus?: number }
+): CardDrawContext {
   const activePlayer = players[activePlayerIndex]
   const opponents = players.filter((_, index) => index !== activePlayerIndex)
   const opponentAvgScore =
@@ -132,6 +140,7 @@ export function buildCardDrawContext(players: readonly Player[], activePlayerInd
     opponents,
     scoreDelta,
     inventoryIds,
+    treasureSetBonus: options?.treasureSetBonus,
   }
 }
 

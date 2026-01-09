@@ -53,6 +53,7 @@ export type GameplaySettings = {
   treasureCursePenalty: number
   treasureCurseIncreaseRate: number
   treasureInitialCurse: number
+  treasureSetBonus: number
   cardWeights: Record<string, number>
 }
 
@@ -110,6 +111,7 @@ const DEFAULT_SETTINGS: GameplaySettings = {
   treasureCursePenalty: gameConfig.mechanics.treasureIsland.cursePenalty,
   treasureCurseIncreaseRate: gameConfig.mechanics.treasureIsland.curseIncreaseRate,
   treasureInitialCurse: gameConfig.mechanics.treasureIsland.initialCurse,
+  treasureSetBonus: gameConfig.mechanics.treasureIsland.setBonus,
   cardWeights: { ...gameConfig.mechanics.cardWeights },
 }
 
@@ -563,6 +565,14 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 max={50}
                 step={5}
                 suffix="%"
+              />
+              <SettingRow
+                label="Missing Card Weight Bonus"
+                value={settings.treasureSetBonus}
+                onChange={(val) => updateSetting('treasureSetBonus', val)}
+                min={0}
+                max={200}
+                step={5}
               />
               {/* Expected Value Display */}
               <div className="treasure-estimate">

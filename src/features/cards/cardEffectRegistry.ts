@@ -47,9 +47,10 @@ const buildMerchantOffers = (
   players: Player[],
   ownerPlayerIndex: number,
   cardWeights?: Record<string, number>,
+  treasureSetBonus?: number,
   count = 4
 ) => {
-  const context = buildCardDrawContext(players, ownerPlayerIndex)
+  const context = buildCardDrawContext(players, ownerPlayerIndex, { treasureSetBonus })
   const choices: CardDefinition[] = []
   for (let i = 0; i < count; i += 1) {
     const entry = pickCardForPlayer(context, cardWeights)
@@ -64,6 +65,7 @@ export type CardEffectContext = {
   ownerPlayerIndex: number
   activePlayerIndex: number
   cardWeights?: Record<string, number>
+  treasureSetBonus?: number
   applyScoreChange: (
     targetIndex: number,
     delta: number,
@@ -224,8 +226,8 @@ const CARD_EFFECTS: Record<string, CardEffectDefinition> = {
   },
   traveling_merchant: {
     handlers: {
-      activated: ({ players, ownerPlayerIndex, cardWeights }) => {
-        const offers = buildMerchantOffers(players, ownerPlayerIndex, cardWeights)
+      activated: ({ players, ownerPlayerIndex, cardWeights, treasureSetBonus }) => {
+        const offers = buildMerchantOffers(players, ownerPlayerIndex, cardWeights, treasureSetBonus)
         if (offers.length === 0) return
         return {
           merchantOffers: offers,

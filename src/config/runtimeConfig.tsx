@@ -78,6 +78,7 @@ export type RuntimeGameConfig = {
       cursePenalty: number          // percentage lost on curse (50 = lose half)
       curseIncreaseRate: number     // percentage per dig (10 = +10% of remaining)
       initialCurse: number          // starting curse percentage
+      setBonus: number              // weight bonus per treasure card owned
     }
     cardWeights: Record<string, number>
   }
@@ -158,6 +159,7 @@ const defaultRuntimeConfig: RuntimeGameConfig = {
       cursePenalty: gameConfig.mechanics.treasureIsland.cursePenalty,
       curseIncreaseRate: gameConfig.mechanics.treasureIsland.curseIncreaseRate,
       initialCurse: gameConfig.mechanics.treasureIsland.initialCurse,
+      setBonus: gameConfig.mechanics.treasureIsland.setBonus,
     },
     cardWeights: { ...gameConfig.mechanics.cardWeights },
   },
@@ -245,6 +247,7 @@ export function gameplaySettingsToRuntimeConfig(settings: GameplaySettings): Run
         cursePenalty: settings.treasureCursePenalty,
         curseIncreaseRate: settings.treasureCurseIncreaseRate,
         initialCurse: settings.treasureInitialCurse,
+        setBonus: settings.treasureSetBonus,
       },
       cardWeights: { ...settings.cardWeights },
     },

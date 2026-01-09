@@ -369,7 +369,7 @@ export function useJeopardyGame({
       const drawnCards: CardDefinition[] = []
 
       for (let i = 0; i < numCards; i++) {
-        const drawContext = buildCardDrawContext(players, activePlayerIndex)
+        const drawContext = buildCardDrawContext(players, activePlayerIndex, { treasureSetBonus: runtimeConfig.mechanics.treasureIsland.setBonus })
         const entry = pickCardForPlayer(drawContext, runtimeConfig.mechanics.cardWeights)
         if (entry) {
           drawnCards.push(entry.definition)
@@ -596,6 +596,7 @@ export function useJeopardyGame({
               ownerPlayerIndex: targetIndex,
               activePlayerIndex,
               cardWeights: runtimeConfig.mechanics.cardWeights,
+              treasureSetBonus: runtimeConfig.mechanics.treasureIsland.setBonus,
               applyScoreChange: applyScoreChangeRef.current,
               updatePlayerStats,
               updateCardState,
@@ -715,7 +716,7 @@ export function useJeopardyGame({
     if (blackMarketConfig?.enabled && numCards > 0 && onBlackMarketStart) {
       const drawnCards: CardDefinition[] = []
       for (let i = 0; i < numCards; i++) {
-        const drawContext = buildCardDrawContext(players, nextIndex)
+        const drawContext = buildCardDrawContext(players, nextIndex, { treasureSetBonus: runtimeConfig.mechanics.treasureIsland.setBonus })
         const entry = pickCardForPlayer(drawContext, runtimeConfig.mechanics.cardWeights)
         if (entry) {
           drawnCards.push(entry.definition)
@@ -1138,7 +1139,7 @@ export function useJeopardyGame({
           }
         } else {
           // Draw random cards
-          const drawContext = buildCardDrawContext(playersRef.current, playerIndex)
+          const drawContext = buildCardDrawContext(playersRef.current, playerIndex, { treasureSetBonus: runtimeConfig.mechanics.treasureIsland.setBonus })
           for (let i = 0; i < quest.reward.amount; i++) {
             const entry = pickCardForPlayer(drawContext, runtimeConfig.mechanics.cardWeights)
             if (entry) {
@@ -1183,7 +1184,7 @@ export function useJeopardyGame({
 
       // Award bonus cards if present
       if (quest.reward.bonusCards && quest.reward.bonusCards > 0) {
-        const drawContext = buildCardDrawContext(playersRef.current, playerIndex)
+        const drawContext = buildCardDrawContext(playersRef.current, playerIndex, { treasureSetBonus: runtimeConfig.mechanics.treasureIsland.setBonus })
         for (let i = 0; i < quest.reward.bonusCards; i++) {
           const entry = pickCardForPlayer(drawContext, runtimeConfig.mechanics.cardWeights)
           if (entry) {
@@ -1274,6 +1275,7 @@ export function useJeopardyGame({
         ownerPlayerIndex: ownerIndex,
         activePlayerIndex,
         cardWeights: runtimeConfig.mechanics.cardWeights,
+        treasureSetBonus: runtimeConfig.mechanics.treasureIsland.setBonus,
         applyScoreChange: applyScoreChangeRef.current,
         updatePlayerStats,
         updateCardState,
@@ -1302,6 +1304,7 @@ export function useJeopardyGame({
             ownerPlayerIndex: playerIndex,
             activePlayerIndex,
             cardWeights: runtimeConfig.mechanics.cardWeights,
+            treasureSetBonus: runtimeConfig.mechanics.treasureIsland.setBonus,
             applyScoreChange: applyScoreChangeRef.current,
             updatePlayerStats,
             updateCardState,
@@ -1342,6 +1345,7 @@ export function useJeopardyGame({
             ownerPlayerIndex: playerIndex,
             activePlayerIndex,
             cardWeights: runtimeConfig.mechanics.cardWeights,
+            treasureSetBonus: runtimeConfig.mechanics.treasureIsland.setBonus,
             applyScoreChange: applyScoreChangeRef.current,
             updatePlayerStats,
             updateCardState,
@@ -1395,7 +1399,7 @@ export function useJeopardyGame({
       if (blackMarketConfig?.enabled && numCards > 0 && onBlackMarketStart) {
         const drawnCards: CardDefinition[] = []
         for (let i = 0; i < numCards; i++) {
-          const drawContext = buildCardDrawContext(players, playerIndex)
+          const drawContext = buildCardDrawContext(players, playerIndex, { treasureSetBonus: runtimeConfig.mechanics.treasureIsland.setBonus })
           const entry = pickCardForPlayer(drawContext, runtimeConfig.mechanics.cardWeights)
           if (entry) {
             drawnCards.push(entry.definition)
@@ -1588,7 +1592,7 @@ export function useJeopardyGame({
     )
 
     // Draw a new card
-    const drawContext = buildCardDrawContext(playersRef.current, playerIndex)
+    const drawContext = buildCardDrawContext(playersRef.current, playerIndex, { treasureSetBonus: runtimeConfig.mechanics.treasureIsland.setBonus })
     const entry = pickCardForPlayer(drawContext, runtimeConfig.mechanics.cardWeights)
     const newCard = entry?.definition ?? null
 

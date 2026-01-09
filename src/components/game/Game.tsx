@@ -368,7 +368,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     const newCards: CardDefinition[] = []
 
     for (let i = 0; i < cardsToDraw; i++) {
-      const drawContext = buildCardDrawContext(players, activePlayerIndex)
+      const drawContext = buildCardDrawContext(players, activePlayerIndex, { treasureSetBonus: runtimeConfig.mechanics.treasureIsland.setBonus })
       const entry = pickCardForPlayer(drawContext, runtimeConfig.mechanics.cardWeights)
       if (entry) {
         const card = entry.definition
@@ -545,7 +545,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     // Grant random cards to the winner and collect them for reveal
     const wonCards: CardDefinition[] = []
     if (prizes.cards > 0) {
-      const context = buildCardDrawContext(players, winnerIndex)
+      const context = buildCardDrawContext(players, winnerIndex, { treasureSetBonus: runtimeConfig.mechanics.treasureIsland.setBonus })
       for (let i = 0; i < prizes.cards; i++) {
         const entry = pickCardForPlayer(context, runtimeConfig.mechanics.cardWeights)
         if (entry) {
