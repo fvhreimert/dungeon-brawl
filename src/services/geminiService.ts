@@ -1,7 +1,26 @@
 import type { QuizCategory } from '@/types/quiz'
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'
+export type GeminiModel =
+  | 'gemini-2.5-flash'
+  | 'gemini-2.5-pro'
+  | 'gemini-3-flash-preview'
+  | 'gemini-3-pro-preview'
+
+export const GEMINI_MODELS: { id: GeminiModel; name: string }[] = [
+  { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
+  { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro' },
+  { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash (Preview)' },
+  { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro (Preview)' },
+]
+
+const DEFAULT_MODEL: GeminiModel = 'gemini-2.5-flash'
+
+function getApiUrl(model: GeminiModel): string {
+  return `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`
+}
+
 const STORAGE_KEY = 'dungeon_brawl_gemini_key'
+const MODEL_STORAGE_KEY = 'dungeon_brawl_gemini_model'
 
 export function getSavedApiKey(): string | null {
   return localStorage.getItem(STORAGE_KEY)
@@ -15,9 +34,22 @@ export function clearApiKey(): void {
   localStorage.removeItem(STORAGE_KEY)
 }
 
-export async function verifyApiKey(apiKey: string): Promise<{ valid: boolean; error?: string }> {
+export function getSavedModel(): GeminiModel {
+  const saved = localStorage.getItem(MODEL_STORAGE_KEY)
+  if (saved && GEMINI_MODELS.some(m => m.id === saved)) {
+    return saved as GeminiModel
+  }
+  return DEFAULT_MODEL
+}
+
+export function saveModel(model: GeminiModel): void {
+  localStorage.setItem(MODEL_STORAGE_KEY, model)
+}
+
+export async function verifyApiKey(apiKey: string, model: GeminiModel = DEFAULT_MODEL): Promise<{ valid: boolean; error?: string }> {
   try {
-    const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+    const apiUrl = getApiUrl(model)
+    const response = await fetch(`${apiUrl}?key=${apiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -47,24 +79,20 @@ export async function verifyApiKey(apiKey: string): Promise<{ valid: boolean; er
 const CATEGORY_PROMPT_TEMPLATE = `Du er en ekspert i at udforme quizspørgsmål. Generér præcis 5 quizspørgsmål inden for kategorien: [Category].
 Følg eventuelle særlige instruktioner: [Instructions].
 
-Krav:
+Du er en professionel redaktør for TV-programmet Jeopardy. Din opgave er at spørgsmål og svar der er underholdende, præcise og interestante, for et publikum i alderen 20-35 år. 
 
-1. Alle spørgsmål og svar skal være på dansk.
-2. Svarene skal være faktuelt korrekte, verificerbare og formuleret som korte, præcise udsagn.
-2. Spørgsmålene skal være relevante og interessante for et publikum i alderen 25–30 år.
-3. Spørgsmålene skal kunne besvares mundtligt uden hjælpemidler.
-4. Spørgsmålene skal stige gradvist i sværhedsgrad (1 = let, 5 = svært).
-5. Spørgsmålene må ikke være ledende eller afsløre svarene på sig selv.
-6. Spørgsmålene må ikke afsløre svarene på de andre spørgsmål.
-7. Undgå at gentage nøgleord fra et svar i senere spørgsmål.
-8. Spørgsmålene skal være korte, naturligt formulerede og uden unødige detaljer.
-9. Undgå "trick questions" – spørg hellere klart og fængende.
-10. Undgå at lave for lange spørgsmål om muligt. 
+REGLER FOR INDHOLD:
 
-Tjek før du svarer:
+A. SVÆRHEDSGRAD
+Spørgsmålene skal stige i sværhedsgrad. 
+   - 1: Alle i rummet bør kunne svare (almen viden)
+   - 5: Mere specifik viden indenfor kategorien, som alle ikke kender til.
 
-1. Intet spørgsmål må indeholde sit eget svar.
-2. Ingen spørgsmål må bruge et ord eller navn, der direkte optræder i et andet spørgsmål eller svar.
+B. Spørgsmålene må ikke indeholde svaret på spørgsmålet. Det må altså ikke være indlysende og afsløre svaret i teksten. Undgå at spørgsmålene i kategorien minder om hinanden eller afslører svarene på andre spørgsmål i kategorien.
+
+C. Spørgsmålene skal helst være korte og præcise, uden unødige detaljer. 
+
+D. Undgå "trick spørgsmål"
 
 Svar udelukkende i dette JSON-format (Der må IKKE være noget ekstra tekst udenfor JSON):
 
@@ -102,11 +130,13 @@ function cleanJsonResponse(text: string): string {
 export async function generateCategory(
   apiKey: string,
   categoryName: string,
-  description: string
+  description: string,
+  model: GeminiModel = DEFAULT_MODEL
 ): Promise<QuizCategory> {
   const prompt = buildPrompt(categoryName, description)
-  
-  const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
+  const apiUrl = getApiUrl(model)
+
+  const response = await fetch(`${apiUrl}?key=${apiKey}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -146,16 +176,17 @@ export type CategoryInput = {
 export async function generateQuizCategories(
   apiKey: string,
   categories: CategoryInput[],
-  onProgress?: (completed: number, total: number) => void
+  onProgress?: (completed: number, total: number) => void,
+  model: GeminiModel = DEFAULT_MODEL
 ): Promise<QuizCategory[]> {
   const results: QuizCategory[] = []
-  
+
   for (let i = 0; i < categories.length; i++) {
     const { name, description } = categories[i]
-    const category = await generateCategory(apiKey, name, description)
+    const category = await generateCategory(apiKey, name, description, model)
     results.push(category)
     onProgress?.(i + 1, categories.length)
   }
-  
+
   return results
 }

@@ -3,7 +3,7 @@ import { Button as RetroButton } from '@/components/ui/8bit/button'
 import { Spinner } from '@/components/ui/8bit/spinner'
 import { getAvailableQuizzes, loadQuiz, quizToQAItems, getQuizCategories } from '@/utils/quizLoader'
 import { ALL_PORTRAITS } from '@/utils/portraits'
-import { generateQuizCategories, type CategoryInput } from '@/services/geminiService'
+import { generateQuizCategories, type CategoryInput, type GeminiModel } from '@/services/geminiService'
 import { GameSettingsScreen, type GameplaySettings } from './GameSettingsScreen'
 import { QuizBuilderScreen } from './QuizBuilderScreen'
 import { ApiKeyModal } from './ApiKeyModal'
@@ -55,6 +55,7 @@ export function MainMenuScreen({ onStartGame, onResumeGame }: MainMenuScreenProp
 
   // Generate quiz state
   const [verifiedApiKey, setVerifiedApiKey] = useState<string | null>(null)
+  const [selectedModel, setSelectedModel] = useState<GeminiModel>('gemini-2.5-flash')
   const [categoryCount, setCategoryCount] = useState(5)
   const [categoryInputs, setCategoryInputs] = useState<CategoryInput[]>(() =>
     Array.from({ length: 5 }, () => ({ name: '', description: '' }))
@@ -134,8 +135,9 @@ export function MainMenuScreen({ onStartGame, onResumeGame }: MainMenuScreenProp
     setGenerationError(null)
   }
 
-  const handleApiKeyVerified = (apiKey: string) => {
+  const handleApiKeyVerified = (apiKey: string, model: GeminiModel) => {
     setVerifiedApiKey(apiKey)
+    setSelectedModel(model)
     setMenuState('generate-quiz')
   }
 
@@ -184,7 +186,8 @@ export function MainMenuScreen({ onStartGame, onResumeGame }: MainMenuScreenProp
       const generatedCategories = await generateQuizCategories(
         verifiedApiKey,
         validCategories,
-        (completed, total) => setGenerationProgress({ completed, total })
+        (completed, total) => setGenerationProgress({ completed, total }),
+        selectedModel
       )
 
       // Create and save as custom quiz

@@ -1,16 +1,25 @@
 import { useState, useEffect, useRef } from 'react'
 import { Button as RetroButton } from '@/components/ui/8bit/button'
 import { Spinner } from '@/components/ui/8bit/spinner'
-import { getSavedApiKey, saveApiKey, verifyApiKey } from '@/services/geminiService'
+import {
+  getSavedApiKey,
+  saveApiKey,
+  verifyApiKey,
+  getSavedModel,
+  saveModel,
+  GEMINI_MODELS,
+  type GeminiModel,
+} from '@/services/geminiService'
 import './ApiKeyModal.css'
 
 type ApiKeyModalProps = {
-  onVerified: (apiKey: string) => void
+  onVerified: (apiKey: string, model: GeminiModel) => void
   onCancel: () => void
 }
 
 export function ApiKeyModal({ onVerified, onCancel }: ApiKeyModalProps) {
   const [apiKey, setApiKey] = useState('')
+  const [selectedModel, setSelectedModel] = useState<GeminiModel>(() => getSavedModel())
   const [isVerifying, setIsVerifying] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const savedKeyRef = useRef<string | null>(null)
@@ -22,6 +31,12 @@ export function ApiKeyModal({ onVerified, onCancel }: ApiKeyModalProps) {
       setApiKey(savedKey)
     }
   }, [])
+
+  const handleModelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const model = e.target.value as GeminiModel
+    setSelectedModel(model)
+    saveModel(model)
+  }
 
   const handlePasteFromClipboard = async () => {
     try {
@@ -42,20 +57,20 @@ export function ApiKeyModal({ onVerified, onCancel }: ApiKeyModalProps) {
 
     // Skip verification if key hasn't changed from saved key
     if (trimmedKey === savedKeyRef.current) {
-      onVerified(trimmedKey)
+      onVerified(trimmedKey, selectedModel)
       return
     }
 
     setIsVerifying(true)
     setError(null)
 
-    const result = await verifyApiKey(trimmedKey)
+    const result = await verifyApiKey(trimmedKey, selectedModel)
 
     setIsVerifying(false)
 
     if (result.valid) {
       saveApiKey(trimmedKey)
-      onVerified(trimmedKey)
+      onVerified(trimmedKey, selectedModel)
     } else {
       setError(result.error || 'Invalid API key')
     }
@@ -99,6 +114,22 @@ export function ApiKeyModal({ onVerified, onCancel }: ApiKeyModalProps) {
           >
             PASTE
           </RetroButton>
+        </div>
+
+        <div className="model-select-row">
+          <label className="model-select-label">Model:</label>
+          <select
+            className="model-select"
+            value={selectedModel}
+            onChange={handleModelChange}
+            disabled={isVerifying}
+          >
+            {GEMINI_MODELS.map((model) => (
+              <option key={model.id} value={model.id}>
+                {model.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         {error && (
