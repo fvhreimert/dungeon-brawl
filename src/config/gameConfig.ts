@@ -32,7 +32,7 @@ export const gameConfig = {
       maxLevel: 10,
     },
     alliances: {
-      baseDurationMultiplier: 2, // multiplied by number of players
+      duration: 8, // alliance duration in turns
     },
     items: {
       cursedCoin: {

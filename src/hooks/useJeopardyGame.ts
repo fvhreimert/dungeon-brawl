@@ -978,7 +978,7 @@ export function useJeopardyGame({
 
   const createAlliance = useCallback(
     (initiatorIndex: number, targetIndex: number, cardInstanceId: string) => {
-      const allianceDuration = players.length * runtimeConfig.mechanics.alliances.baseDurationMultiplier
+      const allianceDuration = runtimeConfig.mechanics.alliances.duration
       const color = getNextAllianceColor()
       const newAlliance: Alliance = {
         id: `alliance-${Date.now()}-${Math.random().toString(36).slice(2)}`,
@@ -991,7 +991,7 @@ export function useJeopardyGame({
       incrementPlayerMetric(initiatorIndex, 'alliancesFormed')
       return newAlliance
     },
-    [players.length, getNextAllianceColor, runtimeConfig.mechanics.alliances.baseDurationMultiplier, incrementPlayerMetric],
+    [getNextAllianceColor, runtimeConfig.mechanics.alliances.duration, incrementPlayerMetric],
   )
 
   const tickDownAlliances = useCallback(() => {

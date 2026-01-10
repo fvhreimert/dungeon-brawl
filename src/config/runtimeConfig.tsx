@@ -17,7 +17,7 @@ export type RuntimeGameConfig = {
       maxLevel: number
     }
     alliances: {
-      baseDurationMultiplier: number
+      duration: number
     }
     items: {
       cursedCoin: {
@@ -98,7 +98,7 @@ const defaultRuntimeConfig: RuntimeGameConfig = {
       maxLevel: gameConfig.mechanics.spiderSense.maxLevel,
     },
     alliances: {
-      baseDurationMultiplier: gameConfig.mechanics.alliances.baseDurationMultiplier,
+      duration: gameConfig.mechanics.alliances.duration,
     },
     items: {
       cursedCoin: {
@@ -186,7 +186,7 @@ export function gameplaySettingsToRuntimeConfig(settings: GameplaySettings): Run
         maxLevel: settings.spiderSenseMaxLevel,
       },
       alliances: {
-        baseDurationMultiplier: settings.allianceBaseDurationMultiplier,
+        duration: settings.allianceDuration,
       },
       items: {
         cursedCoin: {

@@ -16,7 +16,7 @@ export type GameplaySettings = {
   spiderIsopodRerollBonus: number
   spiderSenseBonusPerLevel: number
   spiderSenseMaxLevel: number
-  allianceBaseDurationMultiplier: number
+  allianceDuration: number
   cursedCoinDurationTurns: number
   cursedCoinValue: number
   cardJesterPrice: number
@@ -74,7 +74,7 @@ const DEFAULT_SETTINGS: GameplaySettings = {
   spiderIsopodRerollBonus: gameConfig.mechanics.spiderIsopodRerollBonus,
   spiderSenseBonusPerLevel: gameConfig.mechanics.spiderSense.bonusPerLevel * 100,
   spiderSenseMaxLevel: gameConfig.mechanics.spiderSense.maxLevel,
-  allianceBaseDurationMultiplier: gameConfig.mechanics.alliances.baseDurationMultiplier,
+  allianceDuration: gameConfig.mechanics.alliances.duration,
   cursedCoinDurationTurns: gameConfig.mechanics.items.cursedCoin.durationTurns,
   cursedCoinValue: gameConfig.mechanics.items.cursedCoin.value,
   cardJesterPrice: gameConfig.mechanics.actionPrices.cardJester,
@@ -629,13 +629,13 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
             <div className="settings-section">
               <h2 className="section-title">Alliances</h2>
               <SettingRow
-                label="Duration Multiplier"
-                value={settings.allianceBaseDurationMultiplier}
-                onChange={(val) => updateSetting('allianceBaseDurationMultiplier', val)}
+                label="Duration"
+                value={settings.allianceDuration}
+                onChange={(val) => updateSetting('allianceDuration', val)}
                 min={1}
                 max={100}
                 step={1}
-                suffix="x players"
+                suffix="turns"
               />
             </div>
 
