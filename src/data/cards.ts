@@ -83,6 +83,7 @@ export const CARDS: CardDefinition[] = [
     theme: 'theme-fel',
     imagePath: soulBurstImg,
     framePath: soulBurstFrame,
+    consumesOnActivate: true,
   },
   {
     id: 'thieving_rat',

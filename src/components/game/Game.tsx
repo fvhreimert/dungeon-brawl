@@ -372,7 +372,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
       const entry = pickCardForPlayer(drawContext, runtimeConfig.mechanics.cardWeights)
       if (entry) {
         const card = entry.definition
-        addCardToInventory(card)
+        addCardToInventory(card, activePlayerIndex)
         newCards.push(card)
       }
     }
@@ -442,7 +442,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
   }
 
   const handleMerchantSelect = (card: CardDefinition) => {
-    addCardToInventory(card)
+    addCardToInventory(card, activePlayerIndex)
     setMerchantOffers(null)
   }
 

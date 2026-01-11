@@ -76,6 +76,17 @@ const createCardInstance = (definition: CardDefinition): CardInstance => {
   }
 }
 
+const initializeCardInstance = (
+  definition: CardDefinition,
+  cursedCoinConfig: { durationTurns: number; value: number }
+): CardInstance => {
+  const card = createCardInstance(definition)
+  if (card.id === 'cursed_coin') {
+    card.state = { turnsRemaining: cursedCoinConfig.durationTurns }
+  }
+  return card
+}
+
 const buildPlayerWithStats = (config: PlayerConfig, startingRerolls: number): Player => {
   const basePlayer = {
     ...config,
@@ -626,9 +637,43 @@ export function useJeopardyGame({
     applyScoreChangeRef.current = applyScoreChange
   }, [applyScoreChange])
 
+  // Centralized function for giving NEW cards to a player
+  // This handles initial state setup and on-draw bonuses (e.g., cursed coin +500)
+  // NOTE: Do NOT use this for transferring existing cards (use transferCardBetweenPlayers instead)
+  const addCardToInventory = useCallback(
+    (cardDef: CardDefinition, playerIndex: number, options?: { skipSnapshot?: boolean }): CardInstance => {
+      if (!options?.skipSnapshot) {
+        saveSnapshot()
+      }
+
+      const cursedCoinConfig = runtimeConfig.mechanics.items.cursedCoin
+      const cardInstance = initializeCardInstance(cardDef, cursedCoinConfig)
+
+      // Award on-draw bonuses
+      if (cardDef.id === 'cursed_coin') {
+        applyScoreChange(playerIndex, cursedCoinConfig.value, 'passiveItem')
+      }
+
+      // Add to player's inventory
+      setPlayers((prev) =>
+        prev.map((player, index) => {
+          if (index !== playerIndex) return player
+          return {
+            ...player,
+            inventory: [cardInstance, ...player.inventory],
+          }
+        }),
+      )
+
+      return cardInstance
+    },
+    [applyScoreChange, runtimeConfig.mechanics.items.cursedCoin, setPlayers, saveSnapshot],
+  )
+
   useEffect(() => {
     const puppetLock = puppetLocks[activePlayerIndex]
     if (!puppetLock) return
+    // Check if there are any open tiles in the locked category
     const hasAvailableTiles = tiles.some(
       (tile) => tile.status === 'open' && tile.category === puppetLock.category,
     )
@@ -1125,16 +1170,7 @@ export function useJeopardyGame({
           if (specificCard) {
             for (let i = 0; i < quest.reward.amount; i++) {
               rewardedCards.push(specificCard)
-              const cardInstance = createCardInstance(specificCard)
-              setPlayers((prev) =>
-                prev.map((p, idx) => {
-                  if (idx !== playerIndex) return p
-                  return {
-                    ...p,
-                    inventory: [cardInstance, ...p.inventory],
-                  }
-                }),
-              )
+              addCardToInventory(specificCard, playerIndex, { skipSnapshot: true })
             }
           }
         } else {
@@ -1144,16 +1180,7 @@ export function useJeopardyGame({
             const entry = pickCardForPlayer(drawContext, runtimeConfig.mechanics.cardWeights)
             if (entry) {
               rewardedCards.push(entry.definition)
-              const cardInstance = createCardInstance(entry.definition)
-              setPlayers((prev) =>
-                prev.map((p, idx) => {
-                  if (idx !== playerIndex) return p
-                  return {
-                    ...p,
-                    inventory: [cardInstance, ...p.inventory],
-                  }
-                }),
-              )
+              addCardToInventory(entry.definition, playerIndex, { skipSnapshot: true })
             }
           }
         }
@@ -1189,16 +1216,7 @@ export function useJeopardyGame({
           const entry = pickCardForPlayer(drawContext, runtimeConfig.mechanics.cardWeights)
           if (entry) {
             rewardedCards.push(entry.definition)
-            const cardInstance = createCardInstance(entry.definition)
-            setPlayers((prev) =>
-              prev.map((p, idx) => {
-                if (idx !== playerIndex) return p
-                return {
-                  ...p,
-                  inventory: [cardInstance, ...p.inventory],
-                }
-              }),
-            )
+            addCardToInventory(entry.definition, playerIndex, { skipSnapshot: true })
           }
         }
       }
@@ -1216,28 +1234,8 @@ export function useJeopardyGame({
 
       return rewardedCards.length > 0 ? rewardedCards : null
     },
-    [applyScoreChange, runtimeConfig.mechanics.cardWeights],
+    [applyScoreChange, runtimeConfig.mechanics.cardWeights, addCardToInventory],
   )
-
-  const addCardToInventory = (card: CardDefinition, targetPlayerIndex?: number) => {
-    saveSnapshot()
-    const playerIndex = targetPlayerIndex ?? activePlayerIndex
-    const cardInstance = createCardInstance(card)
-    if (cardInstance.id === 'cursed_coin') {
-      cardInstance.state = { turnsRemaining: runtimeConfig.mechanics.items.cursedCoin.durationTurns }
-      applyScoreChange(playerIndex, runtimeConfig.mechanics.items.cursedCoin.value, 'passiveItem')
-    }
-    setPlayers((prev) =>
-      prev.map((player, index) => {
-        if (index !== playerIndex) return player
-        const inventory = [cardInstance, ...player.inventory]
-        return {
-          ...player,
-          inventory,
-        }
-      }),
-    )
-  }
 
   const combineTreasureSet = (playerIndex: number, cardInstanceIds: string[], goldEarned: number) => {
     saveSnapshot()
@@ -1368,11 +1366,22 @@ export function useJeopardyGame({
   ])
 
   const hasMountedRef = useRef(false)
+  const prevActivePlayerRef = useRef(activePlayerIndex)
   useEffect(() => {
     if (!hasMountedRef.current) {
       hasMountedRef.current = true
+      prevActivePlayerRef.current = activePlayerIndex
       return
     }
+
+    // Clear puppet lock for the previous player (their turn just ended)
+    // This ensures puppet lock only lasts for one turn
+    const prevPlayer = prevActivePlayerRef.current
+    if (prevPlayer !== activePlayerIndex && puppetLocks[prevPlayer]) {
+      clearPuppetLock(prevPlayer)
+    }
+    prevActivePlayerRef.current = activePlayerIndex
+
     // Unfreeze tiles and actions that this player froze (their turn has come back around)
     setTimeout(() => {
         unfreezeTilesForPlayer(activePlayerIndex)
@@ -1382,7 +1391,7 @@ export function useJeopardyGame({
     }, 0)
     runGlobalTurnEffects()
     runTurnStartEffects(activePlayerIndex)
-  }, [activePlayerIndex, runTurnStartEffects, runGlobalTurnEffects, unfreezeTilesForPlayer, unfreezeActionsForPlayer, tickDownAlliances])
+  }, [activePlayerIndex, runTurnStartEffects, runGlobalTurnEffects, unfreezeTilesForPlayer, unfreezeActionsForPlayer, tickDownAlliances, puppetLocks, clearPuppetLock])
 
   const setActivePlayer = useCallback((playerIndex: number) => {
     if (playerIndex >= 0 && playerIndex < players.length) {
@@ -1517,15 +1526,8 @@ export function useJeopardyGame({
 
   // Black Market functions
   const acceptBlackMarketCards = useCallback((cards: CardDefinition[]) => {
-    const cardInstances = cards.map(card => createCardInstance(card))
-
-    setPlayers((prev) =>
-      prev.map((player, index) =>
-        index === activePlayerIndex
-          ? { ...player, inventory: [...player.inventory, ...cardInstances] }
-          : player,
-      ),
-    )
+    // Give each card using centralized function (handles bonuses like cursed coin +500)
+    cards.forEach(card => addCardToInventory(card, activePlayerIndex, { skipSnapshot: true }))
 
     // Track cards received
     if (cards.length > 0) {
@@ -1534,7 +1536,7 @@ export function useJeopardyGame({
 
     // Clear pending Black Market after cards are accepted
     pendingBlackMarketRef.current = null
-  }, [activePlayerIndex, incrementPlayerMetric])
+  }, [activePlayerIndex, incrementPlayerMetric, addCardToInventory])
 
   // Get serializable state for saving
   const getSerializableState = useCallback((): ResumedGameState => {
@@ -1646,7 +1648,7 @@ export function useJeopardyGame({
     arePlayersAllied,
     getPlayerAlliance,
     goldenIdolBonus,
-    resetGoldenIdolBonus: () => setGoldenIdolBonus(0),
+    resetGoldenIdolBonus: () => setGoldenIdolBonus(runtimeConfig.mechanics.goldenIdol.startBonus),
     gameMetrics,
     recordActionUsage,
     incrementPlayerMetric,

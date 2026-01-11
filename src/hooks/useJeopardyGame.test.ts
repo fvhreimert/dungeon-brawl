@@ -170,7 +170,7 @@ describe('useJeopardyGame', () => {
     )
 
     act(() => {
-      result.current.addCardToInventory(CARDS[0])
+      result.current.addCardToInventory(CARDS[0], 0)
     })
 
     expect(calculatePassiveDeltaForPlayer(result.current.players[0], result.current.players)).toBe(25)
@@ -218,7 +218,7 @@ describe('useJeopardyGame', () => {
     )
 
     act(() => {
-      result.current.addCardToInventory(soulBurstCard)
+      result.current.addCardToInventory(soulBurstCard, result.current.activePlayerIndex)
     })
 
     const cardInstance = result.current.players[0].inventory[0]
@@ -330,7 +330,7 @@ describe('useJeopardyGame', () => {
     )
 
     act(() => {
-      result.current.addCardToInventory(puppetMasterCard)
+      result.current.addCardToInventory(puppetMasterCard, result.current.activePlayerIndex)
     })
 
     const cardInstance = result.current.players[0].inventory[0]
@@ -400,7 +400,7 @@ describe('useJeopardyGame', () => {
 
     // Give P1 the beggar card
     act(() => {
-      result.current.addCardToInventory(beggarCard)
+      result.current.addCardToInventory(beggarCard, result.current.activePlayerIndex)
     })
 
     // Give P2 the soul burst card to test if beggar triggers damageTaken
@@ -417,7 +417,7 @@ describe('useJeopardyGame', () => {
     // Now P2's turn - give them soul burst
     expect(result.current.activePlayerIndex).toBe(1)
     act(() => {
-      result.current.addCardToInventory(soulBurstCard)
+      result.current.addCardToInventory(soulBurstCard, result.current.activePlayerIndex)
     })
 
     // Advance turn again to trigger beggar's turnAdvanced

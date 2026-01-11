@@ -86,7 +86,7 @@ REGLER FOR INDHOLD:
 A. SVÆRHEDSGRAD
 Spørgsmålene skal stige i sværhedsgrad. 
    - 1: Alle i rummet bør kunne svare (almen viden)
-   - 5: Mere specifik viden indenfor kategorien, som alle ikke kender til.
+   - 5: Mere specifik viden indenfor kategorien, som kun meget få kender til. 
 
 B. Spørgsmålene må ikke indeholde svaret på spørgsmålet. Det må altså ikke være indlysende og afsløre svaret i teksten. Undgå at spørgsmålene i kategorien minder om hinanden eller afslører svarene på andre spørgsmål i kategorien.
 
