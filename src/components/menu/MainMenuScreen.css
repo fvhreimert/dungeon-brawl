@@ -640,3 +640,98 @@
   color: #888;
   text-align: center;
 }
+
+/* Rate Limit Countdown */
+.rate-limit-countdown {
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+  border: 4px solid #b51a2c;
+  box-shadow:
+    0 0 0 4px #0a0a0a,
+    0 0 20px rgba(181, 26, 44, 0.4),
+    inset 0 0 20px rgba(181, 26, 44, 0.2);
+  position: relative;
+  animation: rate-limit-pulse 1s ease-in-out infinite;
+}
+
+.rate-limit-countdown::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 2px dashed #b51a2c;
+  opacity: 0.4;
+  animation: rate-limit-rotate 4s linear infinite;
+}
+
+@keyframes rate-limit-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 4px #0a0a0a,
+      0 0 20px rgba(181, 26, 44, 0.4),
+      inset 0 0 20px rgba(181, 26, 44, 0.2);
+  }
+  50% {
+    box-shadow:
+      0 0 0 4px #0a0a0a,
+      0 0 30px rgba(181, 26, 44, 0.6),
+      inset 0 0 30px rgba(181, 26, 44, 0.3);
+  }
+}
+
+@keyframes rate-limit-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.countdown-number {
+  font-family: 'November', 'Press Start 2P', monospace;
+  font-size: 48px;
+  color: #ff6b6b;
+  text-shadow:
+    0 0 10px rgba(255, 107, 107, 0.8),
+    2px 2px 0 #000,
+    -2px -2px 0 #000;
+  animation: countdown-tick 1s ease-out infinite;
+}
+
+@keyframes countdown-tick {
+  0% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.rate-limit-message {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  color: #ffb347;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  animation: rate-limit-blink 2s ease-in-out infinite;
+}
+
+@keyframes rate-limit-blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

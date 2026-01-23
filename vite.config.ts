@@ -9,6 +9,15 @@ const isTauri = process.env.TAURI_ENV_PLATFORM !== undefined
 export default defineConfig({
   base: isTauri ? './' : '/dungeon-brawl/',
   plugins: [react()],
+  server: {
+    proxy: {
+      '/jeopardy-api': {
+        target: 'https://jeopardylabs.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/jeopardy-api/, ''),
+      },
+    },
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src")

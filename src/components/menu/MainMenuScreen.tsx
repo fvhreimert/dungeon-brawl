@@ -3,7 +3,8 @@ import { Button as RetroButton } from '@/components/ui/8bit/button'
 import { Spinner } from '@/components/ui/8bit/spinner'
 import { getAvailableQuizzes, loadQuiz, quizToQAItems, getQuizCategories } from '@/utils/quizLoader'
 import { ALL_PORTRAITS } from '@/utils/portraits'
-import { generateQuizCategories, type CategoryInput, type GeminiModel } from '@/services/geminiService'
+import { generateQuizCategories, type CategoryInput, type GeminiModel, type GenerationCallbacks } from '@/services/geminiService'
+import { fetchJeopardyLabsQuiz } from '@/services/jeopardyService'
 import { GameSettingsScreen, type GameplaySettings } from './GameSettingsScreen'
 import { QuizBuilderScreen } from './QuizBuilderScreen'
 import { ApiKeyModal } from './ApiKeyModal'
@@ -14,7 +15,7 @@ import { createCustomQuiz, type CustomQuiz, type CustomQuizMeta } from '@/types/
 import type { PlayerConfig, QAItem, SavedGameState } from '@/types/game'
 import './MainMenuScreen.css'
 
-type MenuState = 'main' | 'quiz-select' | 'api-key' | 'generate-quiz' | 'generating' | 'create-quiz' | 'player-setup' | 'game-settings'
+type MenuState = 'main' | 'quiz-select' | 'api-key' | 'generate-quiz' | 'generating' | 'create-quiz' | 'player-setup' | 'game-settings' | 'steal-quiz'
 
 export type GameSettings = {
   quiz: Quiz
@@ -63,6 +64,11 @@ export function MainMenuScreen({ onStartGame, onResumeGame }: MainMenuScreenProp
   const [quizName, setQuizName] = useState('')
   const [generationProgress, setGenerationProgress] = useState({ completed: 0, total: 0 })
   const [generationError, setGenerationError] = useState<string | null>(null)
+  const [rateLimitCountdown, setRateLimitCountdown] = useState<number | null>(null)
+
+  // Steal quiz state
+  const [stealQuizUrl, setStealQuizUrl] = useState('')
+  const [stealError, setStealError] = useState<string | null>(null)
 
   // Custom quiz storage
   const {
@@ -110,6 +116,43 @@ export function MainMenuScreen({ onStartGame, onResumeGame }: MainMenuScreenProp
 
   const handleQuizFromFile = () => {
     setMenuState('quiz-select')
+  }
+
+  const handleStealQuiz = () => {
+    setMenuState('steal-quiz')
+    setStealError(null)
+  }
+
+  const handleBackFromSteal = () => {
+    setMenuState('main')
+    setStealQuizUrl('')
+    setStealError(null)
+  }
+
+  const handleStealQuizSubmit = async () => {
+    if (!stealQuizUrl.trim()) return
+
+    setMenuState('generating')
+    setGenerationProgress({ completed: 0, total: 1 }) // Dummy progress
+    setGenerationError(null) // Clear any generation errors
+    setStealError(null)
+
+    try {
+      const quiz = await fetchJeopardyLabsQuiz(stealQuizUrl)
+      
+      // Convert to CustomQuiz format and save
+      const customQuiz = createCustomQuiz(quiz.displayName, quiz.categories)
+      await saveCustomQuiz(customQuiz)
+
+      setSelectedQuiz(customQuiz)
+      setIsCustomQuiz(true)
+      setIsGeneratedQuiz(false)
+      setMenuState('player-setup')
+    } catch (error) {
+      console.error('Failed to steal quiz:', error)
+      setStealError(error instanceof Error ? error.message : 'Failed to fetch quiz')
+      setMenuState('steal-quiz')
+    }
   }
 
   const handleQuizSelect = (quizFile: QuizFile) => {
@@ -181,12 +224,35 @@ export function MainMenuScreen({ onStartGame, onResumeGame }: MainMenuScreenProp
     setMenuState('generating')
     setGenerationProgress({ completed: 0, total: validCategories.length })
     setGenerationError(null)
+    setRateLimitCountdown(null)
+
+    // Rate limit countdown handler
+    const startCountdown = (seconds: number) => {
+      setRateLimitCountdown(seconds)
+      const interval = setInterval(() => {
+        setRateLimitCountdown(prev => {
+          if (prev === null || prev <= 1) {
+            clearInterval(interval)
+            return null
+          }
+          return prev - 1
+        })
+      }, 1000)
+    }
+
+    const callbacks: GenerationCallbacks = {
+      onProgress: (completed, total) => {
+        setRateLimitCountdown(null)
+        setGenerationProgress({ completed, total })
+      },
+      onRateLimit: startCountdown,
+    }
 
     try {
       const generatedCategories = await generateQuizCategories(
         verifiedApiKey,
         validCategories,
-        (completed, total) => setGenerationProgress({ completed, total }),
+        callbacks,
         selectedModel
       )
 
@@ -379,10 +445,58 @@ export function MainMenuScreen({ onStartGame, onResumeGame }: MainMenuScreenProp
                   font="retro"
                   className="menu-button"
                   variant="secondary"
+                  onClick={handleStealQuiz}
+                >
+                  Steal Quiz
+                </RetroButton>
+                <RetroButton
+                  font="retro"
+                  className="menu-button"
+                  variant="secondary"
                   onClick={handleResumeGame}
                   disabled={!hasSavedGame}
                 >
                   Resume Game
+                </RetroButton>
+              </div>
+            </div>
+          </>
+        )}
+
+        {menuState === 'steal-quiz' && (
+          <>
+            <h1 className="main-menu-title-standalone">Steal Quiz</h1>
+            <div className="generate-quiz-content">
+              <div className="quiz-name-row">
+                <input
+                  type="text"
+                  className="quiz-name-input"
+                  value={stealQuizUrl}
+                  onChange={(e) => setStealQuizUrl(e.target.value)}
+                  placeholder="PASTE JEOPARDYLABS URL"
+                />
+              </div>
+
+              {stealError && (
+                <div className="generation-error">{stealError}</div>
+              )}
+
+              <div className="generate-quiz-actions">
+                <RetroButton
+                  font="retro"
+                  variant="secondary"
+                  className="back-button"
+                  onClick={handleBackFromSteal}
+                >
+                  Back
+                </RetroButton>
+                <RetroButton
+                  font="retro"
+                  className="generate-btn"
+                  onClick={handleStealQuizSubmit}
+                  disabled={!stealQuizUrl.trim()}
+                >
+                  Steal
                 </RetroButton>
               </div>
             </div>
@@ -585,12 +699,30 @@ export function MainMenuScreen({ onStartGame, onResumeGame }: MainMenuScreenProp
 
         {menuState === 'generating' && (
           <div className="generating-content">
-            <h1 className="main-menu-title-standalone">Generating...</h1>
+            <h1 className="main-menu-title-standalone">
+              {rateLimitCountdown !== null ? 'Please Wait' : 'Generating...'}
+            </h1>
             <div className="generation-status">
-              <Spinner variant="diamond" className="generation-spinner" />
-              <div className="generation-progress">
-                Category {generationProgress.completed} of {generationProgress.total}
-              </div>
+              {rateLimitCountdown !== null ? (
+                <>
+                  <div className="rate-limit-countdown">
+                    <span className="countdown-number">{rateLimitCountdown}</span>
+                  </div>
+                  <div className="rate-limit-message">
+                    API cooling down...
+                  </div>
+                  <div className="generation-progress">
+                    Category {generationProgress.completed} of {generationProgress.total}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <Spinner variant="diamond" className="generation-spinner" />
+                  <div className="generation-progress">
+                    Category {generationProgress.completed} of {generationProgress.total}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}

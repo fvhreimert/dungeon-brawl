@@ -127,45 +127,93 @@ function cleanJsonResponse(text: string): string {
   return cleaned.trim()
 }
 
+export type RateLimitCallback = (waitingSeconds: number) => void
+
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+const MAX_RETRIES = 5
+const INITIAL_BACKOFF_MS = 2000
+
 export async function generateCategory(
   apiKey: string,
   categoryName: string,
   description: string,
-  model: GeminiModel = DEFAULT_MODEL
+  model: GeminiModel = DEFAULT_MODEL,
+  onRateLimit?: RateLimitCallback
 ): Promise<QuizCategory> {
   const prompt = buildPrompt(categoryName, description)
   const apiUrl = getApiUrl(model)
 
-  const response = await fetch(`${apiUrl}?key=${apiKey}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      contents: [
-        {
-          parts: [{ text: prompt }],
-        },
-      ],
-    }),
-  })
+  let backoffMs = INITIAL_BACKOFF_MS
 
-  if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(`Gemini API error: ${response.status} - ${errorText}`)
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    const response = await fetch(`${apiUrl}?key=${apiKey}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [{ text: prompt }],
+          },
+        ],
+      }),
+    })
+
+    // Handle retryable errors: rate limiting (429) and overloaded (503)
+    const isRetryable = response.status === 429 || response.status === 503
+
+    if (isRetryable) {
+      const retryAfterHeader = response.headers.get('Retry-After')
+      let waitMs: number
+
+      if (retryAfterHeader) {
+        // Retry-After can be seconds or a date string
+        const retryAfterSeconds = parseInt(retryAfterHeader, 10)
+        if (!isNaN(retryAfterSeconds)) {
+          waitMs = retryAfterSeconds * 1000
+        } else {
+          // Try parsing as date
+          const retryDate = new Date(retryAfterHeader).getTime()
+          waitMs = Math.max(0, retryDate - Date.now())
+        }
+      } else {
+        // Use longer initial wait for 503 (overloaded) vs 429 (rate limit)
+        waitMs = response.status === 503 ? Math.max(backoffMs, 5000) : backoffMs
+      }
+
+      // Notify UI about the wait time
+      if (onRateLimit) {
+        onRateLimit(Math.ceil(waitMs / 1000))
+      }
+
+      await sleep(waitMs)
+      backoffMs = Math.min(backoffMs * 2, 60000) // Cap at 60 seconds
+      continue
+    }
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      throw new Error(`Gemini API error: ${response.status} - ${errorText}`)
+    }
+
+    const data = await response.json()
+    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text
+
+    if (!generatedText) {
+      throw new Error('No content generated from Gemini API')
+    }
+
+    const cleanedJson = cleanJsonResponse(generatedText)
+    const category: QuizCategory = JSON.parse(cleanedJson)
+
+    return category
   }
 
-  const data = await response.json()
-  const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text
-
-  if (!generatedText) {
-    throw new Error('No content generated from Gemini API')
-  }
-
-  const cleanedJson = cleanJsonResponse(generatedText)
-  const category: QuizCategory = JSON.parse(cleanedJson)
-  
-  return category
+  throw new Error('Rate limit exceeded - max retries reached')
 }
 
 export type CategoryInput = {
@@ -173,19 +221,38 @@ export type CategoryInput = {
   description: string
 }
 
+export type GenerationCallbacks = {
+  onProgress?: (completed: number, total: number) => void
+  onRateLimit?: (waitingSeconds: number) => void
+}
+
+// Proactive delay between requests to reduce rate limit hits
+const DELAY_BETWEEN_REQUESTS_MS = 1500
+
 export async function generateQuizCategories(
   apiKey: string,
   categories: CategoryInput[],
-  onProgress?: (completed: number, total: number) => void,
+  callbacks?: GenerationCallbacks,
   model: GeminiModel = DEFAULT_MODEL
 ): Promise<QuizCategory[]> {
   const results: QuizCategory[] = []
 
   for (let i = 0; i < categories.length; i++) {
     const { name, description } = categories[i]
-    const category = await generateCategory(apiKey, name, description, model)
+    const category = await generateCategory(
+      apiKey,
+      name,
+      description,
+      model,
+      callbacks?.onRateLimit
+    )
     results.push(category)
-    onProgress?.(i + 1, categories.length)
+    callbacks?.onProgress?.(i + 1, categories.length)
+
+    // Proactive throttling: wait between requests (except after last one)
+    if (i < categories.length - 1) {
+      await sleep(DELAY_BETWEEN_REQUESTS_MS)
+    }
   }
 
   return results
