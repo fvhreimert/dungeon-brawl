@@ -85,7 +85,6 @@ function parseJeopardyHtmlToQuiz(html: string, defaultTitle: string): Quiz {
   });
 
   return {
-    id: crypto.randomUUID(),
     displayName: defaultTitle || 'Stealed Quiz',
     categories: categories.map(c => ({
       name: c.name,

@@ -11,6 +11,7 @@ import quiz6 from '@/data/quizzes/quiz_6.json'
 import quiz7 from '@/data/quizzes/quiz_7.json'
 import quiz8 from '@/data/quizzes/quiz_8.json'
 import quiz9 from '@/data/quizzes/quiz_9.json'
+import dutQuiz from '@/data/quizzes/dut.json'
 
 const quizModules: Record<string, Quiz> = {
   'quiz_1.json': quiz1 as Quiz,
@@ -22,6 +23,7 @@ const quizModules: Record<string, Quiz> = {
   'quiz_7.json': quiz7 as Quiz,
   'quiz_8.json': quiz8 as Quiz,
   'quiz_9.json': quiz9 as Quiz,
+  'dut.json': dutQuiz as Quiz,
 }
 
 export function getAvailableQuizzes(): QuizFile[] {

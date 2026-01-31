@@ -1,0 +1,55 @@
+{
+  "displayName": "dut",
+  "categories": [
+    {
+      "name": "Nektar",
+      "questions": [
+        { "q": "Denne nektar hævdes at 'give dig vinger' og findes i en karakteristisk blå og sølvfarvet dåse.", "a": "Red Bull" },
+        { "q": "Denne nektar er kendt for sit neonfarvede kradsemærke-logo og dåser på hele 0,5 liter.", "a": "Monster Energy" },
+        { "q": "Denne nektar blev grundlagt i Aarhus i 1998 og dominerede det danske natteliv i 00'erne.", "a": "Cult Energy" },
+        { "q": "Denne nektar skabte globalt kaos og tømte butikshylder efter lanceringen af YouTube-stjernerne Logan Paul og KSI.", "a": "Prime Energy" },
+        { "q": "Denne nektar fra Thailand fungerede som den direkte opskrift og inspiration for skabelsen af Red Bull.", "a": "Krating Daeng" }
+      ]
+    },
+    {
+      "name": "Dyr",
+      "questions": [
+        { "q": "4stk ben, 1stk snabel, 2stk stødtænder.", "a": "Elefant" },
+        { "q": "4stk ben, 1stk hals, 1stk blå tunge, plettet mønster.", "a": "Giraf" },
+        { "q": "4stk ben, 1stk flad bæverhale, 1stk evne til at lægge æg.", "a": "Næbdyr" },
+        { "q": "1stk 2-3 meter lang snoet fortand, 1000kg spæk, arktisk saltvand.", "a": "Narhval" },
+        { "q": "4stk zebrastribede ben, 1stk mørkebrun krop, 1stk 35cm blå gribetunge, giraf-slægtning.", "a": "Okapi" }
+      ]
+    },
+    {
+      "name": "Blandet Viden",
+      "questions": [
+        { "q": "Hvilken streamingtjeneste står bag globale hitserier som 'Stranger Things' og 'Squid Game'?", "a": "Netflix" },
+        { "q": "Hvilken planet i vores solsystem er kendt som 'Den Røde Planet'?", "a": "Mars" },
+        { "q": "Hvad er det kemiske symbol for grundstoffet guld?", "a": "Au" },
+        { "q": "I hvilket årstal præsenterede Steve Jobs den allerførste iPhone for verden?", "a": "2007" },
+        { "q": "Hvilket land er det eneste i verden, der har et nationalflag, som ikke er firkantet?", "a": "Nepal" }
+      ]
+    },
+    {
+      "name": "kånstid enteløgæns",
+      "questions": [
+        { "q": "va hæder dæ når en kåmputær lærer at gøer tin sjel uen at vi skruer på alting hele tien?", "a": "Machine Learning" },
+        { "q": "va kaller man dæ når vi gier kåmputern fasit på opgaverne mæ friksembel mase foteos så dæn kan øve sig?", "a": "Supervised Learning" },
+        { "q": "va er navne på dæ dær net-vjærk der liger voers jærne og gøer kåmputern mæje klok?", "a": "Neurale netværk" },
+        { "q": "va hedder dæ når en modæl er blævet for go til sit trænins-data og dæfor dumper i virkliheden?", "a": "Overfitting" },
+        { "q": "va heder dæn arkitegtur fra gugel i to tusin og syten dær bruer atension til at forstoe sprov?", "a": "Transformer-modellen" }
+      ]
+    },
+    {
+      "name": "Messenger",
+      "questions": [
+        { "q": "Kan også købe små fugle i stedet for tequila hvis i vil have noget mere børnevenligt - Men skal vide inden for 10 min", "a": "alberte" },
+        { "q": "Er der nogen der lokkes til Bayesian machine learning :)))", "a": "johanne" },
+        { "q": "Undskylder for min gymnasie-fuldhed !", "a": "benedicte" },
+        { "q": "/dtu/blackhole/19/155129", "a": "lasse" },
+        { "q": "Okidokies", "a": "johanne" }
+      ]
+    }
+  ]
+}
