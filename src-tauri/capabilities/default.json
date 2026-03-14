@@ -8,6 +8,8 @@
   "permissions": [
     "core:default",
     "fs:default",
-    "fs:allow-app-data-read-write"
+    "fs:allow-appdata-read-recursive",
+    "fs:allow-appdata-write-recursive",
+    "fs:create-app-specific-dirs"
   ]
 }
