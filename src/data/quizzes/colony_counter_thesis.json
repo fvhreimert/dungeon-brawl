@@ -1,0 +1,155 @@
+{
+  "displayName": "ColonyCounter Thesis",
+  "categories": [
+    {
+      "name": "Background",
+      "questions": [
+        {
+          "q": "What is the standard colony count range that is considered reliable and countable on an agar plate?",
+          "a": "30–300 colonies. Outside this range, counts are considered too sparse or too dense for accurate CFU estimation."
+        },
+        {
+          "q": "What does CFU stand for, and how does plate counting allow you to estimate it from a diluted sample?",
+          "a": "Colony Forming Unit. By counting colonies on a plate made from a known dilution, you can back-calculate the original bacterial concentration (CFU/mL)."
+        },
+        {
+          "q": "What inter-operator coefficient of variation (CoV) was reported for manual colony counting, and what does this number tell us about reliability?",
+          "a": "18.19%. This means different operators counting the same plate will typically disagree by about 18%, demonstrating that manual counting is not a gold-standard reference — it has inherent variability."
+        },
+        {
+          "q": "Why is simple image thresholding (like Otsu) insufficient as a general colony counting solution? Name two distinct failure modes it encounters.",
+          "a": "1) On dense plates, colonies merge into blobs that can't be separated — adding more patches doesn't help because the same merging happens everywhere. 2) It doesn't generalise outside the distribution it was calibrated on, breaking down on plates with different agar colours, lighting, or contrast."
+        },
+        {
+          "q": "The thesis argues that automated colony counting cannot currently replace manual verification. What is the key finding about researcher trust that shaped the entire design of the system from Iteration 0 onwards?",
+          "a": "Researchers do not trust fully automated counts for scientific documentation. This finding from the Iteration 0 user study made interactive verification the design anchor: the system was deliberately built as human-in-the-loop, not fully automated."
+        }
+      ]
+    },
+    {
+      "name": "Iteration 0",
+      "questions": [
+        {
+          "q": "What front-end canvas library was used in Iteration 0 to let users add, remove, and adjust colony detections interactively?",
+          "a": "Konva.js"
+        },
+        {
+          "q": "Which model was used for automatic Petri dish localisation (cropping) in Iteration 0, what was its success rate, and what was its main practical problem?",
+          "a": "FastSAM — succeeded in ~9 out of 10 cases (90%). Its main problem was very slow inference (~1 second per image) requiring a server round-trip to GCP, making manual cropping sometimes faster."
+        },
+        {
+          "q": "The counting study in Iteration 0 compared three workflows. What were they, how long did each take for 10 plates, and what was the key accuracy trade-off?",
+          "a": "Manual (~6.7 min), AI-only (~1.2 min), and AI+Manual (~5.2 min). AI-only was fastest but undercounted by 291 colonies on the high-density plate. AI+Manual reduced this error to 85 colonies, showing that speed and accuracy trade off and AI-only is unacceptable on dense plates."
+        },
+        {
+          "q": "Two of the four Iteration 0 requirements were marked 'Partially Met.' What were they, and what specific numerical evidence justified each rating?",
+          "a": "R0.3 (Counting Accuracy): degraded on the high-density plate (291-colony undercount for AI-only). R0.4 (Counting Speed): the 5.2 vs 6.7 minute reduction was not statistically significant (p = 0.21), and time to photograph the plates was not included."
+        },
+        {
+          "q": "Iteration 0 used only three participants in a fixed method order. Name two specific methodological limitations this introduces and explain how each one threatens the validity of the speed comparison.",
+          "a": "1) Practice effects: operators improve as the session progresses, so the method run last benefits from accumulated experience — this biases the timing data. 2) Underpowered study: with only 3 participants the study has insufficient statistical power to detect real differences, which is why p = 0.21 cannot be interpreted as 'no speed benefit' — the test simply couldn't detect it."
+        }
+      ]
+    },
+    {
+      "name": "Iteration 1",
+      "questions": [
+        {
+          "q": "What was the end-to-end processing time per image reduced to in Iteration 1, and what was the Iteration 0 baseline it was compared against?",
+          "a": "From 20.6 seconds down to 5.7 seconds — a 72% reduction."
+        },
+        {
+          "q": "Why was YOLOX selected over YOLO26 for browser-side Petri dish detection, even though YOLO26 had slightly higher accuracy?",
+          "a": "Licensing. YOLO26 uses Ultralytics' GPL 3.0 license, which would require open-sourcing the entire project. YOLOX has no such constraint. YOLOX-nano still achieved 100%/100%/90% accuracy at IoU 0.75/0.85/0.90, which is sufficient for reliable dish detection."
+        },
+        {
+          "q": "Three complementary changes together produced the 72% speed reduction in Iteration 1. Name all three and which bottleneck each one addressed.",
+          "a": "1) Browser-side ONNX inference for dish cropping — eliminated the GCP Cloud Run network round-trip. 2) Converting the colony detection model to OpenVINO format and switching to compressed WebP payloads — reduced upload and detection time. 3) Parallel upload workflow — each image uploads and runs detection as soon as its crop is accepted, so results arrive while later crops are still being reviewed."
+        },
+        {
+          "q": "The think-aloud evaluation in Iteration 1 identified four problem areas. Name them, and for each give the specific change that was implemented in response.",
+          "a": "1) Cropping pipeline (slow/unreliable) → replaced FastSAM with browser-side YOLOX-nano. 2) Ease of use (workflow not intuitive) → implemented a Driver.js guided onboarding tour. 3) Interactions (marking colonies was slow, missing tools) → added dot annotation tool and text annotation tool. 4) Data organisation and export (no project structure, limited export) → added project-based hierarchy and multi-format batch export."
+        },
+        {
+          "q": "R1.5 (Usability) was marked 'Partially Met' at the end of Iteration 1, despite implementing all fixes identified in the think-aloud evaluation. What is the precise reason, and what specific type of study would be required to mark it 'Satisfied'?",
+          "a": "The usability improvements were never formally evaluated with users after implementation — their effectiveness was unverified. To mark it 'Satisfied,' a formal first-time user test would be needed, where participants who have never seen the system attempt the full workflow without instruction, confirming they can complete it unaided."
+        }
+      ]
+    },
+    {
+      "name": "Iteration 2",
+      "questions": [
+        {
+          "q": "What does the metric CA@10/±1 measure, and why was an absolute ±1 tolerance added on top of the ±10% criterion?",
+          "a": "Practical Counting Accuracy: the percentage of plates where the predicted count is within ±10% of the manual reference. The absolute ±1 tolerance was added for plates with 0–10 colonies, because ±10% on very low counts would demand an exact match, which is unreasonably strict when manual counting itself has known variability."
+        },
+        {
+          "q": "Why were the DS1 and DS2 datasets excluded from training in Iteration 2, and what was the mAP@50 impact of including them?",
+          "a": "DS1 and DS2 contained images with missing or incorrectly placed bounding box annotations, introducing contradictory supervision signals. Including them degraded NatureDTU performance from mAP@50 0.633 to 0.610 — a reduction of 0.023."
+        },
+        {
+          "q": "RF-DETR outperforms YOLO26 within the 0–300 colony range but collapses above 300. What architectural reason causes this, and what mAP@50 does Full-image RF-DETR achieve above 300 colonies on Val II compared to YOLO26?",
+          "a": "RF-DETR uses a fixed set of 300 object queries — each query corresponds to one predicted object, so colonies beyond 300 are structurally undetectable regardless of model capacity. On Val II above 300 colonies, Full-image RF-DETR drops to mAP@50 0.389 versus YOLO26's 0.864."
+        },
+        {
+          "q": "Dual RF-DETR uses a routing threshold of 200 colonies rather than 300 (the hard architectural limit). Using the 'moderate vs critical failure' framework from the thesis, explain the reasoning for choosing 200.",
+          "a": "Plates with 200–300 colonies sent to Full-image RF-DETR are 'moderate failures' — the count is imprecise but not silently truncated. Plates above 300 are 'critical failures' — the count is guaranteed to be cut off. Setting the threshold at 200 provides a safety buffer: routing estimation error can shift a plate's estimated count by up to ~100 colonies without risking a critical misroute to Full-image RF-DETR."
+        },
+        {
+          "q": "YOLOX 640 was the best lightweight router on Val I (0.968 balanced accuracy, no critical failures), yet Full-image RF-DETR was selected as the routing model. Explain the specific failure that disqualified YOLOX 640 and what fundamental limitation it reveals about threshold-tuned detection-based routing.",
+          "a": "On Val II, YOLOX 640 predicted 149 colonies on a plate with 852 actual colonies — a critical failure that routed it to Full-image RF-DETR. This shows that conf/NMS thresholds tuned on Val I do not transfer to extreme-density plates from a different domain. The fundamental limitation: even high accuracy on a validation set cannot guarantee zero critical failures on plates outside the training distribution. Full-image RF-DETR achieves perfect routing on all 61 Val II plates because its detection ceiling naturally returns counts near 300 even on 850-colony plates, making it a structurally safe router."
+        }
+      ]
+    },
+    {
+      "name": "Iteration 3",
+      "questions": [
+        {
+          "q": "What material was the final imaging box prototype made from, and approximately what did the materials cost?",
+          "a": "Foamboard (a foam core with black paper glued on both sides). The total material cost was approximately 600 Danish kroner."
+        },
+        {
+          "q": "Name the four optical design principles that guided the construction of the imaging box prototype.",
+          "a": "1) Light-tight enclosure to block external light sources. 2) Shallow-angle side LED lighting to direct reflections away from the camera lens. 3) Diffuse illumination via lamp shade paper to soften shadows and reduce specular highlights. 4) Optional bottom backlight (square ceiling lamp) for enhanced colony-agar contrast."
+        },
+        {
+          "q": "In the full system evaluation, the apparatus+corrected workflow achieved 100% CA@10/±1 in 6.1 minutes versus 8.2 minutes for manual counting. What specifically made the apparatus reduce the correction time compared to the freehand+corrected workflow?",
+          "a": "The apparatus provided more consistent image framing and more reliable automatic Petri dish cropping — reducing the need for manual crop corrections. This shortened the correction phase from 5.2 minutes (freehand) to 3.0 minutes (apparatus), even though acquisition itself was slightly slower (2.7 vs 2.1 min)."
+        },
+        {
+          "q": "The raw model performed better on freehand images (97.2% CA@10/±1) than on apparatus images (91.7%). This was unexpected since apparatus images are more standardised. What is the most likely explanation, and what would need to change to fix it?",
+          "a": "The model was trained primarily on freehand-style images, so apparatus images — with controlled black-background lighting and bottom backlight — represent a mild domain shift. To fix it, the detection model would need to be retrained or fine-tuned on apparatus-style images so the training distribution matches the deployment distribution."
+        },
+        {
+          "q": "Trace the experimental logic from the original cardboard prototype to the hollow-bottom foamboard design. What did each intermediate finding reveal about the imaging problem, and what specific visual artefact motivated each change?",
+          "a": "Cardboard + Kindle backlight: showed good colony contrast but caused the background around the Kindle to lighten (the Kindle's glow was competing). Black background: darkened the surroundings but the plastic platform reflected individual colonies back up as secondary reflections. Hollow bottom compartment: by removing the platform and letting light pass into a deep empty space, transmitted light was absorbed — achieving a truly black background and eliminating platform reflections. Foamboard final: formalised all lessons with structural rigidity, proper light sealing, professional diffuser paper for repeatable illumination, and an integrated hollow bottom."
+        }
+      ]
+    },
+    {
+      "name": "Future Work",
+      "questions": [
+        {
+          "q": "Colony classification was explored as future work. Three representations were compared for clustering. Which one performed best, and what was its ARI score?",
+          "a": "LAB colour (a simple 3-channel colour baseline) — ARI 0.408. It outperformed both the 30-feature handcrafted descriptor (ARI 0.089) and DINOv2 embeddings (ARI -0.016)."
+        },
+        {
+          "q": "Two synthetic data generation pipelines were explored. Name them and describe what each one generated.",
+          "a": "1) Overlap Augmentation: took individual colony crops and composited them in partially overlapping configurations onto existing plate images to simulate dense plates. 2) Full Plate Synthesis: extracted colonies from existing datasets and repositioned them onto clean plate backgrounds using randomised spatial sampling to generate complete synthetic agar plates."
+        },
+        {
+          "q": "Chrome agar was the clearest agar-specific failure mode, with CA@10/±1 of only 51.4% versus 91.7% on Blood agar. Give one data-related and one visual reason why the model struggles with Chrome agar specifically.",
+          "a": "Data: Chrome agar is underrepresented in the training data — supported by 7 of the 12 total routing failures on the benchmark occurring on Chrome plates, showing the model has not generalised to it. Visual: Chrome agar has a distinctly different background colour and altered colony-agar contrast compared to Blood and LB agar, making it a genuine domain shift."
+        },
+        {
+          "q": "The effort-impact matrix was first built during Iteration 0. At project end, how did the 'Major Projects' quadrant turn out? Which items were fully delivered, partially delivered, and attempted but unresolved — and what pattern explains the failures?",
+          "a": "Delivered: Medium-Quality Counting (Dual RF-DETR), Photo Box, Auto Cropping. Partial: Low-Quality Counting (still needs manual correction), Mobile Interface. Attempted but unresolved: Morphology Classification (both handcrafted descriptors and DINOv2 embeddings failed). The pattern: every undelivered item required robust generalisation across highly diverse visual inputs — a problem that cannot be solved without substantially more annotated training data covering the full distribution."
+        },
+        {
+          "q": "Build an argument using three pieces of specific numerical evidence from the results that support the conclusion 'fully automated colony counting is not yet a solved problem.' Then state what three concrete developments would need to occur before the human-in-the-loop could be safely removed for routine lab use.",
+          "a": "Evidence: 1) Above 300 colonies, even Dual RF-DETR only achieves 30% CA@10/±1 on the external benchmark — far below any usable threshold. 2) On Chrome agar, CA@10/±1 is 51.4%, meaning nearly half of Chrome agar plates would have unacceptable counts without verification. 3) Targeted augmentations (glare, text, shadows) had marginal effect on Full-image RF-DETR and actually degraded 9-slice RF-DETR (mAP from 0.912 to 0.833), showing model-side fixes alone cannot close the edge-performance gap. To remove human-in-the-loop: (1) Substantially more diverse annotated training data covering Chrome agar and extreme-density plates. (2) A routing system with guaranteed zero critical failures across all agar types and densities. (3) Formal clinical-style validation across a broader range of labs, bacterial species, and imaging conditions than the current benchmark."
+        }
+      ]
+    }
+  ]
+}
