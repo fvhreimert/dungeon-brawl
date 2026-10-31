@@ -11,6 +11,8 @@ import rerollIcon from '@/assets/images/ui/reroll_icon.png'
 import { calculatePassiveDeltaForPlayer } from '@/features/cards/cardEffectRegistry'
 import { AnimatedScore } from './AnimatedScore'
 import { QuestIndicator } from '@/features/quests/QuestIndicator'
+import { useRuntimeConfig } from '@/config/runtimeConfig'
+import { getSpiderSensePercent } from '@/features/spiderSense'
 import './Scoreboard.css'
 
 const ALLIANCE_BANNERS: Record<AllianceColor, string> = {
@@ -41,6 +43,8 @@ export function Scoreboard({
   onQuestClick,
   isBlackMarketActive = false,
 }: ScoreboardProps) {
+  const { bonusPerLevel: spiderBonusPerLevel, maxLevel: spiderMaxLevel } = useRuntimeConfig().mechanics.spiderSense
+
   const getPlayerAlliances = (playerIndex: number): Alliance[] => {
     return alliances.filter((alliance) => alliance.playerIndices.includes(playerIndex))
   }
@@ -133,14 +137,17 @@ export function Scoreboard({
                 </button>
               </div>
               <div className="player-meters-row">
-                <div className="spider-sense-meter">
+                <div
+                  className="spider-sense-meter"
+                  title={`Spider Sense Lv ${player.spiderSenseLevel ?? 0}: +${getSpiderSensePercent(player.spiderSenseLevel ?? 0, spiderBonusPerLevel)}% points on correct answers. Feed Isopods to the spider to level up.`}
+                >
                   <img
                     src={spiderSenseIcon}
                     alt="Spider Sense"
                     className="spider-sense-icon"
                   />
                   <div className="spider-sense-bar">
-                    {Array.from({ length: 10 }, (_, i) => (
+                    {Array.from({ length: spiderMaxLevel }, (_, i) => (
                       <div
                         key={i}
                         className={`spider-sense-tick ${i < (player.spiderSenseLevel ?? 0) ? 'filled' : ''}`}
@@ -148,7 +155,7 @@ export function Scoreboard({
                     ))}
                   </div>
                   <span className="spider-sense-level">
-                    +{(player.spiderSenseLevel ?? 0) * 5}%
+                    +{getSpiderSensePercent(player.spiderSenseLevel ?? 0, spiderBonusPerLevel)}%
                   </span>
                 </div>
                 <div className="reroll-counter">

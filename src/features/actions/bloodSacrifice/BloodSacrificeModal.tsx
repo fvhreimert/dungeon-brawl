@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { playSound } from '@/services/soundService'
 import { Button as RetroButton } from '@/components/ui/8bit/button'
 import pentagram from '@/assets/images/actions/pentagram.png'
 import clickSound from '@/assets/sounds/UI/click.mp3'
@@ -29,9 +30,7 @@ export function BloodSacrificeModal({
   const progress = capMaxSacrifice > 0 ? (amount / capMaxSacrifice) : 0;
 
   const playTick = () => {
-    const audio = new Audio(clickSound)
-    audio.volume = 0.15
-    audio.play().catch(() => {})
+    playSound(clickSound, 0.15)
   }
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {

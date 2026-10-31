@@ -9,7 +9,7 @@
 }
 
 .api-key-modal-dialog {
-  background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+  background: #121212;
   border: 4px solid #333;
   box-shadow:
     0 8px 0 #000,
@@ -23,7 +23,7 @@
 }
 
 .api-key-modal-title {
-  font-family: 'November', 'Press Start 2P', monospace;
+  font-family: var(--font-title);
   font-size: 24px;
   color: #ffb347;
   text-align: center;
@@ -32,8 +32,8 @@
 }
 
 .api-key-modal-description {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 9px;
+  font-family: var(--font-pixel);
+  font-size: 13px;
   color: #888;
   text-align: center;
   line-height: 1.6;
@@ -52,11 +52,11 @@
   border: 3px solid #444;
   color: #fff;
   padding: 14px 16px;
-  font-family: 'Press Start 2P', monospace;
-  font-size: 10px;
+  font-family: var(--font-pixel);
+  font-size: 14px;
   outline: none;
   transition: border-color 0.2s;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+  box-shadow: inset var(--crt-shadow-sm);
 }
 
 .api-key-input:focus {
@@ -74,7 +74,7 @@
 
 .paste-btn {
   min-width: 90px;
-  font-size: 9px !important;
+  font-size: 13px !important;
   padding: 14px 16px !important;
 }
 
@@ -86,8 +86,8 @@
 }
 
 .model-select-label {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 9px;
+  font-family: var(--font-pixel);
+  font-size: 13px;
   color: #888;
   white-space: nowrap;
 }
@@ -98,12 +98,12 @@
   border: 3px solid #444;
   color: #fff;
   padding: 12px 16px;
-  font-family: 'Press Start 2P', monospace;
-  font-size: 9px;
+  font-family: var(--font-pixel);
+  font-size: 13px;
   outline: none;
   cursor: pointer;
   transition: border-color 0.2s;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+  box-shadow: inset var(--crt-shadow-sm);
   appearance: none;
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23888'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
   background-repeat: no-repeat;
@@ -133,8 +133,8 @@
 
 .api-key-error {
   color: #ff6b6b;
-  font-family: 'Press Start 2P', monospace;
-  font-size: 9px;
+  font-family: var(--font-pixel);
+  font-size: 13px;
   text-align: center;
   padding: 12px;
   background: rgba(255, 107, 107, 0.1);
@@ -150,12 +150,12 @@
 .api-key-cancel-btn,
 .api-key-verify-btn {
   flex: 1;
-  font-size: 10px !important;
+  font-size: 14px !important;
   padding: 14px 20px !important;
 }
 
 .api-key-verify-btn {
-  background: linear-gradient(180deg, #2a4a2a 0%, #1a3a1a 100%) !important;
+  background: #224222 !important;
   border: 2px solid #4a7a4a !important;
   color: #8effb9 !important;
   box-shadow: 0 4px 0 #0a1a0a !important;

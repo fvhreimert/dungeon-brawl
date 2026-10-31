@@ -92,7 +92,7 @@
 }
 
 .inventory-title {
-  font-family: 'VT323', monospace;
+  font-family: var(--font-terminal);
   font-size: 42px;
   color: #E0D8C8;
   text-transform: uppercase;
@@ -102,7 +102,7 @@
 }
 
 .inventory-count {
-  font-family: 'VT323', monospace;
+  font-family: var(--font-terminal);
   font-size: 28px;
   color: #8f8070;
   text-shadow: 1px 1px 0 #000;
@@ -147,7 +147,7 @@
   align-items: center;
   justify-content: center;
   color: #554a3f;
-  font-family: 'VT323', monospace;
+  font-family: var(--font-terminal);
   font-size: 32px;
   font-style: italic;
   text-shadow: 2px 2px 0 #000;
@@ -197,7 +197,7 @@
   box-shadow:
     inset 0 0 0 2px #3f3a30,
     0 8px 0 #000;
-  font-family: 'VT323', monospace;
+  font-family: var(--font-terminal);
   font-size: 22px;
   letter-spacing: 1px;
   color: #f2f2f2;
@@ -264,8 +264,8 @@
 }
 
 .treasure-set-btn {
-    font-family: 'Press Start 2P', 'Segoe UI', sans-serif;
-    font-size: 11px;
+    font-family: var(--font-pixel);
+    font-size: 14px;
     color: #1a1508;
     background: linear-gradient(180deg, #c9a227 0%, #8a6d14 100%);
     border: 2px solid #f4d675;
@@ -294,7 +294,7 @@
 }
 
 .close-hint {
-    font-family: 'VT323', monospace;
+    font-family: var(--font-terminal);
     color: #8f8070;
     font-size: 22px;
     background: #1F1B17;

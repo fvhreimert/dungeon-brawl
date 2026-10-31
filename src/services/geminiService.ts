@@ -1,19 +1,17 @@
 import type { QuizCategory } from '@/types/quiz'
 
 export type GeminiModel =
-  | 'gemini-2.5-flash'
-  | 'gemini-2.5-pro'
-  | 'gemini-3-flash-preview'
-  | 'gemini-3-pro-preview'
+  | 'gemini-3.8-flash'
+  | 'gemini-3.5-flash-lite'
+  | 'gemini-3.1-pro-preview'
 
 export const GEMINI_MODELS: { id: GeminiModel; name: string }[] = [
-  { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
-  { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro' },
-  { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash (Preview)' },
-  { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro (Preview)' },
+  { id: 'gemini-3.8-flash', name: 'Gemini 3.8 Flash' },
+  { id: 'gemini-3.5-flash-lite', name: 'Gemini 3.5 Flash-Lite' },
+  { id: 'gemini-3.1-pro-preview', name: 'Gemini 3.1 Pro (Preview)' },
 ]
 
-const DEFAULT_MODEL: GeminiModel = 'gemini-2.5-flash'
+const DEFAULT_MODEL: GeminiModel = 'gemini-3.8-flash'
 
 function getApiUrl(model: GeminiModel): string {
   return `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`

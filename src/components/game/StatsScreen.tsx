@@ -102,7 +102,7 @@ export function StatsScreen({ players, gameMetrics, gameEndTime, onBack }: Stats
                   contentStyle={{
                     background: '#1a1a1a',
                     border: '2px solid #333',
-                    fontFamily: "'Press Start 2P', monospace",
+                    fontFamily: 'var(--font-pixel)',
                     fontSize: '8px',
                   }}
                   labelStyle={{ color: '#888' }}

@@ -146,7 +146,7 @@
 }
 
 .quest-title {
-  font-family: 'Press Start 2P', monospace;
+  font-family: var(--font-pixel);
   font-size: 28px;
   color: #5a4020;
   text-shadow:
@@ -171,11 +171,11 @@
   height: 160px;
   image-rendering: pixelated;
   object-fit: contain;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+  filter: drop-shadow(var(--crt-shadow-sm));
 }
 
 .quest-description {
-  font-family: 'Press Start 2P', monospace;
+  font-family: var(--font-pixel);
   font-size: 16px;
   color: #3a2a1a;
   line-height: 2;
@@ -190,8 +190,8 @@
 }
 
 .quest-progress-label {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 14px;
+  font-family: var(--font-pixel);
+  font-size: 16px;
   color: #5a4a3a;
   margin-bottom: 8px;
   text-transform: uppercase;
@@ -251,7 +251,7 @@
 }
 
 .quest-progress-text {
-  font-family: 'Press Start 2P', monospace;
+  font-family: var(--font-pixel);
   font-size: 16px;
   color: #5a3a1a;
   text-align: center;
@@ -281,8 +281,8 @@
 }
 
 .quest-reward-label {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 14px;
+  font-family: var(--font-pixel);
+  font-size: 16px;
   color: #5a4a3a;
   text-transform: uppercase;
   letter-spacing: 2px;
@@ -306,7 +306,7 @@
   width: 48px;
   height: auto;
   image-rendering: pixelated;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(var(--crt-shadow-sm));
   transition: transform 0.2s ease;
 }
 
@@ -321,7 +321,7 @@
 }
 
 .quest-reward-points-value {
-  font-family: 'Press Start 2P', monospace;
+  font-family: var(--font-pixel);
   font-size: 24px;
   color: #daa520;
   text-shadow:
@@ -332,7 +332,7 @@
 }
 
 .quest-reward-plus {
-  font-family: 'Press Start 2P', monospace;
+  font-family: var(--font-pixel);
   font-size: 28px;
   color: #daa520;
   text-shadow:
@@ -347,16 +347,16 @@
   height: 72px;
   image-rendering: pixelated;
   object-fit: contain;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(var(--crt-shadow-sm));
   animation: upgradeGlow 2s ease-in-out infinite;
 }
 
 @keyframes upgradeGlow {
   0%, 100% {
-    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 8px rgba(218, 165, 32, 0.3));
+    filter: drop-shadow(var(--crt-shadow-sm)) drop-shadow(0 0 8px rgba(218, 165, 32, 0.3));
   }
   50% {
-    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 16px rgba(218, 165, 32, 0.6));
+    filter: drop-shadow(var(--crt-shadow-sm)) drop-shadow(0 0 16px rgba(218, 165, 32, 0.6));
   }
 }
 

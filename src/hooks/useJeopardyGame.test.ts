@@ -7,7 +7,9 @@ import type { QAItem, PlayerConfig } from '@/types/game'
 
 describe('useJeopardyGame', () => {
   const mockCategories = ['TestCat']
-  const mockPointValues = [100, 200]
+  // 3 tiles: answering the last open tile ends the game without passing the
+  // turn, so tests that need the turn to come back around need a spare tile.
+  const mockPointValues = [100, 200, 300]
   const mockPlayers: PlayerConfig[] = [
     { name: 'P1', score: 0, inventory: [] },
     { name: 'P2', score: 0, inventory: [] },
@@ -15,6 +17,7 @@ describe('useJeopardyGame', () => {
   const mockQuestions: QAItem[] = [
     { category: 'TestCat', value: 100, question: 'Q1', answer: 'A1' },
     { category: 'TestCat', value: 200, question: 'Q2', answer: 'A2' },
+    { category: 'TestCat', value: 300, question: 'Q3', answer: 'A3' },
   ]
   const soulBurstCard = CARDS.find((card) => card.id === 'soul_burst')
   const puppetMasterCard = CARDS.find((card) => card.id === 'puppet_master')
@@ -30,7 +33,7 @@ describe('useJeopardyGame', () => {
       })
     )
 
-    expect(result.current.tiles).toHaveLength(2)
+    expect(result.current.tiles).toHaveLength(3)
     expect(result.current.tiles[0].status).toBe('open')
     expect(result.current.activePlayerIndex).toBe(0)
     expect(result.current.selectedTile).toBeNull()
@@ -235,7 +238,8 @@ describe('useJeopardyGame', () => {
       result.current.activateCard(cardId, 1)
     })
 
-    expect(result.current.players[0].inventory.find((card) => card.instanceId === cardId)?.state?.storedDamage).toBe(0)
+    // Soul Burst is consumed on activation (consumesOnActivate)
+    expect(result.current.players[0].inventory.find((card) => card.instanceId === cardId)).toBeUndefined()
     expect(result.current.players[0].score).toBe(-30)
     expect(result.current.players[1].score).toBe(-50)
   })

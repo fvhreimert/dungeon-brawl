@@ -1,0 +1,130 @@
+/* NOTE: `filter`, `transform` and `opacity < 1` all create a containing
+   block for position:fixed descendants. Every class here is therefore
+   applied to .dungeon-frame (which contains no fixed modal while these
+   animations run) and never to .app, which is the parent of
+   QuestionDialog and the other fixed overlays. */
+
+/* Retro/CRT temporal effects — docs/retro-crt-plan.md Layer D.
+   Transient only: no sustained readability cost at TV viewing distance.
+   Nothing here may run while a question is on screen (plan §11). */
+
+/* --- Screen overlay -----------------------------------------------------
+   Sits on top of the board inside .dungeon-frame. Purely decorative and
+   pointer-events:none. Question dialogs and other fixed modals render
+   outside the frame, so the text players actually read is never covered.
+
+   Pixel style rules: no border-radius, no smooth gradients. The "curved
+   tube" is suggested with stepped 4px corners, matching the stone frame.
+
+   Structure:
+     .crt-screen            clips to the frame's inner pixel-corner shape
+       .crt-screen::before  scanlines + edge darkening
+       .crt-screen::after   dark bezel with stepped inner corners */
+.dungeon-frame > .crt-screen {
+  position: absolute;
+  inset: 6px; /* matches the stone border thickness */
+  z-index: 3;
+  pointer-events: none;
+  overflow: hidden;
+  clip-path: polygon(
+    0 12px, 6px 12px, 6px 6px, 12px 6px, 12px 0,
+    calc(100% - 12px) 0, calc(100% - 12px) 6px, calc(100% - 6px) 6px, calc(100% - 6px) 12px, 100% 12px,
+    100% calc(100% - 12px), calc(100% - 6px) calc(100% - 12px), calc(100% - 6px) calc(100% - 6px), calc(100% - 12px) calc(100% - 6px), calc(100% - 12px) 100%,
+    12px 100%, 12px calc(100% - 6px), 6px calc(100% - 6px), 6px calc(100% - 12px), 0 calc(100% - 12px)
+  );
+}
+
+/* Coarse scanlines: 2px dark / 2px clear. Whole-pixel pitch avoids the
+   shimmer that thin 1px lines get from TV scaling (plan §7). The inset
+   shadow darkens the edges like a convex tube. */
+.crt-screen::before {
+  content: '';
+  position: absolute;
+  inset: var(--crt-bezel-width);
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, var(--crt-scanline-opacity)) 0 2px,
+    transparent 2px 4px
+  );
+  box-shadow: inset 0 0 40px 6px rgba(0, 0, 0, var(--crt-vignette));
+}
+
+/* Bezel: a solid ring whose inner edge steps in 4px blocks at the corners
+   (evenodd cuts the screen-shaped hole out of the full rectangle). */
+.crt-screen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--crt-bezel-color);
+  clip-path: polygon(evenodd,
+    0 0,
+    100% 0,
+    100% 100%,
+    0 100%,
+    0 0,
+    var(--crt-bezel-width) calc(var(--crt-bezel-width) + 12px),
+    calc(var(--crt-bezel-width) + 4px) calc(var(--crt-bezel-width) + 12px),
+    calc(var(--crt-bezel-width) + 4px) calc(var(--crt-bezel-width) + 4px),
+    calc(var(--crt-bezel-width) + 12px) calc(var(--crt-bezel-width) + 4px),
+    calc(var(--crt-bezel-width) + 12px) var(--crt-bezel-width),
+    calc(100% - var(--crt-bezel-width) - 12px) var(--crt-bezel-width),
+    calc(100% - var(--crt-bezel-width) - 12px) calc(var(--crt-bezel-width) + 4px),
+    calc(100% - var(--crt-bezel-width) - 4px) calc(var(--crt-bezel-width) + 4px),
+    calc(100% - var(--crt-bezel-width) - 4px) calc(var(--crt-bezel-width) + 12px),
+    calc(100% - var(--crt-bezel-width)) calc(var(--crt-bezel-width) + 12px),
+    calc(100% - var(--crt-bezel-width)) calc(100% - var(--crt-bezel-width) - 12px),
+    calc(100% - var(--crt-bezel-width) - 4px) calc(100% - var(--crt-bezel-width) - 12px),
+    calc(100% - var(--crt-bezel-width) - 4px) calc(100% - var(--crt-bezel-width) - 4px),
+    calc(100% - var(--crt-bezel-width) - 12px) calc(100% - var(--crt-bezel-width) - 4px),
+    calc(100% - var(--crt-bezel-width) - 12px) calc(100% - var(--crt-bezel-width)),
+    calc(var(--crt-bezel-width) + 12px) calc(100% - var(--crt-bezel-width)),
+    calc(var(--crt-bezel-width) + 12px) calc(100% - var(--crt-bezel-width) - 4px),
+    calc(var(--crt-bezel-width) + 4px) calc(100% - var(--crt-bezel-width) - 4px),
+    calc(var(--crt-bezel-width) + 4px) calc(100% - var(--crt-bezel-width) - 12px),
+    var(--crt-bezel-width) calc(100% - var(--crt-bezel-width) - 12px),
+    var(--crt-bezel-width) calc(var(--crt-bezel-width) + 12px),
+    0 0
+  );
+}
+
+/* --- Channel-change / roll glitch --------------------------------------
+   Fires on turn transitions only. Short enough to read as interference
+   rather than as a fault. */
+@keyframes crt-roll {
+  0%   { transform: translateY(0);     filter: none; }
+  15%  { transform: translateY(-3px);  filter: brightness(1.5) saturate(0.4); }
+  30%  { transform: translateY(6px);   filter: brightness(0.8); }
+  45%  { transform: translateY(-2px);  filter: brightness(1.35) saturate(0.6); }
+  60%  { transform: translateY(3px);   filter: brightness(0.92); }
+  80%  { transform: translateY(-1px);  filter: brightness(1.1); }
+  100% { transform: translateY(0);     filter: none; }
+}
+
+.crt-glitch {
+  animation: crt-roll 260ms steps(9, end) 1 both;
+}
+
+/* --- Idle flicker -------------------------------------------------------
+   NOT CURRENTLY WIRED UP. An infinite `opacity < 1` animation creates a
+   permanent containing block, which would reparent every position:fixed
+   modal in the app, and it costs a constant repaint on a large subtree.
+   Kept here only as a documented dead end — do not apply to any ancestor
+   of a fixed-position element. */
+@keyframes crt-flicker {
+  0%, 100% { opacity: 1; }
+  47%      { opacity: 0.995; }
+  49%      { opacity: 0.985; }
+  51%      { opacity: 0.997; }
+}
+
+.crt-flicker {
+  animation: crt-flicker 5.5s linear infinite;
+}
+
+/* Respect the OS reduced-motion setting: drop every temporal effect. */
+@media (prefers-reduced-motion: reduce) {
+  .crt-glitch,
+  .crt-flicker {
+    animation: none !important;
+  }
+}

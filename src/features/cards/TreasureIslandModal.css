@@ -11,9 +11,9 @@
 
 .treasure-island-modal {
   width: min(850px, 95vw);
-  background: linear-gradient(180deg, #3a2810 0%, #2a1c0a 20%, #1a1205 60%, #0f0a02 100%);
+  background: #231808;
   border: 4px solid #8b6914;
-  box-shadow: 0 0 0 2px #3a2508, 0 0 0 6px #5a4010, 0 20px 60px rgba(0, 0, 0, 0.95), inset 0 0 80px rgba(139, 105, 20, 0.1), 0 0 80px rgba(139, 105, 20, 0.2);
+  box-shadow: 0 0 0 2px #3a2508, 0 0 0 6px #5a4010, var(--crt-shadow), inset 0 0 80px rgba(139, 105, 20, 0.1), 0 0 80px rgba(139, 105, 20, 0.2);
   color: #f4d675;
   position: relative;
   overflow: hidden;
@@ -43,7 +43,7 @@
 }
 
 .treasure-island-title {
-  font-family: 'ArcadeClassic', sans-serif;
+  font-family: var(--font-arcade);
   font-size: 32px;
   letter-spacing: 3px;
   text-transform: uppercase;
@@ -53,7 +53,7 @@
 }
 
 .treasure-island-subtitle {
-  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-family: var(--font-pixel);
   font-size: 0.55rem;
   color: #a08040;
   letter-spacing: 1px;
@@ -74,7 +74,7 @@
 }
 
 .gallery-label {
-  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-family: var(--font-pixel);
   font-size: 0.5rem;
   color: #c9a227;
   text-transform: uppercase;
@@ -106,7 +106,7 @@
 
 /* Value label under each item */
 .gallery-value {
-  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-family: var(--font-pixel);
   font-size: 0.4rem;
   color: #ffd700;
   text-shadow: 0 0 4px rgba(255, 215, 0, 0.5);
@@ -115,7 +115,7 @@
 
 /* Empty state */
 .gallery-empty {
-  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-family: var(--font-pixel);
   font-size: 0.5rem;
   color: #50ff50;
   text-shadow: 0 0 8px rgba(50, 255, 50, 0.5);
@@ -369,7 +369,7 @@
 }
 
 .curse-meter-label {
-  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-family: var(--font-pixel);
   font-size: 1rem;
   color: #cc4040;
   text-align: center;
@@ -392,21 +392,21 @@
 }
 
 .status-hint {
-  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-family: var(--font-pixel);
   font-size: 0.55rem;
   color: #a08040;
   text-align: center;
 }
 
 .status-digging {
-  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-family: var(--font-pixel);
   font-size: 0.65rem;
   color: #f4d675;
   animation: pulse-text 0.25s infinite alternate;
 }
 
 .status-treasure {
-  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-family: var(--font-pixel);
   font-size: 0.65rem;
   color: #50ff50;
   text-shadow: 0 0 10px rgba(50, 255, 50, 0.6);
@@ -414,7 +414,7 @@
 }
 
 .status-cursed {
-  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-family: var(--font-pixel);
   font-size: 0.65rem;
   color: #ff4040;
   text-shadow: 0 0 15px rgba(255, 64, 64, 0.8);
@@ -461,7 +461,7 @@
 }
 
 .chest-label {
-  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-family: var(--font-pixel);
   font-size: 0.6rem;
   color: #c9a227;
   text-transform: uppercase;
@@ -469,7 +469,7 @@
 }
 
 .chest-gold-value {
-  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-family: var(--font-pixel);
   font-size: 0.9rem;
   color: #ffd700;
   text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
@@ -488,7 +488,7 @@
 }
 
 .chest-empty {
-  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-family: var(--font-pixel);
   font-size: 0.5rem;
   color: #4a3a20;
   display: flex;
@@ -518,7 +518,7 @@
 .chest-item .item-value {
   position: absolute;
   bottom: -4px;
-  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-family: var(--font-pixel);
   font-size: 0.45rem;
   padding: 2px 4px;
   background: rgba(0, 0, 0, 0.85);

@@ -23,21 +23,12 @@
 }
 
 :root {
-  font-family:
-    'Press Start 2P',
-    system-ui,
-    -apple-system,
-    sans-serif;
+  font-family: var(--font-pixel);
 }
 
 /* Use ArcadeClassic for specific elements that need it */
 .arcade-font {
-  font-family:
-    'ArcadeClassic',
-    'Press Start 2P',
-    system-ui,
-    -apple-system,
-    sans-serif;
+  font-family: var(--font-arcade);
 }
 
 .app {
@@ -49,12 +40,12 @@
   align-items: center;
   justify-items: center;
   overflow: hidden;
-  background-color: #080808; /* Fallback color */
+  background-color: #070a08; /* Fallback color (phosphor-cast) */
   background-image: url('./assets/images/textures/background.png');
   background-repeat: repeat;
   background-attachment: fixed;
   background-size: 1480px 780px;
-  color: #e0e0e0;
+  color: var(--crt-text-ink);
   image-rendering: pixelated;
   image-rendering: crisp-edges; /* For Firefox */
 }
@@ -80,7 +71,7 @@
   inset: 0;
   background: #3a3a3a; /* Stone Border Color */
   z-index: -2;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--crt-shadow);
   clip-path: polygon(
     0 12px, 6px 12px, 6px 6px, 12px 6px, 12px 0,
     calc(100% - 12px) 0, calc(100% - 12px) 6px, calc(100% - 6px) 6px, calc(100% - 6px) 12px, 100% 12px,
@@ -93,7 +84,7 @@
   content: '';
   position: absolute;
   inset: 6px; /* Border Thickness */
-  background: linear-gradient(180deg, #111111 0%, #1a1a1a 55%, #0d0d0d 100%);
+  background: #141414; /* flattened: dark gradients band on TV panels */
   z-index: -1;
   clip-path: polygon(
     0 12px, 6px 12px, 6px 6px, 12px 6px, 12px 0,
@@ -121,12 +112,7 @@
   letter-spacing: 3px;
   line-height: 0.9;
   text-transform: none;
-  font-family:
-    'November',
-    'Press Start 2P',
-    system-ui,
-    -apple-system,
-    sans-serif;
+  font-family: var(--font-title);
   background: linear-gradient(
     180deg,
     #FF4500 0%, #FF4500 12.5%,
@@ -141,7 +127,9 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  filter: drop-shadow(4px 4px 0 #000000);
+  /* Layer C: phosphor glow on decorative title (not reading text) */
+  filter: drop-shadow(4px 4px 0 #000000)
+    drop-shadow(0 0 14px rgba(255, 69, 0, calc(var(--crt-glow-strength) * 0.7)));
   border: none;
   box-shadow: none;
   position: relative;

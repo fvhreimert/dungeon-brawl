@@ -47,7 +47,7 @@
 
 /* Big title above menu - single line */
 .main-menu-title-standalone {
-  font-family: 'November', 'Press Start 2P', monospace;
+  font-family: var(--font-title);
   font-size: clamp(36px, 6vw, 64px);
   letter-spacing: 3px;
   line-height: 1;
@@ -90,13 +90,13 @@
 
 .menu-button {
   width: 100%;
-  font-size: 11px !important;
+  font-size: 14px !important;
   padding: 16px 24px !important;
 }
 
 /* Primary action button - green for main CTAs */
 .menu-button-primary {
-  background: linear-gradient(180deg, #2a4a2a 0%, #1a3a1a 100%) !important;
+  background: #224222 !important;
   border: 2px solid #4a7a4a !important;
   color: #8effb9 !important;
   box-shadow: 0 4px 0 #0a1a0a !important;
@@ -127,7 +127,7 @@
 
 .import-quiz-btn {
   width: 100%;
-  font-size: 10px !important;
+  font-size: 14px !important;
   padding: 14px 20px !important;
 }
 
@@ -146,12 +146,12 @@
   text-align: center !important;
   justify-content: center !important;
   padding: 14px 16px !important;
-  font-size: 10px !important;
+  font-size: 14px !important;
 }
 
 .quiz-list-divider {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 9px;
+  font-family: var(--font-pixel);
+  font-size: 13px;
   color: #ffb347;
   text-transform: uppercase;
   text-align: center;
@@ -174,7 +174,7 @@
   width: auto !important;
   min-width: 55px;
   padding: 14px 10px !important;
-  font-size: 9px !important;
+  font-size: 13px !important;
   flex-shrink: 0;
 }
 
@@ -204,7 +204,7 @@
 }
 
 .selected-quiz-name {
-  font-size: 10px;
+  font-size: 14px;
   color: #888;
   margin-top: -16px;
   margin-bottom: 8px;
@@ -225,7 +225,7 @@
 }
 
 .player-count-label {
-  font-size: 12px;
+  font-size: 15px;
   color: #ccc;
 }
 
@@ -297,8 +297,8 @@
   border: 3px solid #444;
   color: #fff;
   padding: 10px 14px;
-  font-family: 'Press Start 2P', monospace;
-  font-size: 10px;
+  font-family: var(--font-pixel);
+  font-size: 14px;
   outline: none;
   transition: border-color 0.2s;
 }
@@ -350,8 +350,8 @@
 }
 
 .portrait-picker-title {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 14px;
+  font-family: var(--font-pixel);
+  font-size: 16px;
   color: #fff;
   text-align: center;
   margin-bottom: 20px;
@@ -417,11 +417,11 @@
 
 .quiz-name-input {
   width: 100%;
-  background: linear-gradient(180deg, #333333 0%, #222222 100%);
+  background: #2a2a2a;
   border: 3px solid #4a4a4a;
   color: #ffb347;
   padding: 16px 20px;
-  font-family: 'Press Start 2P', monospace;
+  font-family: var(--font-pixel);
   font-size: 16px;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
@@ -447,9 +447,9 @@
 }
 
 .category-count-label {
-  font-size: 12px;
+  font-size: 15px;
   color: #ccc;
-  font-family: 'Press Start 2P', monospace;
+  font-family: var(--font-pixel);
 }
 
 .category-count-controls {
@@ -463,7 +463,7 @@
   color: #fff;
   min-width: 40px;
   text-align: center;
-  font-family: 'Press Start 2P', monospace;
+  font-family: var(--font-pixel);
 }
 
 /* Board Layout */
@@ -491,13 +491,13 @@
 .category-input-tile {
   width: 100%;
   padding: 14px 8px;
-  background: linear-gradient(180deg, #333333 0%, #222222 100%);
+  background: #2a2a2a;
   border: 3px solid #4a4a4a;
   color: #b51a2c;
   text-align: center;
   text-transform: uppercase;
-  font-family: 'Press Start 2P', monospace;
-  font-size: 10px;
+  font-family: var(--font-pixel);
+  font-size: 14px;
   line-height: 1.3;
   text-shadow: 0 2px 0 #000000;
   box-shadow:
@@ -528,7 +528,7 @@
   width: 100%;
   height: 180px;
   padding: 14px 10px;
-  background: linear-gradient(180deg, #1a1a1a 0%, #141414 100%);
+  background: #171717;
   border: 3px solid #333333;
   box-shadow:
     inset 0 0 0 3px #222222,
@@ -537,8 +537,8 @@
   color: #e0e0e0;
   text-align: center;
   text-transform: uppercase;
-  font-family: 'Press Start 2P', monospace;
-  font-size: 10px;
+  font-family: var(--font-pixel);
+  font-size: 14px;
   line-height: 1.6;
   outline: none;
   resize: none;
@@ -563,13 +563,13 @@
 
 .generation-error {
   color: #ff6b6b;
-  font-size: 10px;
+  font-size: 14px;
   text-align: center;
   padding: 12px;
   background: rgba(255, 107, 107, 0.1);
   border: 2px solid #ff6b6b;
   width: 100%;
-  font-family: 'Press Start 2P', monospace;
+  font-family: var(--font-pixel);
 }
 
 .generate-quiz-actions {
@@ -636,7 +636,7 @@
 }
 
 .generation-progress {
-  font-size: 12px;
+  font-size: 15px;
   color: #888;
   text-align: center;
 }
@@ -648,7 +648,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
+  background: #121212;
   border: 4px solid #b51a2c;
   box-shadow:
     0 0 0 4px #0a0a0a,
@@ -692,7 +692,7 @@
 }
 
 .countdown-number {
-  font-family: 'November', 'Press Start 2P', monospace;
+  font-family: var(--font-title);
   font-size: 48px;
   color: #ff6b6b;
   text-shadow:
@@ -718,8 +718,8 @@
 }
 
 .rate-limit-message {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 10px;
+  font-family: var(--font-pixel);
+  font-size: 14px;
   color: #ffb347;
   text-align: center;
   text-transform: uppercase;

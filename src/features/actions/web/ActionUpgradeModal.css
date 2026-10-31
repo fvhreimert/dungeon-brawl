@@ -13,10 +13,10 @@
   width: min(1200px, 98vw);
   max-height: 95vh;
   overflow-y: auto;
-  background: linear-gradient(180deg, #1a1020 0%, #0d0812 100%);
+  background: #130c19;
   border: 4px solid #4a3060;
   box-shadow:
-    0 20px 60px rgba(0, 0, 0, 0.9),
+    var(--crt-shadow),
     0 0 0 4px #0a0510,
     inset 0 0 0 2px #2d1d40,
     0 0 40px rgba(100, 50, 150, 0.3);
@@ -60,7 +60,7 @@
 }
 
 .action-upgrade-title {
-  font-family: 'ArcadeClassic', sans-serif;
+  font-family: var(--font-arcade);
   font-size: 42px;
   letter-spacing: 4px;
   text-transform: uppercase;
@@ -72,8 +72,8 @@
 }
 
 .action-upgrade-subtitle {
-  font-family: 'Press Start 2P', system-ui, sans-serif;
-  font-size: 12px;
+  font-family: var(--font-pixel);
+  font-size: 15px;
   color: #a080c0;
   text-align: center;
 }
@@ -141,15 +141,15 @@
 }
 
 .upgrade-name {
-  font-family: 'Press Start 2P', system-ui, sans-serif;
-  font-size: 10px;
+  font-family: var(--font-pixel);
+  font-size: 14px;
   color: #d0b0f0;
   text-transform: uppercase;
 }
 
 .upgrade-description {
-  font-family: 'Press Start 2P', system-ui, sans-serif;
-  font-size: 8px;
+  font-family: var(--font-pixel);
+  font-size: 12px;
   color: #a080c0;
   line-height: 1.6;
 }
@@ -160,7 +160,7 @@
   border: 2px solid #6040a0 !important;
   box-shadow: 0 4px 0 #1a0a25 !important;
   text-shadow: 1px 1px 0 #0a0510;
-  font-size: 8px !important;
+  font-size: 12px !important;
   padding: 6px 12px !important;
   min-width: 90px;
 }
@@ -178,7 +178,7 @@
 }
 
 .upgrade-btn:disabled {
-  background: linear-gradient(180deg, #2a4a2a 0%, #1a3a1a 100%) !important;
+  background: #224222 !important;
   color: #6aba6a !important;
   border-color: #3a6a3a !important;
   cursor: default;
@@ -191,7 +191,7 @@
 }
 
 .close-btn {
-  background: linear-gradient(180deg, #2b2b2b 0%, #1a1a1a 100%) !important;
+  background: #222222 !important;
   color: #cccccc !important;
   box-shadow: 0 4px 0 #000000 !important;
   min-width: 100px;

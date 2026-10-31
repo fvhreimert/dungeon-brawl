@@ -1,3 +1,4 @@
+import { scaleVolume } from '@/services/soundService'
 import madSeerStart from '@/assets/sounds/actions/mad_seer/mad_seer_start.mp3'
 
 const START_SOUNDS = [madSeerStart]
@@ -15,7 +16,7 @@ export function useMadSeerSounds() {
     const clip = startPool[Math.floor(Math.random() * startPool.length)]
     clip.currentTime = 0
     clip.playbackRate = 1
-    clip.volume = 0.22
+    clip.volume = scaleVolume(0.22)
     clip.play().catch(() => {})
   }
 

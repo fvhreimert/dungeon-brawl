@@ -1,3 +1,4 @@
+import { scaleVolume } from '@/services/soundService'
 import bloodSacrificeStart from '@/assets/sounds/actions/blood_sacrifice/blood_sacrifice_start.mp3'
 import bloodSacrificeLand from '@/assets/sounds/actions/blood_sacrifice/blood_sacrifice_land.mp3'
 
@@ -18,7 +19,7 @@ export function useBloodSacrificeSounds() {
     const clip = startPool[Math.floor(Math.random() * startPool.length)]
     clip.currentTime = 0
     clip.playbackRate = 1
-    clip.volume = 0.25
+    clip.volume = scaleVolume(0.25)
     clip.play().catch(() => {})
   }
 
@@ -26,7 +27,7 @@ export function useBloodSacrificeSounds() {
     const clip = landPool[Math.floor(Math.random() * landPool.length)]
     clip.currentTime = 0
     clip.playbackRate = 1
-    clip.volume = 0.25
+    clip.volume = scaleVolume(0.25)
     clip.play().catch(() => {})
   }
 

@@ -3,7 +3,7 @@ import { Button as RetroButton } from '@/components/ui/8bit/button'
 import { Spinner } from '@/components/ui/8bit/spinner'
 import { getAvailableQuizzes, loadQuiz, quizToQAItems, getQuizCategories } from '@/utils/quizLoader'
 import { ALL_PORTRAITS } from '@/utils/portraits'
-import { generateQuizCategories, type CategoryInput, type GeminiModel, type GenerationCallbacks } from '@/services/geminiService'
+import { generateQuizCategories, getSavedModel, type CategoryInput, type GeminiModel, type GenerationCallbacks } from '@/services/geminiService'
 import { fetchJeopardyLabsQuiz } from '@/services/jeopardyService'
 import { GameSettingsScreen, type GameplaySettings } from './GameSettingsScreen'
 import { QuizBuilderScreen } from './QuizBuilderScreen'
@@ -56,7 +56,7 @@ export function MainMenuScreen({ onStartGame, onResumeGame }: MainMenuScreenProp
 
   // Generate quiz state
   const [verifiedApiKey, setVerifiedApiKey] = useState<string | null>(null)
-  const [selectedModel, setSelectedModel] = useState<GeminiModel>('gemini-2.5-flash')
+  const [selectedModel, setSelectedModel] = useState<GeminiModel>(() => getSavedModel())
   const [categoryCount, setCategoryCount] = useState(5)
   const [categoryInputs, setCategoryInputs] = useState<CategoryInput[]>(() =>
     Array.from({ length: 5 }, () => ({ name: '', description: '' }))

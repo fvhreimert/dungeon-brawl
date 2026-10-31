@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { playSound } from '@/services/soundService'
+import { playCardActivationSound } from '@/features/cards/cardSounds'
 import '@/App.css'
+import '@/styles/crt.css'
 import '@/components/actions/Actions.css'
 import '@/components/actions/ExhaustedAction.css'
 
@@ -19,6 +22,8 @@ import { useMadSeerSounds } from '@/features/actions/madSeer/useMadSeerSounds'
 import { useBloodSacrificeSounds } from '@/features/actions/bloodSacrifice/useBloodSacrificeSounds'
 import { Scoreboard } from '@/components/game/Scoreboard'
 import { useJeopardyGame } from '@/hooks/useJeopardyGame'
+import { useCrtEffects } from '@/hooks/useCrtEffects'
+import { getCrtEnabled } from '@/services/displaySettingsService'
 import { gameConfig } from '@/config/gameConfig'
 import { useRuntimeConfig } from '@/config/runtimeConfig'
 import type { QAItem, Tile, PlayerConfig, CardInstance, ActionId, UpgradeableAction, Quest, PendingBlackMarket, ResumedGameState } from '@/types/game'
@@ -70,6 +75,11 @@ import spider7 from '@/assets/images/actions/spiders/spider_7.png'
 import spider8 from '@/assets/images/actions/spiders/spider_8.png'
 
 import lootGoblinSound from '@/assets/sounds/cards/loot_goblin.wav'
+import spiderFeedSound from '@/assets/sounds/actions/web/spider_feed.wav'
+import webUpgradeSound from '@/assets/sounds/actions/web/web_upgrade.wav'
+import jesterRevealSound from '@/assets/sounds/actions/card_jester/jester_reveal.wav'
+import cardGainedSound from '@/assets/sounds/UI/inventory.wav'
+import gameOverSound from '@/assets/sounds/game/game_over.mp3'
 
 const SPIDERS = [null, spider1, spider2, spider3, spider4, spider5, spider6, spider7, spider8]
 
@@ -87,6 +97,14 @@ export type GameProps = {
   onTurnEnd?: (state: ResumedGameState) => void
   onGameEnd?: () => void
 }
+
+// Frog of Fate hop animation. ~16 hops easing from 70ms to 240ms ≈ 2s,
+// plus the landing hold, regardless of how many tiles are open.
+const FROG_MIN_HOPS = 8
+const FROG_MAX_HOPS = 16
+const FROG_HOP_START_MS = 70
+const FROG_HOP_END_MS = 240
+const FROG_LANDING_HOLD_MS = 700
 
 export function Game({ categories, pointValues, players: initialPlayers, questionBank, resumedState, onTurnEnd, onGameEnd }: GameProps) {
   const runtimeConfig = useRuntimeConfig()
@@ -272,7 +290,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     if (freezeSelectMode && cardUsePending) {
       if (frozenActions.web) return
       freezeAction('web', activePlayerIndex, cardUsePending.instanceId)
-      activateCard(cardUsePending.instanceId, activePlayerIndex, { actionId: 'web' })
+      activateCardWithSound(cardUsePending, activePlayerIndex, { actionId: 'web' })
       setFreezeSelectMode(false)
       setCardUsePending(null)
       return
@@ -285,7 +303,18 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     setSpiderFeedingActive(true)
   }
 
+  // Every card activation goes through here so each card can have its own sound.
+  const activateCardWithSound = (
+    card: CardInstance,
+    targetPlayerIndex: number,
+    metadata?: Record<string, unknown>,
+  ) => {
+    playCardActivationSound(card.id)
+    return activateCard(card.instanceId, targetPlayerIndex, metadata)
+  }
+
   const handleSpiderFeedIsopod = (isopodInstanceId: string) => {
+    playSound(spiderFeedSound, 0.5)
     removeCardFromInventory(activePlayerIndex, isopodInstanceId)
     setSpiderIndex((prev) => (prev < 8 ? prev + 1 : prev))
     increaseSpiderSense(activePlayerIndex)
@@ -295,6 +324,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
   }
 
   const handleSpiderFeedSheep = (sheepInstanceId: string) => {
+    playSound(spiderFeedSound, 0.5)
     removeCardFromInventory(activePlayerIndex, sheepInstanceId)
     setSpiderFeedingActive(false)
     addRerolls(activePlayerIndex, runtimeConfig.mechanics.spiderWeb.sheepRerollBonus)
@@ -305,6 +335,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
   }
 
   const handleUpgradeAction = (actionId: UpgradeableAction) => {
+    playSound(webUpgradeSound, 0.45)
     upgradeAction(activePlayerIndex, actionId)
     const newRemaining = remainingUpgrades - 1
     setRemainingUpgrades(newRemaining)
@@ -318,7 +349,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     if (!freezeSelectMode || !cardUsePending) return false
     if (frozenActions[actionId]) return false
     freezeAction(actionId, activePlayerIndex, cardUsePending.instanceId)
-    activateCard(cardUsePending.instanceId, activePlayerIndex, { actionId })
+    activateCardWithSound(cardUsePending, activePlayerIndex, { actionId })
 
     // Track quest progress for glacial elemental
     if (cardUsePending.id === 'glacial_elemental') {
@@ -378,6 +409,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     }
 
     if (newCards.length > 0) {
+      playSound(jesterRevealSound, 0.45)
       setRevealedCards(prev => [...prev, ...newCards])
     }
   }
@@ -407,7 +439,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     const result = effectResult as CardEffectResult | undefined
 
     if (result?.playSound === 'loot_goblin') {
-      new Audio(lootGoblinSound).play().catch(() => {})
+      playSound(lootGoblinSound, 1)
     }
 
     const stolenCard = result?.stolenCard
@@ -442,6 +474,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
   }
 
   const handleMerchantSelect = (card: CardDefinition) => {
+    playSound(cardGainedSound, 0.4)
     addCardToInventory(card, activePlayerIndex)
     setMerchantOffers(null)
   }
@@ -485,7 +518,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     const entry = getCardCatalogEntry(card.id)
     const mode = entry?.targetSelectMode ?? 'standard'
     if (mode === 'none') {
-      const effectResult = activateCard(card.instanceId, activePlayerIndex)
+      const effectResult = activateCardWithSound(card, activePlayerIndex)
       processCardEffectResult(effectResult)
       setCardTargetMode('standard')
       setCardTargetSelecting(false)
@@ -517,7 +550,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
 
   const handleRouletteConfirm = (won: boolean, amount: number) => {
     if (!cardUsePending) return
-    const effectResult = activateCard(cardUsePending.instanceId, activePlayerIndex, {
+    const effectResult = activateCardWithSound(cardUsePending, activePlayerIndex, {
       won,
       amount,
     })
@@ -535,7 +568,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     if (!cardUsePending) return []
 
     // Activate the card with the result metadata
-    const effectResult = activateCard(cardUsePending.instanceId, activePlayerIndex, {
+    const effectResult = activateCardWithSound(cardUsePending, activePlayerIndex, {
       winnerIndex,
       points: prizes.points,
       cards: prizes.cards,
@@ -573,7 +606,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
       setPuppetCategorySelecting(true)
       return
     }
-    const effectResult = activateCard(cardUsePending.instanceId, targetIndex)
+    const effectResult = activateCardWithSound(cardUsePending, targetIndex)
     processCardEffectResult(effectResult)
     setCardUsePending(null)
     setCardTargetSelecting(false)
@@ -590,7 +623,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
 
   const handlePuppetCategorySelect = (category: string) => {
     if (!cardUsePending || puppetTargetIndex === null) return
-    const effectResult = activateCard(cardUsePending.instanceId, puppetTargetIndex, {
+    const effectResult = activateCardWithSound(cardUsePending, puppetTargetIndex, {
       category,
     })
     processCardEffectResult(effectResult)
@@ -639,7 +672,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
       freezeTile(tileId, activePlayerIndex, cardUsePending.instanceId)
 
       // Activate the card (consumes it)
-      const effectResult = activateCard(cardUsePending.instanceId, activePlayerIndex, { tileId })
+      const effectResult = activateCardWithSound(cardUsePending, activePlayerIndex, { tileId })
       processCardEffectResult(effectResult)
 
       // Track quest progress for glacial elemental
@@ -752,6 +785,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
       }
       // Small delay to let the last question animation complete
       const timer = setTimeout(() => {
+        playSound(gameOverSound, 0.45)
         setShowGameOver(true)
       }, 500)
       return () => clearTimeout(timer)
@@ -780,19 +814,21 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     setFrogSelecting(true)
     setFrogLandingIds([])
     
-    // Scale extra hops based on board size to speed up end-game
-    const extraHops = Math.min(10, Math.max(2, Math.floor(openTiles.length / 2)))
-    
-    // Generate 'count' independent sequences
+    // Fixed hop count so the animation takes about the same time on a full
+    // board as on a nearly empty one (it used to visit every open tile).
+    const hopCount = Math.min(FROG_MAX_HOPS, Math.max(FROG_MIN_HOPS, openTiles.length + 2))
+
+    // Generate 'count' independent sequences of random hops. Consecutive hops
+    // never repeat a tile (when possible) so the frog visibly moves. The last
+    // hop is the landing tile and stays a fair random pick.
     const sequences: string[][] = []
-    
+
     for (let f = 0; f < count; f++) {
       const sequence: string[] = []
-      const shuffled = [...openTiles].sort(() => Math.random() - 0.5)
-      shuffled.forEach((tile) => sequence.push(tile.id))
-      
-      for (let i = 0; i < extraHops; i++) {
-        sequence.push(openTiles[Math.floor(Math.random() * openTiles.length)].id)
+      for (let i = 0; i < hopCount; i++) {
+        const prev = sequence[sequence.length - 1]
+        const choices = openTiles.length > 1 ? openTiles.filter((t) => t.id !== prev) : openTiles
+        sequence.push(choices[Math.floor(Math.random() * choices.length)].id)
       }
       sequences.push(sequence)
     }
@@ -816,8 +852,9 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
       setFrogHighlightIds(currentHighlights)
       playHop()
       
+      // Start quick, slow down before landing.
       const progress = i / maxSteps
-      const delay = 120 + progress * 140
+      const delay = FROG_HOP_START_MS + progress * progress * (FROG_HOP_END_MS - FROG_HOP_START_MS)
       await new Promise((resolve) => setTimeout(resolve, delay))
     }
 
@@ -836,7 +873,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     setTimeout(() => {
       setFrogLandingIds([])
       setFrogSelecting(false)
-    }, 900)
+    }, FROG_LANDING_HOLD_MS)
   }
 
   const handleFrogClick = () => {
@@ -981,6 +1018,15 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
     setBlackMarketData(null)
   }
 
+  // Retro/CRT temporal effects (plan Layer D). Suppressed while a question
+  // or blocking action modal is on screen.
+  const [crtEnabled] = useState(getCrtEnabled)
+  const crtRef = useCrtEffects(
+    activePlayerIndex,
+    !!selectedTile || madSeerActive || frogSelecting || idolActive || bloodSacrificeActive,
+    crtEnabled,
+  )
+
   return (
     <div className="app">
       <div className="layout-column left">
@@ -1117,7 +1163,7 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
         </div>
       </div>
 
-      <div className="dungeon-frame">
+      <div className="dungeon-frame" ref={crtRef}>
         <header className="title-wrap relative">
           <h1 className={`title ${isBlackMarketActive ? 'title-black-market' : ''}`}>{displayTitle}</h1>
           <button 
@@ -1203,6 +1249,10 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
             onQuestClick={handleQuestClick}
             isBlackMarketActive={isBlackMarketActive}
         />
+
+        {crtEnabled && (
+          <div className="crt-screen" aria-hidden="true" />
+        )}
       </div>
 
       <div className="layout-column right">
@@ -1581,6 +1631,8 @@ export function Game({ categories, pointValues, players: initialPlayers, questio
           onReveal={handleRevealAnswer}
           onAnswer={handleAnswer}
           onClose={handleCloseDialog}
+          spiderSenseLevel={players[activePlayerIndex]?.spiderSenseLevel ?? 0}
+          spiderSenseBonusPerLevel={runtimeConfig.mechanics.spiderSense.bonusPerLevel}
         />
       )}
 

@@ -1,7 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { playSound } from '@/services/soundService'
 import { Button as RetroButton } from '@/components/ui/8bit/button'
 import rouletteImg from '@/assets/images/ui/roulette.png'
 import clickSound from '@/assets/sounds/UI/click.mp3'
+import rouletteWinSound from '@/assets/sounds/cards/roulette/win.wav'
+import rouletteLoseSound from '@/assets/sounds/cards/roulette/lose.wav'
 import './RouletteModal.css'
 
 type RouletteModalProps = {
@@ -59,9 +62,7 @@ export function RouletteModal({ playerScore, onConfirm, onCancel }: RouletteModa
   }
 
   const playTick = () => {
-    const audio = new Audio(clickSound)
-    audio.volume = 0.15
-    audio.play().catch(() => {})
+    playSound(clickSound, 0.15)
   }
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,6 +85,7 @@ export function RouletteModal({ playerScore, onConfirm, onCancel }: RouletteModa
     spinTimeoutRef.current = setTimeout(() => {
       setResult(won ? 'win' : 'lose')
       setPhase('result')
+      playSound(won ? rouletteWinSound : rouletteLoseSound, 0.45)
     }, 2500) // 2.5 seconds of suspense
   }
 

@@ -23,7 +23,7 @@
 }
 
 .traveling-merchant-title {
-  font-family: 'Press Start 2P', 'Segoe UI', sans-serif;
+  font-family: var(--font-pixel);
   font-size: 18px;
   color: #f4e9d3;
   text-align: center;
@@ -32,8 +32,8 @@
 }
 
 .traveling-merchant-subtitle {
-  font-family: 'Press Start 2P', 'Segoe UI', sans-serif;
-  font-size: 12px;
+  font-family: var(--font-pixel);
+  font-size: 15px;
   color: #b9a88b;
   text-align: center;
   margin: 0;

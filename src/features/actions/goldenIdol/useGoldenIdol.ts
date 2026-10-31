@@ -5,7 +5,16 @@ import idolTick from '@/assets/sounds/actions/golden_idol/idol_tick.wav'
 import idolLand from '@/assets/sounds/actions/golden_idol/idol_land.mp3'
 import goldenIdolSound from '@/assets/sounds/actions/golden_idol/golden_idol.mp3'
 
+import { scaleVolume } from '@/services/soundService'
+
 const LAND_IDOL_SOUND = idolLand
+
+// Crumble timing: 150ms + 80ms per tile, capped at 2s (≈29 tiles on a full
+// 6x5 board), then a short pause on the survivor.
+const IDOL_CRUMBLE_BASE_MS = 150
+const IDOL_CRUMBLE_PER_TILE_MS = 80
+const IDOL_CRUMBLE_MAX_MS = 2000
+const IDOL_SURVIVOR_PAUSE_MS = 500
 
 // Use a shared AudioContext if possible to avoid hitting context limits
 // But inside a hook, we usually just want one per app session.
@@ -72,7 +81,7 @@ export function useGoldenIdol() {
     source.buffer = buffer;
     
     const gainNode = ctx.createGain();
-    gainNode.gain.value = volume;
+    gainNode.gain.value = scaleVolume(volume);
 
     if (pitchVar > 0) {
       // Simple random detune in cents
@@ -99,7 +108,7 @@ export function useGoldenIdol() {
 
   const playLand = useCallback(() => {
     const audio = createAudio(LAND_IDOL_SOUND)
-    audio.volume = 0.5
+    audio.volume = scaleVolume(0.5)
     audio.play().catch(() => {})
   }, [])
 
@@ -131,23 +140,26 @@ export function useGoldenIdol() {
     const victims = openTiles.filter(t => !survivorIds.includes(t.id))
     const shuffledVictims = [...victims].sort(() => Math.random() - 0.5)
 
-    // Crumble loop
-    const maxDelay = Math.min(600, shuffledVictims.length * 50 + 150)
-    
-    for (let i = 0; i < shuffledVictims.length; i++) {
+    // Crumble loop: the whole crumble fits in a fixed time budget, so a full
+    // board doesn't take much longer than a nearly empty one. Each tile's
+    // share of the budget grows toward the end, so it slows down for drama.
+    const n = shuffledVictims.length
+    const budget = Math.min(IDOL_CRUMBLE_MAX_MS, IDOL_CRUMBLE_BASE_MS + n * IDOL_CRUMBLE_PER_TILE_MS)
+    const weights = shuffledVictims.map((_, i) => 1 + 3 * Math.pow(i / Math.max(1, n - 1), 2))
+    const totalWeight = weights.reduce((sum, w) => sum + w, 0)
+
+    for (let i = 0; i < n; i++) {
       const victim = shuffledVictims[i]
-      
-      const progress = i / shuffledVictims.length
-      const delay = 50 + (Math.pow(progress, 2) * maxDelay)
-      
+      const delay = (budget * weights[i]) / totalWeight
+
       await new Promise(resolve => setTimeout(resolve, delay))
-      
+
       updateTileModifiers(victim.id, { isCrumbled: true })
       playTick()
     }
 
     // Dramatic pause on the survivor
-    await new Promise(resolve => setTimeout(resolve, 800))
+    await new Promise(resolve => setTimeout(resolve, IDOL_SURVIVOR_PAUSE_MS))
 
     // Set the survivor ID first, which will trigger the yellow indicator
     setIsActive(false) // Exit active state

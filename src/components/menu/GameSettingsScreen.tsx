@@ -3,6 +3,8 @@ import { Button as RetroButton } from '@/components/ui/8bit/button'
 import { gameConfig } from '@/config/gameConfig'
 import { CARDS } from '@/data/cards'
 import './GameSettingsScreen.css'
+import { getCrtEnabled, setCrtEnabled, getSoundVolume, setSoundVolume } from '@/services/displaySettingsService'
+import { playAnswerSound } from '@/services/soundService'
 
 export type GameplaySettings = {
   startingPoints: number
@@ -277,6 +279,20 @@ function SettingRow({ label, value, onChange, min = 0, max = 9999, step = 1, suf
 
 export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenProps) {
   const [settings, setSettings] = useState<GameplaySettings>(DEFAULT_SETTINGS)
+  const [crtEnabled, setCrtEnabledState] = useState(getCrtEnabled)
+  const [soundVolume, setSoundVolumeState] = useState(getSoundVolume)
+
+  const handleVolumeChange = (volume: number) => {
+    setSoundVolumeState(volume)
+    setSoundVolume(volume)
+    // Preview the new level.
+    playAnswerSound(true)
+  }
+
+  const handleCrtToggle = (enabled: boolean) => {
+    setCrtEnabledState(enabled)
+    setCrtEnabled(enabled)
+  }
 
   const FROG_MULTIPLIER_OPTIONS = [2, 4, 8, 16, 32, 64, 128]
 
@@ -590,6 +606,25 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
           </div>
 
           <div className="settings-column">
+            {/* Display Section (saved across games, not a gameplay rule) */}
+            <div className="settings-section">
+              <h2 className="section-title">Display</h2>
+              <SettingToggle
+                label="Retro TV Effect"
+                value={crtEnabled}
+                onChange={handleCrtToggle}
+              />
+              <SettingRow
+                label="Sound Volume"
+                value={soundVolume}
+                onChange={handleVolumeChange}
+                min={0}
+                max={100}
+                step={10}
+                suffix="%"
+              />
+            </div>
+
             {/* Gameplay Section */}
             <div className="settings-section">
               <h2 className="section-title">Gameplay</h2>
@@ -635,7 +670,7 @@ export function GameSettingsScreen({ onBack, onStartGame }: GameSettingsScreenPr
                 min={1}
                 max={100}
                 step={1}
-                suffix="turns"
+                suffix=" turns"
               />
             </div>
 

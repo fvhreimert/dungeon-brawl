@@ -6,8 +6,8 @@
   top: 16px;
   left: 50%;
   transform: translateX(-50%);
-  font-family: 'Press Start 2P', monospace;
-  font-size: 10px;
+  font-family: var(--font-pixel);
+  font-size: 14px;
   color: #888888;
   text-shadow:
     -1px 0 #0a0a0a,
@@ -194,8 +194,8 @@
   position: absolute;
   bottom: 8px;
   right: 0;
-  font-family: 'Press Start 2P', monospace;
-  font-size: 10px;
+  font-family: var(--font-pixel);
+  font-size: 14px;
   padding: 10px 20px;
   background: linear-gradient(180deg, #2a5a2a 0%, #1a3a1a 100%);
   border: 3px solid #3a7a3a;
@@ -260,7 +260,7 @@
 }
 
 .turn-intro-title {
-  font-family: 'Press Start 2P', monospace;
+  font-family: var(--font-pixel);
   font-size: 28px;
   color: var(--col-gold-main, #c9a227);
   text-shadow:
@@ -274,8 +274,8 @@
 }
 
 .turn-intro-subtitle {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 14px;
+  font-family: var(--font-pixel);
+  font-size: 16px;
   color: #8fef8f;
   text-shadow:
     2px 2px 0 #000,

@@ -4,16 +4,16 @@
 
 @layer base {
   :root {
-    --background: 240 5% 6%;
-    --foreground: 0 0% 90%;
+    --background: 150 4% 5%;
+    --foreground: 60 8% 88%;
     --card: 240 4% 9%;
-    --card-foreground: 0 0% 96%;
+    --card-foreground: 60 8% 94%;
     --popover: 240 4% 9%;
-    --popover-foreground: 0 0% 96%;
+    --popover-foreground: 60 8% 94%;
     --primary: 350 73% 44%;
     --primary-foreground: 0 0% 98%;
     --secondary: 240 3% 14%;
-    --secondary-foreground: 0 0% 92%;
+    --secondary-foreground: 60 8% 90%;
     --muted: 240 3% 14%;
     --muted-foreground: 240 5% 65%;
     --accent: 350 68% 36%;
@@ -28,19 +28,40 @@
     --chart-3: 200 40% 48%;
     --chart-4: 35 70% 55%;
     --chart-5: 170 55% 45%;
-    --radius: 0.5rem
+    --radius: 0.5rem;
+
+    /* Font stacks — use these instead of writing font-family by hand. */
+    --font-pixel: 'Press Start 2P', 'VT323', monospace;   /* UI labels */
+    --font-title: 'November', 'Press Start 2P', monospace; /* big titles */
+    --font-arcade: 'ArcadeClassic', 'Press Start 2P', monospace;
+    --font-terminal: 'VT323', monospace;
+    --font-question: 'Jersey 20', 'VT323', sans-serif;     /* question/answer text */
+
+    /* --- Retro/CRT tunables (docs/retro-crt-plan.md §8) ---
+       Baked-in values, no settings UI. Edit here to retune globally. */
+    --crt-shadow: 8px 8px 0 rgba(0, 0, 0, 0.85);
+    --crt-shadow-sm: 4px 4px 0 rgba(0, 0, 0, 0.85);
+    --crt-bevel: 2px;
+    --crt-glow-strength: 0.45;
+    --crt-text-ink: #e6e4d6;
+
+    /* Screen overlay (src/styles/crt.css). Lower = subtler. */
+    --crt-scanline-opacity: 0.07;
+    --crt-vignette: 0.5;
+    --crt-bezel-width: 10px;
+    --crt-bezel-color: #0b0c0b
   }
   .dark {
-    --background: 240 5% 6%;
-    --foreground: 0 0% 90%;
+    --background: 150 4% 5%;
+    --foreground: 60 8% 88%;
     --card: 240 4% 9%;
-    --card-foreground: 0 0% 96%;
+    --card-foreground: 60 8% 94%;
     --popover: 240 4% 9%;
-    --popover-foreground: 0 0% 96%;
+    --popover-foreground: 60 8% 94%;
     --primary: 350 73% 44%;
     --primary-foreground: 0 0% 98%;
     --secondary: 240 3% 14%;
-    --secondary-foreground: 0 0% 92%;
+    --secondary-foreground: 60 8% 90%;
     --muted: 240 3% 14%;
     --muted-foreground: 240 5% 65%;
     --accent: 350 68% 36%;

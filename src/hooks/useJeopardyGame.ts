@@ -38,6 +38,7 @@ import {
   pickCardForPlayer,
 } from '@/config/cardCatalog'
 import { createQuestInstance } from '@/data/quests'
+import { getSpiderSenseBonus } from '@/features/spiderSense'
 
 type UseJeopardyGameParams = {
   categories: readonly string[]
@@ -817,8 +818,11 @@ export function useJeopardyGame({
     let scoreChange: number
     if (correct) {
       const spiderSenseLevel = players[activePlayerIndex].spiderSenseLevel ?? 0
-      const bonusMultiplier = 1 + (spiderSenseLevel * runtimeConfig.mechanics.spiderSense.bonusPerLevel)
-      scoreChange = Math.round(effectiveValue * bonusMultiplier)
+      scoreChange = effectiveValue + getSpiderSenseBonus(
+        effectiveValue,
+        spiderSenseLevel,
+        runtimeConfig.mechanics.spiderSense.bonusPerLevel,
+      )
     } else {
       const penaltyPercent = runtimeConfig.gameplay.wrongAnswerPenaltyPercent / 100
       scoreChange = penaltyPercent > 0 ? -Math.round(effectiveValue * penaltyPercent) : 0

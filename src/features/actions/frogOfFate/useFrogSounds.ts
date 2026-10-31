@@ -1,3 +1,4 @@
+import { scaleVolume } from '@/services/soundService'
 import frogStart from '@/assets/sounds/actions/frog_of_fate/frog_start.mp3'
 import frogTick from '@/assets/sounds/actions/frog_of_fate/frog_tick.wav'
 import frogLand from '@/assets/sounds/actions/frog_of_fate/frog_land.mp3'
@@ -21,7 +22,7 @@ export function useFrogSounds() {
     const clip = startPool[Math.floor(Math.random() * startPool.length)]
     clip.currentTime = 0
     clip.playbackRate = 1
-    clip.volume = 0.22
+    clip.volume = scaleVolume(0.22)
     clip.play().catch(() => {})
   }
 
@@ -29,7 +30,7 @@ export function useFrogSounds() {
     const clip = hopPool[Math.floor(Math.random() * hopPool.length)]
     clip.currentTime = 0
     clip.playbackRate = 0.95 + Math.random() * 0.1
-    clip.volume = 0.05
+    clip.volume = scaleVolume(0.05)
     clip.play().catch(() => {})
   }
 
@@ -37,7 +38,7 @@ export function useFrogSounds() {
     const clip = landPool[Math.floor(Math.random() * landPool.length)]
     clip.currentTime = 0
     clip.playbackRate = 1
-    clip.volume = 0.2
+    clip.volume = scaleVolume(0.2)
     clip.play().catch(() => {})
   }
 

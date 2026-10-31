@@ -14,7 +14,7 @@
   background: #0b0713;
   border: 4px solid #3b1c55;
   box-shadow:
-    0 20px 60px rgba(0, 0, 0, 0.85),
+    var(--crt-shadow),
     0 0 0 4px #0a0810,
     inset 0 0 0 2px #1c0f2a;
   color: #e9dbff;
@@ -62,8 +62,8 @@
 }
 
 .madseer-eyes {
-  font-family: 'Press Start 2P', cursive;
-  font-size: 14px;
+  font-family: var(--font-pixel);
+  font-size: 16px;
   letter-spacing: 6px;
   color: #d79bff;
   text-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
@@ -71,7 +71,7 @@
 }
 
 .madseer-title {
-  font-family: 'ArcadeClassic', sans-serif;
+  font-family: var(--font-arcade);
   font-size: 32px;
   letter-spacing: 2px;
   text-transform: uppercase;
@@ -82,8 +82,8 @@
 }
 
 .madseer-subtitle {
-  font-family: 'Press Start 2P', cursive;
-  font-size: 12px;
+  font-family: var(--font-pixel);
+  font-size: 15px;
   color: #b48cff;
   text-shadow: 0 0 10px rgba(160, 32, 240, 0.7);
 }
@@ -105,7 +105,7 @@
   height: 340px;
   border: 3px solid #4c2a72;
   box-shadow:
-    0 12px 24px rgba(0, 0, 0, 0.6),
+    var(--crt-shadow),
     inset 0 0 0 2px #1b0f29;
   overflow: hidden;
   border-radius: 0;
@@ -144,8 +144,8 @@
   left: 50%;
   top: 50%;
   transform: rotate(var(--start-angle, 0deg)) translateX(var(--radius, 120px)) rotate(calc(-1 * var(--start-angle, 0deg)));
-  font-family: 'Press Start 2P', cursive;
-  font-size: 12px;
+  font-family: var(--font-pixel);
+  font-size: 15px;
   color: #f1e3ff;
   text-shadow:
     0 0 10px rgba(214, 157, 255, 0.8),
@@ -153,7 +153,7 @@
   padding: 6px 8px;
   background: rgba(29, 12, 46, 0.65);
   border: 2px solid rgba(214, 157, 255, 0.4);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--crt-shadow);
   animation-name: madseerOrbit;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
@@ -161,7 +161,7 @@
 }
 
 .madseer-copy {
-  font-family: 'Jersey 20', sans-serif;
+  font-family: var(--font-question);
   font-size: 20px;
   text-align: center;
   color: #d4b7ff;
@@ -182,7 +182,7 @@
 .madseer-btn {
   min-width: 200px;
   justify-content: center;
-  font-size: 14px !important;
+  font-size: 16px !important;
   letter-spacing: 1px;
 }
 
@@ -198,7 +198,7 @@
 }
 
 .madseer-reject {
-  background: linear-gradient(180deg, #2b0f32 0%, #1a071f 100%) !important;
+  background: #220b28 !important;
   color: #f6d8ff !important;
   box-shadow: 0 4px 0 #0c0413 !important;
 }

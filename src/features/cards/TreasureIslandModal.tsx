@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
+import { playSound } from '@/services/soundService'
 import { Button as RetroButton } from '@/components/ui/8bit/button'
 import { useRuntimeConfig } from '@/config/runtimeConfig'
 import treasureIslandImg from '@/assets/images/ui/treasure_island.png'
@@ -64,12 +65,6 @@ function generateRandomCrossPosition(): { x: number; y: number } {
   const x = 25 + Math.random() * 50
   const y = 25 + Math.random() * 50
   return { x, y }
-}
-
-function playSound(src: string, volume = 0.5) {
-  const audio = new Audio(src)
-  audio.volume = volume
-  audio.play().catch(() => {})
 }
 
 export function TreasureIslandModal({ onComplete, onCancel }: TreasureIslandModalProps) {

@@ -29,7 +29,7 @@
 }
 
 .turn-start-title {
-  font-family: 'Press Start 2P', monospace;
+  font-family: var(--font-pixel);
   font-size: 32px;
   color: #FFD700;
   text-shadow:
@@ -108,8 +108,8 @@
 }
 
 .turn-start-hint {
-  font-family: 'Press Start 2P', monospace;
-  font-size: 12px;
+  font-family: var(--font-pixel);
+  font-size: 15px;
   color: #AAA;
   text-align: center;
   margin-top: 10px;

@@ -10,7 +10,7 @@
 
 .puppet-category-dialog {
   width: min(640px, 94vw);
-  background: linear-gradient(180deg, #100202 0%, #050000 100%);
+  background: #0a0101;
   border: 3px solid #5d1c07;
   box-shadow:
     0 0 50px rgba(0, 0, 0, 0.8),
@@ -21,11 +21,11 @@
   flex-direction: column;
   gap: 20px;
   color: #fce4cc;
-  font-family: 'Jersey 20', sans-serif;
+  font-family: var(--font-question);
 }
 
 .puppet-category-title {
-  font-family: 'Press Start 2P', cursive;
+  font-family: var(--font-pixel);
   font-size: 26px;
   text-transform: uppercase;
   letter-spacing: 2px;
@@ -36,7 +36,7 @@
 }
 
 .puppet-category-subtitle {
-  font-family: 'Jersey 20', sans-serif;
+  font-family: var(--font-question);
   margin: 0;
   line-height: 1.5;
   color: #f7cfa5;
@@ -49,7 +49,7 @@
 }
 
 .puppet-category-btn {
-  font-family: 'Press Start 2P', cursive;
+  font-family: var(--font-pixel);
   border: 3px solid #ff7f32;
   background: #1a0501;
   color: #ffe5cf;
@@ -74,7 +74,7 @@
 .puppet-category-btn:hover:not(.puppet-category-btn-disabled) {
   transform: translateY(-4px);
   box-shadow:
-    0 10px 18px rgba(0, 0, 0, 0.6),
+    var(--crt-shadow-sm),
     0 0 18px rgba(255, 127, 50, 0.45);
 }
 
@@ -85,8 +85,8 @@
 }
 
 .puppet-category-remaining {
-  font-family: 'Jersey 20', sans-serif;
-  font-size: 13px;
+  font-family: var(--font-question);
+  font-size: 16px;
   letter-spacing: 0.8px;
   color: #ffbd92;
 }
@@ -104,11 +104,11 @@
 }
 
 .puppet-category-cancel {
-  font-family: 'Press Start 2P', cursive;
+  font-family: var(--font-pixel);
   border: none;
   background: none;
   color: #f59f6e;
-  font-size: 14px;
+  font-size: 16px;
   letter-spacing: 1.4px;
   text-transform: uppercase;
   cursor: pointer;

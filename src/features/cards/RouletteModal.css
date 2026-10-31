@@ -11,10 +11,10 @@
 
 .roulette-dialog {
   width: min(550px, 92vw);
-  background: linear-gradient(180deg, #1a1008 0%, #0d0804 100%);
+  background: #130c06;
   border: 4px solid #c9a227;
   box-shadow:
-    0 20px 60px rgba(0, 0, 0, 0.9),
+    var(--crt-shadow),
     0 0 0 4px #0a0502,
     inset 0 0 0 2px #3d2f0b,
     0 0 40px rgba(201, 162, 39, 0.3);
@@ -43,7 +43,7 @@
 }
 
 .roulette-title {
-  font-family: 'ArcadeClassic', sans-serif;
+  font-family: var(--font-arcade);
   font-size: 36px;
   letter-spacing: 2px;
   text-transform: uppercase;
@@ -66,7 +66,7 @@
 }
 
 .roulette-subtitle {
-  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-family: var(--font-pixel);
   font-size: 0.7rem;
   color: #c9a227;
   text-align: center;
@@ -146,7 +146,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'ArcadeClassic', sans-serif;
+  font-family: var(--font-arcade);
   font-size: 24px;
   text-transform: uppercase;
   animation: result-pop 0.5s ease-out;
@@ -184,7 +184,7 @@
 }
 
 .roulette-label {
-  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-family: var(--font-pixel);
   color: #ffd700;
   font-size: 1rem;
   text-shadow: 2px 2px 0px #3d2f0b;
@@ -233,7 +233,7 @@
   width: 100%;
   display: flex;
   justify-content: space-between;
-  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-family: var(--font-pixel);
   font-size: 0.6rem;
   color: #8b7500;
 }
@@ -242,7 +242,7 @@
 .roulette-odds {
   display: flex;
   gap: 2rem;
-  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-family: var(--font-pixel);
   font-size: 0.75rem;
 }
 
@@ -277,7 +277,7 @@
 
 /* Spinning Text */
 .roulette-spinning-text {
-  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-family: var(--font-pixel);
   font-size: 0.8rem;
   color: #ffd700;
   text-align: center;
@@ -291,7 +291,7 @@
 
 /* Result Text */
 .roulette-result-text {
-  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-family: var(--font-pixel);
   font-size: 1rem;
   text-align: center;
   padding: 1rem;

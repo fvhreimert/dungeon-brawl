@@ -16,7 +16,7 @@
   background: #0f0f0f;
   border: 4px solid #333333;
   box-shadow:
-    0 20px 60px rgba(0, 0, 0, 0.8),
+    var(--crt-shadow),
     0 0 0 4px #0a0a0a,
     inset 0 0 0 2px #1a1a1a;
   display: flex;
@@ -53,24 +53,67 @@
   background: #1a1a1a;
   border: 2px solid #333333;
   padding: 10px 16px;
-  font-size: 14px;
+  font-size: 16px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   color: #a0a0a0;
   box-shadow: 0 2px 0 #000000;
-  font-family: 'Press Start 2P', cursive;
-  font-size: 12px;
+  font-family: var(--font-pixel);
+  font-size: 15px;
   line-height: 1.5;
 }
 
 .dialog-value-badge {
-  font-family: 'ArcadeClassic', sans-serif;
+  font-family: var(--font-arcade);
   font-size: 32px;
   color: #ffdd82;
   text-shadow: 2px 2px 0 #000;
   display: flex;
   align-items: baseline;
   gap: 8px;
+}
+
+/* Value + Spider Sense bonus, stacked on the right of the header */
+.dialog-value-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+/* Spider Sense bonus: a small line under the value, in the same white spider +
+   silver look as the scoreboard meter. Must stay smaller than the value itself. */
+.dialog-spider-bonus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  background: #0a0a0a;
+  border: 2px solid #8a8a8a;
+  box-shadow: 0 2px 0 #000000;
+}
+
+.dialog-spider-icon {
+  width: 16px;
+  height: 16px;
+  image-rendering: pixelated;
+  filter: brightness(0) invert(1);
+}
+
+.dialog-spider-amount {
+  font-family: var(--font-pixel);
+  font-size: 13px;
+  line-height: 1;
+  color: #ffffff;
+}
+
+.dialog-spider-label {
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  line-height: 1;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #a8a8a8;
 }
 
 .dialog-content {
@@ -86,7 +129,7 @@
 }
 
 .dialog-question-text {
-  font-family: 'Jersey 20', sans-serif;
+  font-family: var(--font-question);
   font-size: clamp(32px, 5vw, 56px);
   line-height: 1.1;
   text-align: center;
@@ -120,8 +163,8 @@
 }
 
 .dialog-answer-label {
-  font-family: 'Press Start 2P', cursive;
-  font-size: 12px;
+  font-family: var(--font-pixel);
+  font-size: 15px;
   color: #666666;
   margin-bottom: 16px;
   text-transform: uppercase;
@@ -129,7 +172,7 @@
 }
 
 .dialog-answer-text {
-  font-family: 'Jersey 20', sans-serif;
+  font-family: var(--font-question);
   font-size: 36px;
   color: #4ade80;
   text-align: center;
@@ -170,8 +213,8 @@
   font-size: 18px;
   padding: 14px 20px;
   text-transform: uppercase;
-  font-family: 'Press Start 2P', cursive;
-  font-size: 14px !important;
+  font-family: var(--font-pixel);
+  font-size: 16px !important;
   letter-spacing: 1px;
 }
 

@@ -81,7 +81,7 @@
 }
 
 .pixel-card-description-box {
-    box-shadow: inset 0 0 0 2px rgba(0,0,0,0.1), inset 0 4px 8px rgba(0,0,0,0.15);
+    box-shadow: inset 0 0 0 2px rgba(0,0,0,0.1), inset var(--crt-shadow-sm);
 }
 
 .pixel-card-backing-layer {
